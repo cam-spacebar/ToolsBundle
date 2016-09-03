@@ -6,7 +6,7 @@
  * Time: 2:25 PM
  */
 
-namespace VisageFour\ToolsBundle\Services;
+namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Doctrine\ORM\EntityManager;
 use VisageFour\ToolsBundle\Entity\code;

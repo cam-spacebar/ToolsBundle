@@ -1,6 +1,6 @@
 <?php
 
-namespace VisageFour\ToolsBundle\Repository;
+namespace VisageFour\Bundle\ToolsBundle\Repository;
 
 /**
  * codeRepository
