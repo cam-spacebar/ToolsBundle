@@ -1,4 +1,7 @@
 services:
-#    tools.example:
-#        class: VisageFour\ToolsBundle\Example
-#        arguments: ["@service_id", "plain_value", %parameter%]
+    toolsbundle.webhookmanager:
+        class: VisageFour\Bundle\ToolsBundle\Services\WebHookManager
+        arguments:
+            - "@doctrine.orm.entity_manager"
+            - "@buzz"
+            - "@logger"
