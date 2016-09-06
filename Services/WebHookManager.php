@@ -14,6 +14,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManager;
 use JMS\Serializer\Serializer;
 use Psr\Log\LoggerInterface;
+use Sensio\Bundle\BuzzBundle\SensioBuzzBundle;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -27,7 +28,7 @@ class WebHookManager {
     private $logger;
     //private $serializer;
 
-    public function __constructor (EntityManager $em, Browser $buzz, LoggerInterface $logger) {
+    public function __construct (EntityManager $em, Browser $buzz, LoggerInterface $logger) {
         $this->em           = $em;
         $this->buzz         = $buzz;
         $this->logger       = $logger;
@@ -37,9 +38,7 @@ class WebHookManager {
 
     // todo: add variable for normalization attribute group - what is meant by this?
     public function callWebhook ($webhookURL, $object) {
-        $buzz           = $this->buzz;
         //$serializer     = $this->serializer;
-        $em             = $this->em;
         /*
                  * // normalize only code
                 $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
@@ -78,7 +77,10 @@ class WebHookManager {
             ['groups' => ['zapierSpreadsheet']]
         );
 
-        $response1 = $buzz->post(
+        $this->logger->info('About to send payload to webhook at URL: '. $webhookURL);
+        $this->logger->info('Payload JSON: '. $json);
+
+        $response1 = $this->buzz->post(
             $webhookURL,
             array(),
             $json
