@@ -37,7 +37,7 @@ class WebHookManager {
     }
 
     // todo: add variable for normalization attribute group - what is meant by this?
-    public function callWebhook ($webhookURL, $object) {
+    public function callWebhook ($webhookURL, $object, $dateTimeFieldList = null) {
         //$serializer     = $this->serializer;
         /*
                  * // normalize only code
@@ -61,8 +61,33 @@ class WebHookManager {
             'json' => new JsonEncoder()
         );
 
+        // used to convert datetime objects
+        $callback = function ($dateTime) {
+            if (!($dateTime instanceof \DateTime)) {
+                throw new \Exception ('The \\DateTime object to be normalized is not a \\DateTime object');
+            }
+
+            return $dateTime instanceof \DateTime
+                ? $dateTime->format(\DateTime::ISO8601)
+                : '';
+        };
+
         $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
         $propertyNormalizer = new PropertyNormalizer($classMetadataFactory);
+
+        if (!empty($dateTimeFieldList)) {
+            // normalize DateTime objects
+            $fieldArray = array ();
+            foreach ($dateTimeFieldList as $curI => $fieldName) {
+                $fieldArray [$fieldName] = $callback;
+            }
+
+            //dump()
+        }
+
+        $propertyNormalizer->setCallbacks(array('createdAt' => $callback, 'visaExpiry' => $callback));         // this will convert the createdAt \DateTime object into a string
+
+
         $normalizers = array(
             $propertyNormalizer
             //new personNormalizer(),
