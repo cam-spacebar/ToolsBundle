@@ -1,6 +1,6 @@
 <?php
 
-namespace VisageFour\Bundle\PersonBundle\Services;
+namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
@@ -21,12 +21,12 @@ abstract class BaseEntityManager
         parent::__construct($em, $class, $dispatcher, $logger);
     }
 
-    SERVICE DEFINITION IN YAML:
-    applicationName.productOrderManager:
-        class: Platypuspie\AnchorcardsBundle\Services\ProductOrderManager
+    ===== SERVICE DEFINITION in YML =====
+        twencha.event_series_manager:
+        class: Twencha\Bundle\EventRegistrationBundle\Services\EventSeriesManager
         arguments:
             - "@doctrine.orm.entity_manager"
-            - "AnchorcardsBundle:productOrder"
+            - "EventSeriesBundle:EventSeries"
             - "@event_dispatcher"
             - "@logger"
 
@@ -57,5 +57,21 @@ abstract class BaseEntityManager
         $this->class    = $metadata->getName();
 
         // todo: alert logger that manager has been created
+    }
+
+    abstract public function createNew();
+
+    public function getAllBy($criteriaArray) {
+        $result = $this->repo->findBy(
+            $criteriaArray
+        );
+        return $result;
+    }
+
+    public function getOneBy($criteriaArray) {
+        $result = $this->repo->findBy(
+            $criteriaArray
+        );
+        return $result;
     }
 }
