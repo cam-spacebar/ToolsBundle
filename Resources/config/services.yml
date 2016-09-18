@@ -1,7 +1,16 @@
 services:
-    toolsbundle.webhookmanager:
+    tools_bundle.webhookmanager:
         class: VisageFour\Bundle\ToolsBundle\Services\WebHookManager
         arguments:
             - "@doctrine.orm.entity_manager"
             - "@buzz"
+            - "@logger"
+
+
+    tools_bundle.code_manager:
+        class: VisageFour\Bundle\ToolsBundle\Services\CodeManager
+        arguments:
+            - "@doctrine.orm.entity_manager"
+            - "EventSeriesBundle:Event"
+            - "@event_dispatcher"
             - "@logger"

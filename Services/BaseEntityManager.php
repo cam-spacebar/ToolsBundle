@@ -22,7 +22,7 @@ abstract class BaseEntityManager
     }
 
     ===== SERVICE DEFINITION in YML =====
-        twencha.event_series_manager:
+        tools_bundle.event_series_manager:
         class: Twencha\Bundle\EventRegistrationBundle\Services\EventSeriesManager
         arguments:
             - "@doctrine.orm.entity_manager"
@@ -58,8 +58,6 @@ abstract class BaseEntityManager
 
         // todo: alert logger that manager has been created
     }
-
-    abstract public function createNew();
 
     public function getAllBy($criteriaArray) {
         $result = $this->repo->findBy(

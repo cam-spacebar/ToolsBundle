@@ -6,12 +6,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * code
+ * Code
  *
  * @ORM\Table(name="code")
  * @ORM\Entity(repositoryClass="VisageFour\ToolsBundle\Repository\codeRepository")
  */
-class code
+class Code
 {
     /**
      * @var int

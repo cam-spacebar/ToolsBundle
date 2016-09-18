@@ -1,49 +1,86 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: cameronburns
- * Date: 30/01/2016
- * Time: 2:25 PM
- */
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Doctrine\ORM\EntityManager;
-use VisageFour\ToolsBundle\Entity\code;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use VisageFour\Bundle\ToolsBundle\Entity\Code;
 
-class CodesQR {
-    protected $em;
-    protected $repo;
+class CodeManager extends BaseEntityManager {
 
-    public function __construct (EntityManager $em) {
-        $this->em           = $em;
-        $this->repo         = $this->em->getRepository('ToolsBundle:code');
+    /**
+     * CodeManager constructor.
+     * @param EntityManager $em
+     * @param $class
+     * @param EventDispatcherInterface $dispatcher
+     * @param LoggerInterface $logger
+    */
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
+        parent::__construct($em, $class, $dispatcher, $logger);
     }
 
-    function getCodeByCode ($code) {
-        $response           = $this->repo->findOneBy (array(
-            'code'            => $code
-        ));
-
-        return $response;
-    }
-
-    static function createCode ($codeNumber) {
-        $response = new code();
+    function createNew ($codeNumber) {
+        $response = new Code();
         $response->setCode          ($codeNumber);
 
         return $response;
     }
 
-    public function findOneBy ($parameters = NULL) {
-        $curCode = $this->repo->findOneBy ($parameters);
+    function getCodeByCode ($code) {
+        $response = $this->repo->findOneBy (array(
+            'code'  => $code
+        ));
 
-        return $curCode;
+        return $response;
     }
 
-    public function findAllBy ($parameters = NULL) {
-        $codes = $this->repo->findAll ($parameters);
+    // todo: refactor this for objects not array elements and allow to persist
+    public function buildUniqueCodes ($existingCodes, $numOfCodes = 400) {
+        /*
+        $newUniqueCodes = array ();
+        for ($i = 1; $i <= $numOfCodes; $i++) {
+            $newUniqueCodes [] = $this->makeNewUniqueCode ($existingCodes, $newUniqueCodes);
+        }
 
-        return $codes;
+        return $newUniqueCodes;
+        */
+    }
+
+    public function createUniqueCodeObj ($persist = true) {
+        $newCodeStr = $this->createUniqueCodeStr ();
+        $newCode    = $this->createNew($newCodeStr);
+
+        if ($persist) {
+            $this->em->persist($newCode);
+            $this->em->flush();
+        }
+
+        return $newCode;
+    }
+
+    // continue looping until found a unique code
+    public function createUniqueCodeStr () {
+        $newCodeStr     = $this->createRandomCode (3, 3);
+
+        if (!empty($this->getCodeByCode($newCodeStr))) {
+            $newCodeStr = $this->createUniqueCodeStr();
+        }
+        return $newCodeStr;
+    }
+
+    public function createRandomCode ($noOfChrs = 3, $noOfNums = 3) {
+        $response = '';
+        for ($i = 0; $i < $noOfChrs; $i++) {
+            $curVal = rand(0, 25);
+            $response .= chr (97 + (int) $curVal);
+        }
+
+        for ($j = 0; $j < $noOfNums; $j++) {
+            $curVal = rand(0, 9);
+            $response .= (int) $curVal;
+        }
+
+        return $response;
     }
 }
