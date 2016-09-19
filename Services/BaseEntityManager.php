@@ -29,7 +29,6 @@ abstract class BaseEntityManager
             - "EventSeriesBundle:EventSeries"
             - "@event_dispatcher"
             - "@logger"
-
     //*/
     
     protected $em;

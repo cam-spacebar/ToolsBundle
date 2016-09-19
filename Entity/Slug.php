@@ -2,16 +2,18 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Code
+ * Slug
  *
- * @ORM\Table(name="code")
- * @ORM\Entity(repositoryClass="VisageFour\ToolsBundle\Repository\CodeRepository")
+ * @ORM\Table(name="slug")
+ * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\SlugRepository")
  */
-class Code
+class Slug
 {
     /**
      * @var int
@@ -20,31 +22,30 @@ class Code
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime")
+     * @ORM\Column(name="CreatedAt", type="datetime")
      */
-    private $createdAt;
+    protected $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
+     * @ORM\Column(name="UpdatedAt", type="datetime")
      */
-    private $updatedAt;
+    protected $updatedAt;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="code", type="string", length=10, unique=true)
+     * @ORM\ManyToOne(targetEntity="Twencha\TwenchaBundle\Entity\eventSeries")
+     * @ORM\JoinColumn(name="related_code_id", referencedColumnName="id")
      */
-    private $code;
+    private $relatedCode;
 
-
+    // START: GETTERS AND SETTERS
     /**
      * Get id
      *
@@ -60,7 +61,7 @@ class Code
      *
      * @param \DateTime $createdAt
      *
-     * @return code
+     * @return Slug
      */
     public function setCreatedAt($createdAt)
     {
@@ -84,7 +85,7 @@ class Code
      *
      * @param \DateTime $updatedAt
      *
-     * @return code
+     * @return Slug
      */
     public function setUpdatedAt($updatedAt)
     {
@@ -103,28 +104,24 @@ class Code
         return $this->updatedAt;
     }
 
-    /**
-     * Set code
-     *
-     * @param string $code
-     *
-     * @return code
-     */
-    public function setCode($code)
+    public function __construct()
     {
-        $this->code = $code;
-
-        return $this;
+        //$this->relatedRegistrationList = new ArrayCollection();
     }
 
     /**
-     * Get code
-     *
-     * @return string
+     * @return mixed
      */
-    public function getCode()
+    public function getRelatedCode()
     {
-        return $this->code;
+        return $this->relatedCode;
+    }
+
+    /**
+     * @param mixed $relatedCode
+     */
+    public function setRelatedCode($relatedCode)
+    {
+        $this->relatedCode = $relatedCode;
     }
 }
-
