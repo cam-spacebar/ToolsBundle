@@ -40,7 +40,7 @@ class Slug
     protected $updatedAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Twencha\TwenchaBundle\Entity\eventSeries")
+     * @ORM\ManyToOne(targetEntity="VisageFour\ToolsBundle\Entity\Code")
      * @ORM\JoinColumn(name="related_code_id", referencedColumnName="id")
      */
     private $relatedCode;
