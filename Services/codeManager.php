@@ -8,7 +8,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\Code;
 
 class CodeManager extends BaseEntityManager {
-
     /**
      * CodeManager constructor.
      * @param EntityManager $em
@@ -20,11 +19,24 @@ class CodeManager extends BaseEntityManager {
         parent::__construct($em, $class, $dispatcher, $logger);
     }
 
-    function createNew ($codeNumber) {
-        $response = new Code();
-        $response->setCode          ($codeNumber);
+    public function createNew ($persist = true, $codeNumber = null) {
+        // instantiate
+        /** @var Code $code */
+        $code = parent::createNew(false);
 
-        return $response;
+        // configure
+        if (empty($codeNumber)) {
+            // generated randomized code string
+            $codeNumber = $this->createUniqueCodeStr ();
+        }
+        $code->setCode ($codeNumber);
+
+        // persist
+        if ($persist) {
+            $this->em->persist($code);
+        }
+
+        return $code;
     }
 
     function getCodeByCode ($code) {
@@ -47,6 +59,7 @@ class CodeManager extends BaseEntityManager {
         */
     }
 
+    // todo: refactor methods referenceing this to instead use the factory method instead.
     public function createUniqueCodeObj ($persist = true) {
         $newCodeStr = $this->createUniqueCodeStr ();
         $newCode    = $this->createNew($newCodeStr);

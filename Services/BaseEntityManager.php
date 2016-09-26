@@ -19,6 +19,23 @@ abstract class BaseEntityManager
     ZZZ
     public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
         parent::__construct($em, $class, $dispatcher, $logger);
+        // custom config
+        // ...
+    }
+
+    public function createNew ($persist = true) {
+        // instantiate
+        $event = parent::createNew(false);
+
+        // configure
+        // ...
+
+        // persist
+        if ($persist) {
+            $this->em->persist($event);
+        }
+
+        return $event;
     }
 
     ===== SERVICE DEFINITION in YML =====
@@ -51,11 +68,23 @@ abstract class BaseEntityManager
         $this->dispatcher   = $dispatcher;
         $this->logger       = $logger;
 
-
         $metadata       = $this->em->getClassMetadata($class);
         $this->class    = $metadata->getName();
 
         // todo: alert logger that manager has been created
+    }
+
+    protected function createNew ($persist = true) {
+        // instantiate
+        $object = new $this->class();
+        $this->logger->info('Create new '. $this->class().' obj');
+
+        // persist?
+        if ($persist) {
+            $this->em->persist($object);
+        }
+
+        return $object;
     }
 
     public function getAllBy($criteriaArray) {

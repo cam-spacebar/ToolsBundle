@@ -118,10 +118,12 @@ class Slug
     }
 
     /**
-     * @param mixed $relatedCode
+     * @param Code $relatedCode
      */
-    public function setRelatedCode($relatedCode)
+    public function setRelatedCode(Code $relatedCode)
     {
         $this->relatedCode = $relatedCode;
+
+        return $this;
     }
 }
