@@ -23,7 +23,7 @@ abstract class BaseEntityManager
         // ...
     }
 
-    public function createNew ($persist = true) {
+    public function customCreateNew ($persist = true) {
         // instantiate
         $event = parent::createNew(false);
 
@@ -74,10 +74,10 @@ abstract class BaseEntityManager
         // todo: alert logger that manager has been created
     }
 
-    protected function createNew ($persist = true) {
+    public function createNew ($persist = true) {
         // instantiate
         $object = new $this->class();
-        $this->logger->info('Create new '. $this->class().' obj');
+        $this->logger->info('Create new '. $this->class .' obj');
 
         // persist?
         if ($persist) {

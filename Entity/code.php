@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Code
  *
  * @ORM\Table(name="code")
- * @ORM\Entity(repositoryClass="VisageFour\ToolsBundle\Repository\CodeRepository")
+ * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\CodeRepository")
  */
 class Code
 {

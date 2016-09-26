@@ -7,12 +7,9 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * Slug
- *
- * @ORM\Table(name="base_slug")
- * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\SlugRepository")
- */
+// do not include ORM mapping here as the sub-classed slug cannot inherit the OneToOne relationship
+// some reason, the ORM doesn't allow this to be a mapped superclass if itself is an entity.
+// plus I don't need an extra table in the DB that an super-entity would have created.
 class Slug
 {
     /**
@@ -40,10 +37,12 @@ class Slug
     protected $updatedAt;
 
     /**
+     * @var Code
+     *
      * @ORM\OneToOne(targetEntity="VisageFour\Bundle\ToolsBundle\Entity\Code", cascade={"persist"})
      * @ORM\JoinColumn(name="related_code_id", referencedColumnName="id")
     */
-    private $relatedCode;
+    protected $relatedCode;
 
     // START: GETTERS AND SETTERS
     /**

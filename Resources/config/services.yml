@@ -11,6 +11,6 @@ services:
         class: VisageFour\Bundle\ToolsBundle\Services\CodeManager
         arguments:
             - "@doctrine.orm.entity_manager"
-            - 'VisageFour\Bundle\PersonBundle\Entity\Code'
+            - 'VisageFour\Bundle\ToolsBundle\Entity\Code'
             - "@event_dispatcher"
             - "@logger"
