@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Slug
  *
- * @ORM\Table(name="slug")
+ * @ORM\Table(name="base_slug")
  * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\SlugRepository")
  */
 class Slug
@@ -40,9 +40,9 @@ class Slug
     protected $updatedAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity="VisageFour\ToolsBundle\Entity\Code")
+     * @ORM\OneToOne(targetEntity="VisageFour\Bundle\ToolsBundle\Entity\Code", cascade={"persist"})
      * @ORM\JoinColumn(name="related_code_id", referencedColumnName="id")
-     */
+    */
     private $relatedCode;
 
     // START: GETTERS AND SETTERS

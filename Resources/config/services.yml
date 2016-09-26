@@ -11,14 +11,6 @@ services:
         class: VisageFour\Bundle\ToolsBundle\Services\CodeManager
         arguments:
             - "@doctrine.orm.entity_manager"
-            - "VisageFour\Bundle\PersonBundle\Entity\Code"
-            - "@event_dispatcher"
-            - "@logger"
-
-    visage_four.base_person_manager:
-        class: VisageFour\Bundle\PersonBundle\Services\BasePersonManager
-        arguments:
-            - "@doctrine.orm.entity_manager"
-            - "VisageFour\Bundle\PersonBundle\Entity\BasePerson"
+            - 'VisageFour\Bundle\PersonBundle\Entity\Code'
             - "@event_dispatcher"
             - "@logger"
