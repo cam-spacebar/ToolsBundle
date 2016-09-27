@@ -109,7 +109,7 @@ class Slug
     }
 
     /**
-     * @return mixed
+     * @return Code
      */
     public function getRelatedCode()
     {
