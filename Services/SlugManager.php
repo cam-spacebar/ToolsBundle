@@ -18,6 +18,7 @@ use VisageFour\Bundle\ToolsBundle\Services\BaseEntityManager;
 class SlugManager extends BaseEntityManager
 {
     private $router;
+    private $codeManager;
 
     /**
      * EventSeriesManager constructor.
@@ -26,19 +27,32 @@ class SlugManager extends BaseEntityManager
      * @param EventDispatcherInterface $dispatcher
      * @param Logger $logger
      */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, Logger $logger, Router $router) {
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, Logger $logger, Router $router, CodeManager $codeManager) {
         parent::__construct($em, $class, $dispatcher, $logger);
 
-        $this->router = $router;
+        $this->router       = $router;
+        $this->codeManager  = $codeManager;
     }
 
     public function getSlugURL (Slug $slug, $routeName) {
         $URL = $this->router->generate(
             $routeName,
-            array('eventSlug' => $slug->getRelatedCode()->getCode()),
+            array('eventSlugCode' => $slug->getRelatedCode()->getCode()),
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
         return $URL;
+    }
+
+    public function getSlugByCode ($slugCode) {
+        $code = $this->codeManager->repo->findOneBy(
+            array ('code' => $slugCode)
+        );
+
+        $slug = $this->repo->findOneBy(
+            array ('relatedCode'    => $code)
+        );
+
+        return $slug;
     }
 }
