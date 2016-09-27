@@ -77,7 +77,9 @@ abstract class BaseEntityManager
     public function createNew ($persist = true) {
         // instantiate
         $object = new $this->class();
-        $this->logger->info('Create new '. $this->class .' obj');
+
+        $persistStatus = ($persist) ? 'true' : 'false';
+        $this->logger->info('Create new '. $this->class .' obj. Persist is ('. $persistStatus .')');
 
         // persist?
         if ($persist) {
