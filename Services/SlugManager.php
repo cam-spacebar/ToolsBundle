@@ -44,6 +44,9 @@ class SlugManager extends BaseEntityManager
         return $URL;
     }
 
+    /**
+     * @return Slug
+     */
     public function getSlugByCode ($slugCode) {
         $code = $this->codeManager->repo->findOneBy(
             array ('code' => $slugCode)

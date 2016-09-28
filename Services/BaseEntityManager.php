@@ -33,6 +33,9 @@ abstract class BaseEntityManager
         // persist
         if ($persist) {
             $this->em->persist($event);
+            $persistStatus = 'true';
+        } else {
+            $persistStatus = 'false';
         }
 
         return $event;
@@ -78,13 +81,13 @@ abstract class BaseEntityManager
         // instantiate
         $object = new $this->class();
 
-        $persistStatus = ($persist) ? 'true' : 'false';
-        $this->logger->info('Create new '. $this->class .' obj. Persist is ('. $persistStatus .')');
-
         // persist?
         if ($persist) {
             $this->em->persist($object);
         }
+
+        $persistStatus = ($persist) ? 'true' : 'false';
+        $this->logger->info('Create new '. $this->class .' obj. Persist is ('. $persistStatus .')');
 
         return $object;
     }
