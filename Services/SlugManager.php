@@ -48,13 +48,25 @@ class SlugManager extends BaseEntityManager
      * @return Slug
      */
     public function getSlugByCode ($slugCode) {
-        $code = $this->codeManager->repo->findOneBy(
-            array ('code' => $slugCode)
-        );
+        try {
+            if (empty($eventSlugCode)) {
+                throw new \Exception('No $eventSeriesId specified');
+            }
 
-        $slug = $this->repo->findOneBy(
-            array ('relatedCode'    => $code)
-        );
+            $code = $this->codeManager->repo->findOneBy(
+                array ('code' => $slugCode)
+            );
+
+            $slug = $this->repo->findOneBy(
+                array ('relatedCode'    => $code)
+            );
+
+            if (empty($slug)) {
+                throw new \Exception ('Could not find slug with code id: "'. $eventSlugCode .'"');
+            }
+        } catch (\Exception $e) {
+            die ('Could not load event as there was an issue with the event slug in the link you have used.');
+        }
 
         return $slug;
     }
