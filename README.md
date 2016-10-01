@@ -23,4 +23,7 @@ The tools Bundle includes the following:
 5. Custom controller extension
   * Has isDevEnvironment(), checkAccess(), getThisPerson() etc
 
+6. BaseFormType
+  * has constructor for a form that is used as a service (used as a service asprocessing logic that used to be in gthe controller has been moved to the form).
+
 
