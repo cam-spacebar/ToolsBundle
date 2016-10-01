@@ -5,7 +5,7 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use VisageFour\Bundle\ToolsBundle\Entity\Code;
+use Twencha\Bundle\EventRegistrationBundle\Entity\Code;
 
 class CodeManager extends BaseEntityManager {
     /**

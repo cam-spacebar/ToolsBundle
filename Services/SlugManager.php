@@ -12,7 +12,7 @@ use Twencha\Bundle\EventRegistrationBundle\Entity\Event;
 use Twencha\Bundle\EventRegistrationBundle\Entity\EventSeries;
 use Twencha\Bundle\EventRegistrationBundle\Entity\Slug;
 use Twencha\Bundle\EventRegistrationBundle\Entity\Source;
-use VisageFour\Bundle\ToolsBundle\Entity\Code;
+use Twencha\Bundle\EventRegistrationBundle\Entity\Code;
 use VisageFour\Bundle\ToolsBundle\Services\BaseEntityManager;
 
 class SlugManager extends BaseEntityManager

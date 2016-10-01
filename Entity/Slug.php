@@ -39,7 +39,7 @@ class Slug
     /**
      * @var Code
      *
-     * @ORM\OneToOne(targetEntity="VisageFour\Bundle\ToolsBundle\Entity\Code", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Code", cascade={"persist"})
      * @ORM\JoinColumn(name="related_code_id", referencedColumnName="id")
     */
     protected $relatedCode;

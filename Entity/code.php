@@ -6,10 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Code
- *
- * @ORM\Table(name="code")
- * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\CodeRepository")
+ * @ORM\MappedSuperclass
  */
 class Code
 {
@@ -20,7 +17,7 @@ class Code
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var \DateTime
@@ -28,21 +25,21 @@ class Code
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(name="createdAt", type="datetime")
      */
-    private $createdAt;
+    protected $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(name="updatedAt", type="datetime")
      */
-    private $updatedAt;
+    protected $updatedAt;
 
     /**
      * @var string
      *
      * @ORM\Column(name="code", type="string", length=10, unique=false)
      */
-    private $code;
+    protected $code;
 
 
     /**
