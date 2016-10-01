@@ -100,8 +100,15 @@ abstract class BaseEntityManager
     }
 
     public function getOneBy($criteriaArray) {
-        $result = $this->repo->findBy(
+        $result = $this->repo->findOneBy(
             $criteriaArray
+        );
+        return $result;
+    }
+
+    public function getOneById($id) {
+        $result = $this->repo->findOneBy(
+            array ('id'        => $id)
         );
         return $result;
     }
