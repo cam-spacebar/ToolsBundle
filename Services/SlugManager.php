@@ -37,7 +37,7 @@ class SlugManager extends BaseEntityManager
     public function getSlugURL (Slug $slug, $routeName) {
         $URL = $this->router->generate(
             $routeName,
-            array('eventSlugCode' => $slug->getRelatedCode()->getCode()),
+            array('slugCode' => $slug->getRelatedCode()->getCode()),
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
@@ -63,7 +63,7 @@ class SlugManager extends BaseEntityManager
             );
 
             if (empty($slug)) {
-                throw new \Exception ('Could not find slug with code id: "'. $eventSlugCode .'"');
+                throw new \Exception ('Could not find slug with code id: "'. $slugCode .'"');
             }
         } catch (\Exception $e) {
             //die ('Could not load event as there was an issue with the event slug in the link you have used.');

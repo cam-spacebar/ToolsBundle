@@ -14,3 +14,11 @@ services:
             - 'VisageFour\Bundle\ToolsBundle\Entity\Code'
             - "@event_dispatcher"
             - "@logger"
+
+
+    tools_bundle.code_slug_converter:
+        class: VisageFour\Bundle\ToolsBundle\Request\ParamConverter\CodeSlugParamConverter
+        tags:
+            - { name: request.param_converter, converter: code_slug_converter }
+        arguments:
+            - "@?doctrine"
