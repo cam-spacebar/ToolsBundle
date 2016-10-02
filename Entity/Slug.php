@@ -36,13 +36,14 @@ class Slug
      */
     protected $updatedAt;
 
-    /**
+    /*---
      * @var Code
      *
      * @ORM\OneToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Code", cascade={"persist"})
      * @ORM\JoinColumn(name="related_code_id", referencedColumnName="id")
-    */
-    protected $relatedCode;
+     */
+    // MUST IMPLEMENT THIS IN THE EXTENDING CLASS - CANNOT BE CREATED IN THIS ONE. As it creates issues with relationships
+    //protected $relatedCode;
 
     // START: GETTERS AND SETTERS
     /**
@@ -106,23 +107,5 @@ class Slug
     public function __construct()
     {
         //$this->relatedRegistrationList = new ArrayCollection();
-    }
-
-    /**
-     * @return Code
-     */
-    public function getRelatedCode()
-    {
-        return $this->relatedCode;
-    }
-
-    /**
-     * @param Code $relatedCode
-     */
-    public function setRelatedCode(Code $relatedCode)
-    {
-        $this->relatedCode = $relatedCode;
-
-        return $this;
     }
 }
