@@ -25,20 +25,21 @@ abstract class BaseEntityManager
 
     public function customCreateNew ($persist = true) {
         // instantiate
-        $event = parent::createNew(false);
+        $newObj = parent::createNew(false);
 
         // configure
         // ...
 
-        // persist
-        if ($persist) {
-            $this->em->persist($event);
-            $persistStatus = 'true';
-        } else {
-            $persistStatus = 'false';
-        }
+        $persistStatus = ($persist) ? 'true' : 'false';
+        $newObj = 'Created a new '. $this->class .' obj. Persist ('. $persistStatus .').';
+        // custom notes
+        $newObj =. ' with question caption:  "'.
+            $question->getQuestionCaption() .'", for event series: "'.
+            $eventSeries->getName() .'"'.
 
-        return $event;
+        $this->logString ($string);
+
+        return $newObj;
     }
 
     ===== SERVICE DEFINITION in YML =====
@@ -57,6 +58,9 @@ abstract class BaseEntityManager
     protected $repo;
 
     protected $class;
+
+    // used to output result when using Doctrine fixtures > set to true when in LoadUserData.php (or other fixtures file)
+    protected $outputLogToScreen;
 
     /**
      * BaseEntityManager constructor.
@@ -111,5 +115,33 @@ abstract class BaseEntityManager
             array ('id'        => $id)
         );
         return $result;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOutputLogToScreen()
+    {
+        return $this->outputLogToScreen;
+    }
+
+    /**
+     * @param mixed $outputLogToScreen
+     * used to output result when using Doctrine fixtures > set to true when in LoadUserData.php (or other fixtures file)
+     */
+    public function setOutputLogToScreen($outputLogToScreen)
+    {
+        $this->outputLogToScreen = $outputLogToScreen;
+    }
+
+    public function logString ($logString) {
+        $this->logger->info($logString);
+
+        if ($this->outputLogToScreen) {
+            // used to output result when using Doctrine fixtures
+            print $logString ."\n";
+        }
+
+        return true;
     }
 }
