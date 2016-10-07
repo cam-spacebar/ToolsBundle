@@ -30,6 +30,11 @@ abstract class BaseEntityManager
         // configure
         // ...
 
+        if ($persist) {
+            $this->persist($answer);
+        }
+
+        // log
         $persistStatus = ($persist) ? 'true' : 'false';
         $newObj = 'Created a new '. $this->class .' obj. Persist ('. $persistStatus .').';
         // custom notes
@@ -143,5 +148,11 @@ abstract class BaseEntityManager
         }
 
         return true;
+    }
+
+    // use this instead of direct em call to apply the law of demeter
+    // (may want to use a different persistence layer at some point)
+    public function persist ($obj) {
+        $this->em->persist($obj);
     }
 }
