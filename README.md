@@ -26,4 +26,6 @@ The tools Bundle includes the following:
 6. BaseFormType
   * has constructor for a form that is used as a service (used as a service asprocessing logic that used to be in gthe controller has been moved to the form).
 
-
+7. Email Register
+  * requires Lexik mailer bundle
+  * used in: Anchorcards app and twencha app/bundle
