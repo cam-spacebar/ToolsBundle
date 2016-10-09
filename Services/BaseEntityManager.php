@@ -31,12 +31,12 @@ abstract class BaseEntityManager
         // ...
 
         if ($persist) {
-            $this->persist($answer);
+            $this->persist($newObj);
         }
 
         // log
         $persistStatus = ($persist) ? 'true' : 'false';
-        $newObj = 'Created a new '. $this->class .' obj. Persist ('. $persistStatus .').';
+        $string = 'Created a new '. $this->class .' obj. Persist ('. $persistStatus .').';
         // custom notes
         $newObj =. ' with question caption:  "'.
             $question->getQuestionCaption() .'", for event series: "'.

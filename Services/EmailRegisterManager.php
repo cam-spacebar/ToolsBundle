@@ -124,33 +124,10 @@ class EmailRegisterManager extends BaseEntityManager
         $this->setLexikMailer($lexikMailer);
     }
 
-    public function customCreateNew ($persist = true) {
-        // instantiate
-        $newObj = parent::createNew(false);
-
-        // configure
-        // ...
-
-        if ($persist) {
-            $this->persist($answer);
-        }
-
-        // log
-        $persistStatus = ($persist) ? 'true' : 'false';
-        $newObj = 'Created a new '. $this->class .' obj. Persist ('. $persistStatus .').';
-        // custom notes
-        $newObj =. ' with question caption:  "'.
-        $question->getQuestionCaption() .'", for event series: "'.
-        $eventSeries->getName() .'"'.
-
-        $this->logString ($string);
-
-        return $newObj;
-    }
-
     public function createEmailAndProcess ($to, $params, $template, $locale, $spoolEmail, $adapter = EmailRegister::LEXIK_ADAPTER) {
         $loggerAction = ($spoolEmail) ? 'spool' : 'send';
-        $email = $this->createNew();
+        /** @var EmailRegister $email */
+        $email = $this->createNew(false);
         $email->configure($to, $params, $template, $locale, $adapter);
 
         $this->logger->info('Attempting to '. $loggerAction .' email with id: '. $email->getId() .'. EmailRegister: (Id not available as just instantiated). $to: "'. $to .'" $template: "'. $template .'"');

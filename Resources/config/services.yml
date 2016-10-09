@@ -22,3 +22,28 @@ services:
             - { name: request.param_converter, converter: code_slug_converter }
         arguments:
             - "@?doctrine"
+
+# creating problems currently, need to fix it's routing issue - not sure how
+#    sonata.admin.email_register:
+#        class: VisageFour\Bundle\ToolsBundle\Admin\EmailRegisterAdmin
+#        tags:
+#            - name: sonata.admin
+#              manager_type: orm
+#              group: "Emails"
+#              label: "Registered Email"
+#        arguments:
+#            - ~
+#            - VisageFour\Bundle\ToolsBundle\Entity\EmailRegister
+#            - ~
+
+
+# add this to your projects services.yml, not in the shared VisageFour services.yml as it will crash the app if lexik mailer is not installed.
+#    anchorcards.email_register_manager:
+#        class: VisageFour\Bundle\ToolsBundle\Services\EmailRegisterManager
+#        arguments:
+#            - "@doctrine.orm.entity_manager"
+#            - "ToolsBundle:EmailRegister"
+#            - "@event_dispatcher"
+#            - "@logger"
+#            - "@lexik_mailer.message_factory"
+#            - "@mailer"
