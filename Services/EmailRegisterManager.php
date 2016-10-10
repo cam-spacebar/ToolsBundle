@@ -3,11 +3,11 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Lexik\Bundle\MailerBundle\Message\MessageFactory;
-use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister
+use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Psr\Log\LoggerInterface
+use Psr\Log\LoggerInterface;
 use Swift_Mailer;
 
 class EmailRegisterManager extends BaseEntityManager

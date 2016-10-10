@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: cameronburns
- * Date: 31/01/2016
- * Time: 7:55 PM
- */
 
 namespace VisageFour\Bundle\ToolsBundle\Admin;
 
