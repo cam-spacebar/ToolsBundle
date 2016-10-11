@@ -45,9 +45,10 @@ class EmailRegisterManager extends BaseEntityManager
             - ~
             - VisageFour\Bundle\ToolsBundle\Entity\EmailRegister
             - ~
-    EMAIL REGISTER SERVICE
 
-    anchorcards.email_register_manager:
+
+    EMAIL REGISTER MANAGER SERVICE
+    app_name.email_register_manager:
         class: VisageFour\Bundle\ToolsBundle\Services\EmailRegisterManager
         arguments:
             - "@doctrine.orm.entity_manager"
@@ -61,16 +62,16 @@ class EmailRegisterManager extends BaseEntityManager
     /**
      * @var Swift_Mailer
      */
-    private $mailer;
+    protected $mailer;
 
     /**
      * @var MessageFactory
      */
-    private $lexikMailer;
+    protected $lexikMailer;
 
     // these are the names of Lexik bundle templates and their twig
     // counterparts (as they need to be uploaded to the production server DB to work
-    // todo: delete these or use as exmaples
+    // todo: delete these - put them in a class that implements the ToolsBundle version in a project
     const PhotoGroupLinkEmail   = 'photoGroup-link';        // twig version: "PhotosReadyNotification.html.twig"
     const CodeRegistered        = 'code-registered';        // twig version: "CodesRegistered.twig"
     const MsgPhotocardNotice    = 'photocard-notice';       // twig version: "PhotocardNotice.twig"
@@ -161,18 +162,20 @@ class EmailRegisterManager extends BaseEntityManager
                     $email->getLocale()
                 );
 
-                $this->logger->info('Attempting to email. Template: "'. $email->getEmailTemplate() .'" To: "'. $email->getToEmail() .'"');
+                $this->logger->info('Attempting to process (send) email. Template: "'. $email->getEmailTemplate() .'" To: "'. $email->getToEmail() .'"');
 
                 // set to false when in dev mode and in particular when using mobile internet - as the send will fail
                 $toSend = true;
                 //$toSend = false;
-                $emulateSending = true;
+                $emulateSending = false;
                 if ($toSend || $emulateSending) {
                     // then send the email
                     if (!$emulateSending) {
                         $this->mailer->send($message);
+                        $this->logger->info('Sent email successfully (emulate sending set to: OFF).');
+                    } else {
+                        $this->logger->info('emulate sending: ON (email not sent to gateway).');
                     }
-                    $this->logger->info('Sent email successfully.');
 
                     $email->setSendStatus(EmailRegister::SENT);
                 } else {
