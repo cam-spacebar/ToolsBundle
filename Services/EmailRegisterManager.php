@@ -69,6 +69,8 @@ class EmailRegisterManager extends BaseEntityManager
      */
     protected $lexikMailer;
 
+    protected $emulateSending;
+
     // these are the names of Lexik bundle templates and their twig
     // counterparts (as they need to be uploaded to the production server DB to work
     // todo: delete these - put them in a class that implements the ToolsBundle version in a project
@@ -118,8 +120,13 @@ class EmailRegisterManager extends BaseEntityManager
      * @param MessageFactory            $lexikMailer
      * @param Swift_Mailer              $mailer
      */
-    public function __construct($em, $class, $dispatcher, $logger, $lexikMailer, $mailer) {
+    public function __construct($em, $class, $dispatcher, $logger, $lexikMailer, $mailer, $emulateSending) {
         parent::__construct($em, $class, $dispatcher, $logger);
+
+        $this->emulateSending = $emulateSending;
+        if ($this->emulateSending) {
+            $this->logger->info('Emulate email sending: ON');
+        }
 
         $this->setMailer($mailer);
         $this->setLexikMailer($lexikMailer);
