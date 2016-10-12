@@ -62,7 +62,7 @@ class EmailRegister
     /**
      * @var string
      *
-     * @ORM\Column(name="paramsSerialized", type="string", length=255)
+     * @ORM\Column(name="paramsSerialized", type="string", length=900)
      */
     private $paramsSerialized;
 
