@@ -173,11 +173,9 @@ class EmailRegisterManager extends BaseEntityManager
 
                 // set to false when in dev mode and in particular when using mobile internet - as the send will fail
                 $toSend = true;
-                //$toSend = false;
-                $emulateSending = false;
-                if ($toSend || $emulateSending) {
+                if ($toSend) {
                     // then send the email
-                    if (!$emulateSending) {
+                    if ($this->emulateSending) {
                         $this->mailer->send($message);
                         $this->logger->info('Sent email successfully (emulate sending set to: OFF).');
                     } else {
@@ -186,7 +184,7 @@ class EmailRegisterManager extends BaseEntityManager
 
                     $email->setSendStatus(EmailRegister::SENT);
                 } else {
-                    $this->logger->info('EMAIL NOT SENT (Send email turned off). Email id: '. $email->getId());
+                    $this->logger->info('EMAIL NOT SENT (Send email turned off - as mobile internet creates problems on dev machine). Email id: '. $email->getId());
                 }
                 $this->em->persist($email);
             }
