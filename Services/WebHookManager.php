@@ -125,13 +125,12 @@ class WebHookManager {
                 $json
             );
             $this->logger->info('JSON payload sent to webhook');
+
+            return $response1;
         } else {
             $this->logger->info('JSON payload *NOT* sent to webhook. disableWebhookCalls set to true');
+
+            return true;
         }
-
-
-        //dump($response1); die();
-
-        return $response1;
     }
 }
