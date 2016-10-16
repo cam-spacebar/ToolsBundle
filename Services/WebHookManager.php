@@ -118,11 +118,17 @@ class WebHookManager {
         $this->logger->info('About to send payload to webhook at URL: '. $webhookURL);
         $this->logger->info('Payload JSON: '. $json);
 
-        $response1 = $this->buzz->post(
-            $webhookURL,
-            array(),
-            $json
-        );
+        if ($this->disableWebhookCalls == false) {
+            $response1 = $this->buzz->post(
+                $webhookURL,
+                array(),
+                $json
+            );
+            $this->logger->info('JSON payload sent to webhook');
+        } else {
+            $this->logger->info('JSON payload *NOT* sent to webhook. disableWebhookCalls set to true');
+        }
+
 
         //dump($response1); die();
 
