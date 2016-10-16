@@ -144,7 +144,6 @@ class EmailRegisterManager extends BaseEntityManager
         $msg = ' ';
         if ($spoolEmail == false) {
             $this->sendEmail($email);
-            $this->logger->info('EMAIL SENT.');
         } else {
             $this->logger->info('EMAIL SPOOLED.');
 
@@ -176,10 +175,10 @@ class EmailRegisterManager extends BaseEntityManager
                 if ($toSend) {
                     // then send the email
                     if ($this->emulateSending) {
+                        $this->logger->info('emulate sending: ON (email not sent to gateway).');
+                    } else {
                         $this->mailer->send($message);
                         $this->logger->info('Sent email successfully (emulate sending set to: OFF).');
-                    } else {
-                        $this->logger->info('emulate sending: ON (email not sent to gateway).');
                     }
 
                     $email->setSendStatus(EmailRegister::SENT);

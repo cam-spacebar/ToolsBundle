@@ -263,7 +263,7 @@ class StaticInternational
         'ZW' => 'Zimbabwe'
     );
 
-    // languages
+    // languages - remember to use sort() to get inalphabetical order (if required)
     public static $languages = array (
         'aa' => 'Afar',
         'ab' => 'Abkhaz',
