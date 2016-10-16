@@ -5,6 +5,7 @@ services:
             - "@doctrine.orm.entity_manager"
             - "@buzz"
             - "@logger"
+            - "%disable_webhook_calls%"
 
 
     tools_bundle.code_manager:
@@ -14,7 +15,6 @@ services:
             - 'VisageFour\Bundle\ToolsBundle\Entity\Code'
             - "@event_dispatcher"
             - "@logger"
-
 
     tools_bundle.code_slug_converter:
         class: VisageFour\Bundle\ToolsBundle\Request\ParamConverter\CodeSlugParamConverter

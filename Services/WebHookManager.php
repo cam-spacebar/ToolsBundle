@@ -8,7 +8,6 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
-
 use Buzz\Browser;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManager;
@@ -28,18 +27,32 @@ class WebHookManager {
     private $logger;
     //private $serializer;
 
-    public function __construct (EntityManager $em, Browser $buzz, LoggerInterface $logger) {
-        $this->em           = $em;
-        $this->buzz         = $buzz;
-        $this->logger       = $logger;
+    public function __construct (EntityManager $em, Browser $buzz, LoggerInterface $logger, $disableWebhookCalls) {
+        $this->em                   = $em;
+        $this->buzz                 = $buzz;
+        $this->logger               = $logger;
+        $this->disableWebhookCalls  = $disableWebhookCalls;
         //todo: remove this if not needed - loojks like it is overwritten in the callWebhook() anyway and maybe an old aretfact
         //$this->serializer   = $serializer;
     }
 
     // todo: add variable for normalization attribute group - what is meant by this?
+    /* IMPLEMENTATION CODE:
+    /** @var WebHookManager $webHookManager
+    $webHookManager = $this->container->get('toolsbundle.webhookmanager');
+
+    $dateTimeFields = array ('createdAt', 'visaExpiry');    // array of the obj members that need to be converted into strings
+    $result = $webHookManager->callWebhook (
+        $job ['webHookURL'],
+        $jobApplication,
+        $dateTimeFields
+    );
+
+    // */
     public function callWebhook ($webhookURL, $object, $dateTimeFieldList = null) {
         //$serializer     = $this->serializer;
         /*
+
                  * // normalize only code
                 $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
                 $normalizer = new PropertyNormalizer($classMetadataFactory);
