@@ -27,7 +27,7 @@ class EmailRegister
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var \DateTime
@@ -50,28 +50,28 @@ class EmailRegister
      *
      * @ORM\Column(name="toEmail", type="string", length=255)
      */
-    private $toEmail;
+    protected $toEmail;
 
     /**
      * @var string
      *
      * @ORM\Column(name="locale", type="string", length=10)
      */
-    private $locale;
+    protected $locale;
 
     /**
      * @var string
      *
      * @ORM\Column(name="paramsSerialized", type="string", length=900)
      */
-    private $paramsSerialized;
+    protected $paramsSerialized;
 
     /**
      * @var integer
      *
      * @ORM\Column(name="sendStatus", type="integer")
      */
-    private $sendStatus;
+    protected $sendStatus;
 
     /**
      * @var integer
@@ -80,21 +80,21 @@ class EmailRegister
      *
      * this is the final system used to send the email (lexik bundle, swiftmail or whatever else might be defined)
      */
-    private $adapter;
+    protected $adapter;
 
     /**
      * @var string
      *
      * @ORM\Column(name="emailTemplate", type="string", length=255)
      */
-    private $emailTemplate;
+    protected $emailTemplate;
 
     /**
      * @var string
      *
      *
      */
-    private $params;
+    protected $params;
     
     /**
      * Get id

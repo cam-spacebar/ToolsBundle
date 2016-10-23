@@ -58,6 +58,33 @@ class BaseEmailRegisterManager extends BaseEntityManager
             - "@lexik_mailer.message_factory"
             - "@mailer"
             - "%emulate_email_sending%
+
+    === SUB-EMAIL REGISTER MANAGER CLASS - EMAIL METHOD IMPLEMENTATION EXAMPLE ===
+    // CUSTOM EMAIL METHODS BELOW:
+    // New Booking - admin notification
+    public function sendNewBookingEmail (Booking $booking, Slug $slug, Event $event) {
+        $person = $booking->getRelatedBookedPerson();
+        $slug   = $booking->getRelatedSlug();
+
+        $params = array (
+            'bookingCreatedAt'      => $booking->getCreatedAt()->format('Y-m-j H:i'),
+            'eventSeriesName'       => $slug->getRelatedEventSeries()->getName(),
+            'eventStartDateTime'    => $event->getStartDateTime()->format('Y-m-j H:i'),
+
+            'bookedPersonEmail'     => $person->getEmail(),
+            'bookingId'              => $booking->getId(),
+
+            'code'                  => $slug->getRelatedCode()->getCode(),
+            'source'                => $slug->getRelatedSource()->getName()
+        );
+
+        $params = $this->duplicateCheck ($booking, $params);
+
+        $template       = EmailRegisterManager::$AdminNewBookingEmail['reference'];
+        $emailRegister  = $this->sendThis($slug->getRelatedPromoterPerson(), $params, $template);
+
+        return $emailRegister;
+    }
     */
 
     /**
