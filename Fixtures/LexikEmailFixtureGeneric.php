@@ -31,7 +31,6 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
      * @var Container
      */
     protected $container;
-    protected $manager;
     protected $locator;
     protected $parser;
 
@@ -43,22 +42,21 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
     public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;
-        $this->em = $this->container->get('doctrine.orm.default_entity_manager');       // needed, as for some reason, the $maanger passed to load doesn't work (it behaves like it;s save an obj but hasn't)
+        $this->em = $this->container->get('doctrine.orm.default_entity_manager');       // needed, as for some reason, the $manager obj passed to load doesn't work (it behaves like it;s save an obj but hasn't)
     }
 
     public function __construct()
     {
     }
 
-    // used to remove lexik layouts, layout translations, email templates and email template translations before beginning fixture population
-    public function deleteLexikLayoutsAndEmailTemplates () {
-        $cmd = $this->em->getClassMetadata('Lexik\Bundle\MailerBundle\Entity\Email');
+    // delete all records from a DB table
+    public function purgeEntityTable ($entityPath) {
+        $cmd = $this->em->getClassMetadata($entityPath);
         $connection = $this->em->getConnection();
         $connection->beginTransaction();
 
         try {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
-            print 'DELETE FROM '.$cmd->getTableName();
             $connection->query('DELETE FROM '.$cmd->getTableName());
             // Beware of ALTER TABLE here--it's another DDL statement and will cause
             // an implicit commit.
@@ -68,7 +66,17 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
             $connection->rollback();
         }
 
-        die('here');;
+        print 'Deleted all records from: "'. $entityPath ."\"\n";
+    }
+
+    // used to remove lexik layouts, layout translations, email templates and email template translations before beginning fixture population
+    public function deleteLexikLayoutsAndEmailTemplates () {
+        $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\Email');
+        $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\EmailTranslation');
+        $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\Layout');
+        $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\LayoutTranslation');
+
+        print "===\n";
 
         return true;
     }
@@ -85,8 +93,8 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         $lexikLayoutTranslation->setBody($layoutParams['body']);
         $lexikLayoutTranslation->setLayout($lexikLayout);
 
-        $this->manager->persist($lexikLayout);
-        $this->manager->persist($lexikLayoutTranslation);
+        $this->em->persist($lexikLayout);
+        $this->em->persist($lexikLayoutTranslation);
 
         print 'Created Lexik Layout with reference: "'. $layoutParams['reference'] ."\"\n";
 
@@ -127,8 +135,8 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         $lexikEmailTranslation->setBodyText(file_get_contents($NewPersonRegistrationTXTPath));
         $lexikEmailTranslation->setEmail($lexikEmail);
 
-        $this->manager->persist($lexikEmailTranslation);
-        $this->manager->persist($lexikEmail);
+        $this->em->persist($lexikEmailTranslation);
+        $this->em->persist($lexikEmail);
 
         print 'Created Lexik Email with reference: "'. $emailArr['reference'] ."\"\n";
 
