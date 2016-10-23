@@ -10,13 +10,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Swift_Mailer;
 
-class EmailRegisterManager extends BaseEntityManager
+class BaseEmailRegisterManager extends BaseEntityManager
 {
     /*
                 === USAGE BELOW! ===
 
     /** @var $emailRegisterManager EmailRegisterManager
-    $emailRegisterManager = $this->container->get('anchorcards.email_register_manager');
+    $emailRegisterManager = $this->container->get('app_name.email_register_manager');
 
     // $emailRegisterManager->sendNextSpooled();
     // $remaininedEmails = $emailRegisterManager->countSpooled();
@@ -32,10 +32,10 @@ class EmailRegisterManager extends BaseEntityManager
         EmailRegister::LEXIK_ADAPTER
     );
 
-    === SERVICE DEFINITION ===
+    === SONATA ADMIN SERVICE DEFINITION ===
     SONATA ADMIN SERVICE:
         sonata.admin.email_register:
-        class: Platypuspie\AnchorcardsBundle\Admin\EmailRegisterAdmin
+        class: Companyname\Bundle\Bundlename\Services\EmailRegisterManager -- class that extends BaseEmailRegisterManager
         tags:
             - name: sonata.admin
               manager_type: orm
@@ -47,16 +47,17 @@ class EmailRegisterManager extends BaseEntityManager
             - ~
 
 
-    EMAIL REGISTER MANAGER SERVICE
+    === EMAIL REGISTER MANAGER SERVICE ===
     app_name.email_register_manager:
-        class: VisageFour\Bundle\ToolsBundle\Services\EmailRegisterManager
+        class: Companyname\Bundle\Bundlename\Services\EmailRegisterManager -- class that extends BaseEmailRegisterManager
         arguments:
             - "@doctrine.orm.entity_manager"
-            - "ToolsBundle:EmailRegister"
+            - "ToolsBundle:EmailRegister" -- Entity should be extended first?? (probably no need / not many cases where extension is needed)
             - "@event_dispatcher"
             - "@logger"
             - "@lexik_mailer.message_factory"
             - "@mailer"
+            - "%emulate_email_sending%
     */
 
     /**
@@ -70,14 +71,6 @@ class EmailRegisterManager extends BaseEntityManager
     protected $lexikMailer;
 
     protected $emulateSending;
-
-    // these are the names of Lexik bundle templates and their twig
-    // counterparts (as they need to be uploaded to the production server DB to work
-    // todo: delete these - put them in a class that implements the ToolsBundle version in a project
-    const PhotoGroupLinkEmail   = 'photoGroup-link';        // twig version: "PhotosReadyNotification.html.twig"
-    const CodeRegistered        = 'code-registered';        // twig version: "CodesRegistered.twig"
-    const MsgPhotocardNotice    = 'photocard-notice';       // twig version: "PhotocardNotice.twig"
-    const DownloadOriginalPhoto = 'SendOriginalPhotoLink';  // twig version: "SendOriginalPhotoLink.twig"
 
     /**
      * @return mixed
