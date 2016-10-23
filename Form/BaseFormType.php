@@ -7,6 +7,7 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormFactoryInterface;
 
 class BaseFormType extends AbstractType
 {
@@ -28,27 +29,32 @@ class BaseFormType extends AbstractType
     protected $em;
     protected $dispatcher;
     protected $logger;
+    protected $kernelEnv;
+    protected $formFactory;
+
+    protected $formResult;
 
     protected $processingResult;
-    protected $formResultCodes;
 
     const FORM_NAME_HUMAN_READABLE = '';
 
-    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
+    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv) {
         $this->em               = $em;
         $this->dispatcher       = $dispatcher;
         $this->logger           = $logger;
+        $this->kernelEnv        = $kernelEnv;
+        $this->formFactory      = $formFactory;
     }
 
     public function setProcessingResult ($formResultCode) {
-        if (empty($this->formResultCodes[$formResultCode])) {
+        if (empty($this->resultCodes[$formResultCode])) {
             $errorString = 'Code: "'. $formResultCode .'" could not be identified in the "'. self::FORM_NAME_HUMAN_READABLE .'" form';
             throw new \Exception($errorString);
         }
 
         $this->processingResult = $formResultCode;
 
-        $this->logger->info(self::FORM_NAME_HUMAN_READABLE .' form processing result: "'. $this->formResultCodes[$formResultCode] .'"');
+        $this->logger->info(self::FORM_NAME_HUMAN_READABLE .' form processing result: "'. $this->resultCodes[$formResultCode] .'"');
 
         return $this->processingResult;
     }
@@ -57,5 +63,21 @@ class BaseFormType extends AbstractType
     public function throwFormResultCodeError ($formResult) {
         $errorString = 'Controller is not programmed to handle a form result of: '. $formResult .' (this number will translate to a constant of some sort in the Type class used in this form)';
         throw new \Exception($errorString);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFormResult()
+    {
+        return $this->formResult;
+    }
+
+    /**
+     * @param mixed $formResult
+     */
+    public function setFormResult($formResult)
+    {
+        $this->formResult = $formResult;
     }
 }
