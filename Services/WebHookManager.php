@@ -11,9 +11,7 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 use Buzz\Browser;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManager;
-use JMS\Serializer\Serializer;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\BuzzBundle\SensioBuzzBundle;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -74,32 +72,11 @@ class WebHookManager {
             'json' => new JsonEncoder()
         );
 
-        // used to convert datetime objects
-        $callback = function ($dateTime) {
-            if (!($dateTime instanceof \DateTime)) {
-                throw new \Exception ('The \\DateTime object to be normalized is not a \\DateTime object');
-            }
-
-            return $dateTime instanceof \DateTime
-                ? $dateTime->format(\DateTime::ISO8601)
-                : '';
-        };
-
         $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
         $propertyNormalizer = new PropertyNormalizer($classMetadataFactory);
+        $fieldArray = $this->getFieldCallbacks($dateTimeFieldList);
 
-        if (!empty($dateTimeFieldList)) {
-            // normalize DateTime objects
-            $fieldArray = array ();
-            foreach ($dateTimeFieldList as $curI => $fieldName) {
-                $fieldArray [$fieldName] = $callback;
-            }
-
-            //dump()
-        }
-
-        $propertyNormalizer->setCallbacks(array('createdAt' => $callback, 'visaExpiry' => $callback));         // this will convert the createdAt \DateTime object into a string
-
+        $propertyNormalizer->setCallbacks($fieldArray);
 
         $normalizers = array(
             $propertyNormalizer
@@ -115,9 +92,22 @@ class WebHookManager {
             ['groups' => ['zapierSpreadsheet']]
         );
 
-        $this->logger->info('About to send payload to webhook at URL: '. $webhookURL);
-        $this->logger->info('Payload JSON: '. $json);
+        return $this->sendJson($webhookURL, $json);
+    }
 
+    // $newarray = array_merge(json_decode($json1, true),json_decode($json2, true));
+
+    /**
+     * @param $webhookURL
+     * @param $json
+     * @return bool|\Buzz\Message\MessageInterface
+     */
+    public function sendJson($webhookURL, $json)
+    {
+        $this->logger->info('About to send payload to webhook at URL: ' . $webhookURL);
+        $this->logger->info('Payload JSON: ' . $json);
+
+        // todo: marker: BUZZTIMEOUT: need to catch RequestException "Operation timed out after 5001 milliseconds with 0 bytes received" + send error to admin
         if ($this->disableWebhookCalls == false) {
             $response1 = $this->buzz->post(
                 $webhookURL,
@@ -132,5 +122,38 @@ class WebHookManager {
 
             return true;
         }
+    }
+
+    /**
+     * This sets calls backs to execute when the normalizer finds an object within the object being normalized.
+     * It's generally used for date time objects within the class being normalized
+     *
+     * @param $dateTimeFieldList
+     * @return array
+     */
+    public function getFieldCallbacks($dateTimeFieldList)
+    {
+// used to convert datetime objects
+        $callback = function ($dateTime) {
+            if (!($dateTime instanceof \DateTime)) {
+                throw new \Exception ('The \\DateTime object to be normalized is not a \\DateTime object');
+            }
+
+            return $dateTime instanceof \DateTime
+                ? $dateTime->format(\DateTime::ISO8601)
+                : '';
+        };
+
+        $fieldArray = array();
+        if (!empty($dateTimeFieldList)) {
+            // normalize DateTime objects
+            foreach ($dateTimeFieldList as $curI => $fieldName) {
+                $fieldArray [$fieldName] = $callback;
+            }
+            return $fieldArray;
+
+            //dump()
+        }
+        return $fieldArray;
     }
 }
