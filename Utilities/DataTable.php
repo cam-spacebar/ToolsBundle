@@ -3,6 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Utilities;
 
 use Lexik\Bundle\MailerBundle\Message\MessageFactory;
+use Symfony\Component\HttpFoundation\Response;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
 use Doctrine\ORM\EntityManager;
@@ -12,6 +13,8 @@ use Swift_Mailer;
 
 // this class is used to represent data that will be
 // rendered in a datatable or into a .CSV
+// Note: can be extended to add useful sorting / reordering algorythms for specific use cases.
+// (or is it better to have this logic in the manger class?)
 class DataTable
 {
     /*
@@ -48,7 +51,8 @@ class DataTable
         return $this;
     }
 
-    public function render ($renderDefaultStyle = true) {
+    // Render the default styles (if nessacary) and redner the datatable
+    public function renderTable ($renderDefaultStyle = true) {
         if ($renderDefaultStyle) { $this->renderDefaultStyle(); }
 
 
@@ -103,5 +107,101 @@ class DataTable
 }
 </style>
 ';
+    }
+
+    /*
+    IMPLETEMENTATION CODE:
+    // it may be useful to abstract this logic into the maanger class if one exists
+    $tableHeaders = array (
+        array ('caption'    => 'Bookings',                      'reference'     => 'bookings'),
+        array ('caption'    => 'Event Name',                    'reference'     => 'eventSeriesName'),
+        array ('caption'    => 'Event Start',                   'reference'     => 'startDateTime'),
+        array ('caption'    => 'Download Bookings (as .csv)',   'reference'     => 'downloadHref')
+    );
+
+    // or use whatever source is needed
+    $tableData = array (
+        array ('name'       => 'tom',   'emailAddress'  => 'tom@hotmail.com'),
+        array ('name'       => 'jess',  'emailAddress'  => 'jess@gmail.com')
+    );
+
+    $dataTable = new DataTable($tableHeaders, $tableData);
+
+    $date           = new \datetime ();
+    $dateString     = $date->format('Y-m-d H:i');
+    $filename       = 'Bookings as CSV (date: '. $dateString .').csv';
+
+    return $dataTable->generateCSVresponse (
+        $filename
+    );
+     */
+    // accepts $data as an array of strings (with commas), $headRow must already be sperated by CSV
+    public function generateCSVresponse ($filename = null) {
+        if (empty($filename)) {
+            $filename = 'download.csv';
+        }
+
+        $filename = $this->sanitizeFilename ($filename);
+        $response = new Response($this->getFinishedCSVContent());
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename='. $filename );
+
+        return $response;
+    }
+
+    // return header and data rows in CSV
+    public function getFinishedCSVContent () {
+        $headRow    = $this->getHeadersAsCSV ();
+        $dataRows   = $this->getDataAsCSV();
+        $content    = $headRow ."\n". $dataRows;
+
+        return $content;
+    }
+
+        // return header captions as CSV
+    public function getHeadersAsCSV () {
+        $headersCSV = '';
+        $firstLoop = true;
+        foreach($this->headers as $curI => $curHeader) {
+            if (!$firstLoop) {
+                $headersCSV .= ',';
+            }
+            $firstLoop = false;
+            $headersCSV .= $curHeader ['caption'];
+        }
+        return $headersCSV;
+    }
+
+    // return values as CSV
+    public function getDataAsCSV () {
+        $dataCSV = '';
+
+        foreach($this->data as $curJ => $curDatum) {
+            $firstLoop = true;
+            foreach($this->headers as $curI => $curHeader) {
+                if (!$firstLoop) {
+                    $dataCSV .= ',';
+                }
+                $firstLoop = false;
+                $curValue = (isset($curDatum[$curHeader['reference']])) ? $curDatum[$curHeader['reference']] : '';
+                $dataCSV .=  $curValue;
+            }
+                $dataCSV .= "\n";
+        }
+
+        return $dataCSV;
+    }
+
+    // used to remove illegal characters from a filename
+    public function sanitizeFilename ($filename) {
+        // Remove anything which isn't a word, whitespace, number
+        // or any of the following caracters -_~,;[]().
+        // If you don't need to handle multi-byte characters
+        // you can use preg_replace rather than mb_ereg_replace
+        $filename = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $filename);
+        // Remove any runs of periods (thanks falstro!)
+        $filename = mb_ereg_replace("([\.]{2,})", '', $filename);
+
+        return $filename;
     }
 }
