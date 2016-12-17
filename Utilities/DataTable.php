@@ -17,17 +17,35 @@ use Swift_Mailer;
 // (or is it better to have this logic in the manger class?)
 class DataTable
 {
+
+
     /*
-    $tableHeader = array (
-        array ('caption'    => 'Name',  'reference'     => 'name'),
-        array ('caption'    => 'Email', 'reference'     => 'emailAddress')
+    IMPLETEMENTATION CODE:
+    // it may be useful to abstract this logic into the manager class
+    $tableHeaders = array (
+        array ('caption'    => 'Bookings',                      'reference'     => 'bookings'),
+        array ('caption'    => 'Event Name',                    'reference'     => 'eventSeriesName'),
+        array ('caption'    => 'Event Start',                   'reference'     => 'startDateTime'),
+        array ('caption'    => 'Download Bookings (as .csv)',   'reference'     => 'downloadHref')
     );
+
+    // or use whatever source is needed
     $tableData = array (
         array ('name'       => 'tom',   'emailAddress'  => 'tom@hotmail.com'),
         array ('name'       => 'jess',  'emailAddress'  => 'jess@gmail.com')
     );
-    $datatable = new DataTable ($tableHeader, $tableData);
-    // */
+
+    $dataTable = new DataTable($tableHeaders, $tableData);
+
+    // generate a response object with CSV data
+    $date           = new \datetime ();
+    $dateString     = $date->format('Y-m-d H:i');
+    $filename       = 'Bookings as CSV (date: '. $dateString .').csv';
+
+    return $dataTable->generateCSVresponse (
+        $filename
+    );
+    */
 
     protected $headers;
     protected $data;
@@ -109,32 +127,6 @@ class DataTable
 ';
     }
 
-    /*
-    IMPLETEMENTATION CODE:
-    // it may be useful to abstract this logic into the maanger class if one exists
-    $tableHeaders = array (
-        array ('caption'    => 'Bookings',                      'reference'     => 'bookings'),
-        array ('caption'    => 'Event Name',                    'reference'     => 'eventSeriesName'),
-        array ('caption'    => 'Event Start',                   'reference'     => 'startDateTime'),
-        array ('caption'    => 'Download Bookings (as .csv)',   'reference'     => 'downloadHref')
-    );
-
-    // or use whatever source is needed
-    $tableData = array (
-        array ('name'       => 'tom',   'emailAddress'  => 'tom@hotmail.com'),
-        array ('name'       => 'jess',  'emailAddress'  => 'jess@gmail.com')
-    );
-
-    $dataTable = new DataTable($tableHeaders, $tableData);
-
-    $date           = new \datetime ();
-    $dateString     = $date->format('Y-m-d H:i');
-    $filename       = 'Bookings as CSV (date: '. $dateString .').csv';
-
-    return $dataTable->generateCSVresponse (
-        $filename
-    );
-     */
     // accepts $data as an array of strings (with commas), $headRow must already be sperated by CSV
     public function generateCSVresponse ($filename = null) {
         if (empty($filename)) {
