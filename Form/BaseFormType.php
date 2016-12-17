@@ -31,6 +31,7 @@ class BaseFormType extends AbstractType
     protected $logger;
     protected $kernelEnv;
     protected $formFactory;
+    protected $resultCodes;
 
     protected $formResult;
 
@@ -42,13 +43,14 @@ class BaseFormType extends AbstractType
         $this->em               = $em;
         $this->dispatcher       = $dispatcher;
         $this->logger           = $logger;
-        $this->kernelEnv        = $kernelEnv;
         $this->formFactory      = $formFactory;
+        $this->kernelEnv        = $kernelEnv;
     }
 
     public function setProcessingResult ($formResultCode) {
         if (empty($this->resultCodes[$formResultCode])) {
             $errorString = 'Code: "'. $formResultCode .'" could not be identified in the "'. self::FORM_NAME_HUMAN_READABLE .'" form';
+            //dump($this->resultCodes);
             throw new \Exception($errorString);
         }
 

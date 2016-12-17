@@ -20,6 +20,7 @@ class CustomController extends Controller
     $thisPerson = $this->getThisPerson();
 
     */
+    //this will check the user has the role specified in the parameters
     public function checkAccess ($role) {
         /** @var $userSecurity \VisageFour\Bundle\PersonBundle\Services\UserSecurity */
         $userSecurity   = $this->container->get('usersecurity');
@@ -28,6 +29,8 @@ class CustomController extends Controller
         return true;
     }
 
+    // will return the person that corresponds to the user account - you will need to make sure the relationships correctly.
+    // if the person doesn't exist, this method should create one for the user and return it.
     public function getThisPerson () {
         die ('needs to be configured for more generalized use - code below from anchorcards app');
         /** @var $userSecurity \VisageFour\Bundle\PersonBundle\Services\UserSecurity */
