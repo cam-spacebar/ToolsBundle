@@ -32,7 +32,8 @@ class CustomController extends Controller
     // will return the person that corresponds to the user account - you will need to make sure the relationships correctly.
     // if the person doesn't exist, this method should create one for the user and return it.
     public function getThisPerson () {
-        die ('needs to be configured for more generalized use - code below from anchorcards app');
+        // This needs to be generalized for use in other apps!!! see service: platypuspie.personmanager which is specifc to anchorcards
+
         /** @var $userSecurity \VisageFour\Bundle\PersonBundle\Services\UserSecurity */
         $userSecurity   = $this->container->get('usersecurity');
         $thisPerson     = $userSecurity->getPersonLoggedIn();
@@ -79,5 +80,17 @@ class CustomController extends Controller
         }
 
         return false;
+    }
+
+    public function getSiteName () {
+        $this->container->getParameter('site_name');
+    }
+
+    public function getSiteURL () {
+        $this->container->getParameter('site_url');
+    }
+
+    public function getNoReplyEmail () {
+        $this->container->getParameter('email_noreply');
     }
 }
