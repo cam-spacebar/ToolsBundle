@@ -21,7 +21,6 @@ class CustomController extends Controller
 
     */
     public function checkAccess ($role) {
-        die ('needs to be configured for more generalized use - code below from anchorcards app');
         /** @var $userSecurity \VisageFour\Bundle\PersonBundle\Services\UserSecurity */
         $userSecurity   = $this->container->get('usersecurity');
         $userSecurity->checkRole ($role);
