@@ -122,6 +122,10 @@ abstract class BaseEntityManager
         return $result;
     }
 
+    public function findAll () {
+        return $this->repo->findAll();
+    }
+
     /**
      * @return mixed
      */

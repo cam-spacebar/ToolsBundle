@@ -25,9 +25,9 @@ class CustomController extends Controller
     // need to pass in the applications extended PersonManager for FindOneBy method - although BasePersonRepo will act as an interface
     public function getPersonLoggedInOrCreate () {
         $personManager  = $this->getPersonManager();
-        $thisPerson     = $this->getLoggedInPerson();
+        $person         = $this->getLoggedInPerson();
 
-        if (empty($thisPerson)) {
+        if (empty($person)) {
             // create new person if email address exists
             $thisUser = $this->getUserLoggedIn();
 
@@ -62,7 +62,7 @@ class CustomController extends Controller
             }
         }
 
-        return $thisPerson;
+        return $person;
     }
 
     // return true if is in dev environment
