@@ -7,7 +7,6 @@ services:
             - "@logger"
             - "%disable_webhook_calls%"
 
-
     tools_bundle.code_manager:
         class: VisageFour\Bundle\ToolsBundle\Services\CodeManager
         arguments:
