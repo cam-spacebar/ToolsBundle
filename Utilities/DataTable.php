@@ -50,11 +50,13 @@ class DataTable
     protected $headers;
     protected $data;
     protected $CssClassName;
+    protected $noDataMessage;
 
-    public function __construct($tableHeaders, $tableData, $CssClassName = 'datatable1') {
+    public function __construct($tableHeaders, $tableData, $noDataMessage = 'no data to present.', $CssClassName = 'datatable1') {
         $this->setData($tableData);
         $this->setHeaders($tableHeaders);
-        $this->CssClassName = $CssClassName;
+        $this->noDataMessage    = $noDataMessage;
+        $this->CssClassName     = $CssClassName;
     }
 
     public function setHeaders ($tableHeaders) {
@@ -70,37 +72,41 @@ class DataTable
     }
 
     // Render the default styles (if nessacary) and redner the datatable
-    public function renderTable ($renderDefaultStyle = true) {
-        if ($renderDefaultStyle) { $this->renderDefaultStyle(); }
-
-
-        if (empty($this->headers)) {
-            throw new \Exception ('dataTable headers must not be empty');
-        }
+    public function renderTable ($renderDefaultStyle = true)
+    {
         if (empty($this->data)) {
-            throw new \Exception ('dataTable data must not be empty');
-        }
+            print $this->noDataMessage;
+        } else {
+            if ($renderDefaultStyle) {
+                $this->renderDefaultStyle();
+            }
 
-        $class = (!empty($this->CssClassName)) ? ' class="'. $this->CssClassName .'"' : '';
-        print '<table'. $class .'>';
-        // render table headers
-        print '    <tr>';
-        foreach ($this->headers as $curi => $curHeader) {
-            print '        <th>'. $curHeader['caption'] .'</th>';
-        }
-        print '        </tr>';
+            if (empty($this->headers)) {
+                throw new \Exception ('dataTable headers must not be empty');
+            }
 
-        // render table data
-        foreach ($this->data as $curi1 => $curCell) {
-            print '        <tr>';
-            foreach ($this->headers as $curi2 => $curHeader) {
-                //if (!isset($curCell[$curHeader['reference']])) { die ('here'. $curHeader['reference']); }
-                $curValue = (isset($curCell[$curHeader['reference']])) ? $curCell[$curHeader['reference']] : '';
-                print '        <td>' . $curValue . '</td>';
+            $class = (!empty($this->CssClassName)) ? ' class="' . $this->CssClassName . '"' : '';
+            print '<table' . $class . '>';
+            // render table headers
+            print '    <tr>';
+            foreach ($this->headers as $curi => $curHeader) {
+                print '        <th>' . $curHeader['caption'] . '</th>';
             }
             print '        </tr>';
+
+            // render table data
+            foreach ($this->data as $curi1 => $curCell) {
+                print '        <tr>';
+                foreach ($this->headers as $curi2 => $curHeader) {
+                    //if (!isset($curCell[$curHeader['reference']])) { die ('here'. $curHeader['reference']); }
+                    $curValue = (isset($curCell[$curHeader['reference']])) ? $curCell[$curHeader['reference']] : '';
+                    print '        <td>' . $curValue . '</td>';
+                }
+                print '        </tr>';
+            }
+            print '</table>';
         }
-        print '</table>';
+
 
         return null;        // if return true, will render as : '1'
     }
