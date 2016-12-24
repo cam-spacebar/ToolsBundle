@@ -17,8 +17,6 @@ use Swift_Mailer;
 // (or is it better to have this logic in the manger class?)
 class DataTable
 {
-
-
     /*
     IMPLETEMENTATION CODE:
     // it may be useful to abstract this logic into the manager class
@@ -47,25 +45,29 @@ class DataTable
     );
     */
 
+    protected $columnFormat;
     protected $headers;
     protected $data;
     protected $CssClassName;
     protected $noDataMessage;
 
-    public function __construct($tableHeaders, $tableData, $noDataMessage = 'no data to present.', $CssClassName = 'datatable1') {
-        $this->setData($tableData);
-        $this->setHeaders($tableHeaders);
+    protected $supportedColumnFormats;
+
+    public function __construct($columnFormat, $noDataMessage = 'no data to present.', $CssClassName = 'datatable1') {
+        $this->columnFormat     = $columnFormat;
         $this->noDataMessage    = $noDataMessage;
         $this->CssClassName     = $CssClassName;
+
+        $this->checkColumnFormatValid ($columnFormat);
     }
 
-    public function setHeaders ($tableHeaders) {
+    protected function setHeaders ($tableHeaders) {
         $this->headers = $tableHeaders;
 
         return $this;
     }
 
-    public function setData ($tableData) {
+    protected function setData ($tableData) {
         $this->data = $tableData;
 
         return $this;
@@ -90,7 +92,9 @@ class DataTable
             // render table headers
             print '    <tr>';
             foreach ($this->headers as $curi => $curHeader) {
-                print '        <th>' . $curHeader['caption'] . '</th>';
+                if (in_array($this->columnFormat, $curHeader['supportedFormats'])) {
+                    print '        <th>' . $curHeader['caption'] . '</th>';
+                }
             }
             print '        </tr>';
 
@@ -98,21 +102,21 @@ class DataTable
             foreach ($this->data as $curi1 => $curCell) {
                 print '        <tr>';
                 foreach ($this->headers as $curi2 => $curHeader) {
-                    //if (!isset($curCell[$curHeader['reference']])) { die ('here'. $curHeader['reference']); }
-                    $curValue = (isset($curCell[$curHeader['reference']])) ? $curCell[$curHeader['reference']] : '';
-                    print '        <td>' . $curValue . '</td>';
+                    if (in_array($this->columnFormat, $curHeader['supportedFormats'])) {
+                        $curValue = (isset($curCell[$curHeader['reference']])) ? $curCell[$curHeader['reference']] : '';
+                        print '        <td>' . $curValue . '</td>';
+                    }
                 }
                 print '        </tr>';
             }
             print '</table>';
         }
 
-
         return null;        // if return true, will render as : '1'
     }
 
     // provide some basic default styling for the datatable - this can be customized later
-    public function renderDefaultStyle () {
+    private function renderDefaultStyle () {
         print '
 <style>
 .datatable1, .datatable1 th, .datatable1 td {
@@ -134,7 +138,7 @@ class DataTable
     }
 
     // accepts $data as an array of strings (with commas), $headRow must already be sperated by CSV
-    public function generateCSVresponse ($filename = null) {
+     public function generateCSVresponse ($filename = null) {
         if (empty($filename)) {
             $filename = 'download.csv';
         }
@@ -148,7 +152,7 @@ class DataTable
     }
 
     // return header and data rows in CSV
-    public function getFinishedCSVContent () {
+    protected function getFinishedCSVContent () {
         $headRow    = $this->getHeadersAsCSV ();
         $dataRows   = $this->getDataAsCSV();
         $content    = $headRow ."\n". $dataRows;
@@ -157,7 +161,7 @@ class DataTable
     }
 
         // return header captions as CSV
-    public function getHeadersAsCSV () {
+    protected function getHeadersAsCSV () {
         $headersCSV = '';
         $firstLoop = true;
         foreach($this->headers as $curI => $curHeader) {
@@ -171,7 +175,7 @@ class DataTable
     }
 
     // return values as CSV
-    public function getDataAsCSV () {
+    protected function getDataAsCSV () {
         $dataCSV = '';
 
         foreach($this->data as $curJ => $curDatum) {
@@ -191,7 +195,7 @@ class DataTable
     }
 
     // used to remove illegal characters from a filename
-    public function sanitizeFilename ($filename) {
+    protected function sanitizeFilename ($filename) {
         // Remove anything which isn't a word, whitespace, number
         // or any of the following caracters -_~,;[]().
         // If you don't need to handle multi-byte characters
@@ -201,5 +205,14 @@ class DataTable
         $filename = mb_ereg_replace("([\.]{2,})", '', $filename);
 
         return $filename;
+    }
+
+    // will check that the $columnFormat requested for use in dataTable construction is one supported by the dataTable
+    protected function checkColumnFormatValid ($requestedColumnFormat) {
+        if (!in_array($requestedColumnFormat, $this->supportedColumnFormats)) {
+            throw new \Exception ('The requested $columnFormat: '. $requestedColumnFormat .' is not supported in this dataTable');
+        }
+
+        return true;
     }
 }
