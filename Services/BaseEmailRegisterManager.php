@@ -158,7 +158,9 @@ class BaseEmailRegisterManager extends BaseEntityManager
         $email = $this->createNew(false);
         $email->configure($to, $params, $template, $locale, $adapter);
 
-        $this->logger->info('Attempting to '. $loggerAction .' email with id: '. $email->getId() .'. EmailRegister: (Id not available as just instantiated). $to: "'. $to .'" $template: "'. $template .'"');
+        $this->logger->info('Attempting to '. $loggerAction .' email.'.
+            '$to: "'. $to .'" $template: "'. $template .'"'.
+            ' with id: '. $email->getId() .'. EmailRegister: (Id not available as just instantiated).');
 
         $email->setSendStatus(EmailRegister::SPOOLED);
         $msg = ' ';
