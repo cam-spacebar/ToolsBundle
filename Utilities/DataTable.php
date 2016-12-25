@@ -49,13 +49,13 @@ class DataTable
     protected $headers;
     protected $data;
     protected $CssClassName;
-    protected $noDataMessage;
+    protected $entityName;
 
     protected $supportedColumnFormats;
 
-    public function __construct($columnFormat, $noDataMessage = 'no data to present.', $CssClassName = 'datatable1') {
+    public function __construct($columnFormat, $entityName, $CssClassName = 'datatable1') {
         $this->columnFormat     = $columnFormat;
-        $this->noDataMessage    = $noDataMessage;
+        $this->entityName       = $entityName;
         $this->CssClassName     = $CssClassName;
 
         $this->checkColumnFormatValid ($columnFormat);
@@ -77,7 +77,8 @@ class DataTable
     public function renderTable ($renderDefaultStyle = true)
     {
         if (empty($this->data)) {
-            print $this->noDataMessage;
+            print $this->entityName;
+            print 'No '. $this->entityName .' to display';
         } else {
             if ($renderDefaultStyle) {
                 $this->renderDefaultStyle();
@@ -138,9 +139,15 @@ class DataTable
     }
 
     // accepts $data as an array of strings (with commas), $headRow must already be sperated by CSV
-     public function generateCSVresponse ($filename = null) {
+    public function generateCSVresponse ($filenamePrepend = null, $filename = null) {
         if (empty($filename)) {
-            $filename = 'download.csv';
+            $date = new \DateTime('now');
+            $dateStr = '('. $date->format('Y-m-d H_i_s') .')';
+            $filename = $this->entityName. ' '. $dateStr .'.csv';
+
+            if (!empty($filenamePrepend)) {
+                $filename = $filename .'-'. $filenamePrepend;
+            }
         }
 
         $filename = $this->sanitizeFilename ($filename);
@@ -160,16 +167,18 @@ class DataTable
         return $content;
     }
 
-        // return header captions as CSV
+    // return header captions as CSV
     protected function getHeadersAsCSV () {
         $headersCSV = '';
         $firstLoop = true;
         foreach($this->headers as $curI => $curHeader) {
-            if (!$firstLoop) {
-                $headersCSV .= ',';
+            if (in_array($this->columnFormat, $curHeader['supportedFormats'])) {
+                if (!$firstLoop) {
+                    $headersCSV .= ',';
+                }
+                $firstLoop = false;
+                $headersCSV .= $curHeader ['caption'];
             }
-            $firstLoop = false;
-            $headersCSV .= $curHeader ['caption'];
         }
         return $headersCSV;
     }
@@ -178,17 +187,21 @@ class DataTable
     protected function getDataAsCSV () {
         $dataCSV = '';
 
-        foreach($this->data as $curJ => $curDatum) {
-            $firstLoop = true;
-            foreach($this->headers as $curI => $curHeader) {
-                if (!$firstLoop) {
-                    $dataCSV .= ',';
+        if (!empty($this->data)) {
+            foreach($this->data as $curJ => $curDatum) {
+                $firstLoop = true;
+                foreach($this->headers as $curI => $curHeader) {
+                    if (in_array($this->columnFormat, $curHeader['supportedFormats'])) {
+                        if (!$firstLoop) {
+                            $dataCSV .= ',';
+                        }
+                        $firstLoop = false;
+                        $curValue = (isset($curDatum[$curHeader['reference']])) ? $curDatum[$curHeader['reference']] : '';
+                        $dataCSV .= $curValue;
+                    }
                 }
-                $firstLoop = false;
-                $curValue = (isset($curDatum[$curHeader['reference']])) ? $curDatum[$curHeader['reference']] : '';
-                $dataCSV .=  $curValue;
-            }
                 $dataCSV .= "\n";
+            }
         }
 
         return $dataCSV;
