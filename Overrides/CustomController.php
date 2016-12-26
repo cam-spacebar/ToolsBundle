@@ -74,6 +74,11 @@ class CustomController extends Controller
         return false;
     }
 
+
+    // This is default behaviour. although, if there's multiple domains, then a SiteManager service
+    // should determine what the site name
+    // these methods can then be overriden in the app's implementation of custom controller if it's a multi-domain website.
+    // todo: include sample siteManager code here for a multi domain website.
     public function getSiteName () {
         $this->container->getParameter('site_name');
     }
@@ -85,6 +90,7 @@ class CustomController extends Controller
     public function getNoReplyEmail () {
         $this->container->getParameter('email_noreply');
     }
+
 
 
 

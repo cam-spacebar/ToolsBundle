@@ -22,7 +22,6 @@ services:
         arguments:
             - "@?doctrine"
 
-
     sonata.admin.email_register:
         class: VisageFour\Bundle\ToolsBundle\Admin\EmailRegisterAdmin
         tags:
