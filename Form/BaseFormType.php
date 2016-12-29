@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormFactoryInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
 
 class BaseFormType extends AbstractType
 {
@@ -32,6 +33,9 @@ class BaseFormType extends AbstractType
     protected $kernelEnv;
     protected $formFactory;
     protected $resultCodes;
+    protected $webHookManager;
+
+    protected $webHookURL;
 
     protected $formResult;
 
@@ -39,18 +43,18 @@ class BaseFormType extends AbstractType
 
     const FORM_NAME_HUMAN_READABLE = '';
 
-    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv) {
+    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv, $webHookManager = null) {
         $this->em               = $em;
         $this->dispatcher       = $dispatcher;
         $this->logger           = $logger;
         $this->formFactory      = $formFactory;
         $this->kernelEnv        = $kernelEnv;
+        $this->webHookManager   = $webHookManager;
     }
 
     public function setProcessingResult ($formResultCode) {
         if (empty($this->resultCodes[$formResultCode])) {
             $errorString = 'Code: "'. $formResultCode .'" could not be identified in the "'. self::FORM_NAME_HUMAN_READABLE .'" form';
-            //dump($this->resultCodes);
             throw new \Exception($errorString);
         }
 
@@ -81,5 +85,27 @@ class BaseFormType extends AbstractType
     public function setFormResult($formResult)
     {
         $this->formResult = $formResult;
+    }
+
+    // if the webhook url is set, it will be called after when the form is succesfully persisted.
+    // object passed in must support the CanNormalize interface
+    public function callWebhook (CanNormalize $object1) {
+        if (empty($this->webHookManager)) {
+            $this->logger->info('Form: webHookManager is not populated. No hooks called.');
+            return true;
+        } else {
+            $normalizedObj      = $object1->normalize();
+            $jsonPacket         = json_encode ($normalizedObj);
+
+            $result = true;
+            if (!empty($this->webHookURL)) {
+                $result = $this->webHookManager->sendJson (
+                    $this->webHookURL, $jsonPacket
+                );
+                $this->logger->info('Form: webHookManager sent a JSON packet to URL "'. $this->webHookURL .'"');
+            }
+
+            return $result;
+        }
     }
 }

@@ -59,6 +59,7 @@ abstract class BaseEntityManager
     
     protected $em;
     protected $dispatcher;
+    protected $eventDispatcher;
     protected $logger;
     protected $repo;
 
@@ -71,13 +72,14 @@ abstract class BaseEntityManager
      * BaseEntityManager constructor.
      * @param EntityManager             $em
      * @param                           $class
-     * @param EventDispatcherInterface  $dispatcher
+     * @param EventDispatcherInterface  $eventDispatcher
      * @param LoggerInterface           $logger
      */
-    public function __construct($em, $class, $dispatcher, $logger) {
+    public function __construct($em, $class, $eventDispatcher, $logger) {
         $this->em           = $em;
         $this->repo         = $this->em->getRepository($class);
-        $this->dispatcher   = $dispatcher;
+        $this->dispatcher   = $eventDispatcher;     // this should be phased out as a variable
+        $this->eventDispatcher   = $eventDispatcher;
         $this->logger       = $logger;
 
         $metadata       = $this->em->getClassMetadata($class);
@@ -158,5 +160,21 @@ abstract class BaseEntityManager
     // (may want to use a different persistence layer at some point)
     public function persist ($obj) {
         $this->em->persist($obj);
+    }
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    public function getEventDispatcher()
+    {
+        return $this->eventDispatcher;
+    }
+
+    /**
+     * @param EventDispatcherInterface $eventDispatcher
+     */
+    public function setEventDispatcher($eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
     }
 }
