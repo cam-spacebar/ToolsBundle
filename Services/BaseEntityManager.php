@@ -76,14 +76,14 @@ abstract class BaseEntityManager
      * @param LoggerInterface           $logger
      */
     public function __construct($em, $class, $eventDispatcher, $logger) {
-        $this->em           = $em;
-        $this->repo         = $this->em->getRepository($class);
-        $this->dispatcher   = $eventDispatcher;     // this should be phased out as a variable
-        $this->eventDispatcher   = $eventDispatcher;
-        $this->logger       = $logger;
+        $this->em               = $em;
+        $this->repo             = $this->em->getRepository($class);
+        $this->dispatcher       = $eventDispatcher;     // this should be phased out as a variable
+        $this->eventDispatcher  = $eventDispatcher;
+        $this->logger           = $logger;
 
-        $metadata       = $this->em->getClassMetadata($class);
-        $this->class    = $metadata->getName();
+        $metadata               = $this->em->getClassMetadata($class);
+        $this->class            = $metadata->getName();
 
         // todo: alert logger that manager has been created
     }
