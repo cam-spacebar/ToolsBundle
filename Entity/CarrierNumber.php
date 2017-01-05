@@ -55,7 +55,7 @@ class CarrierNumber
     /**
      * @var boolean
      *
-     * @ORM\Column(name="SmsCapable", type="bool")
+     * @ORM\Column(name="SmsCapable", type="boolean")
      */
     protected $SmsCapable;
 
