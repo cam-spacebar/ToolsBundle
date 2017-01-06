@@ -1,6 +1,7 @@
 <?php
 
 namespace VisageFour\Bundle\ToolsBundle\Interfaces;
+
 use Symfony\Component\HttpFoundation\Request;
 
 /**

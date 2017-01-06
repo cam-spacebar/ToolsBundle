@@ -22,7 +22,9 @@ class CarrierNumberManager extends BaseEntityManager {
 
     /**
      * @param $number
-     * @return null|CarrierNumber
+     * @param bool $throwError
+     * @return null|\VisageFour\Bundle\ToolsBundle\Entity\CarrierNumber
+     * @throws \Exception
      */
     function getCarrierNumberByNumber ($number, $throwError = false) {
         $number = $this->normalizeMobileNumber ($number);
@@ -44,8 +46,8 @@ class CarrierNumberManager extends BaseEntityManager {
         ));
 
         if ($throwError) {
-            if (empty($carrierNumber)) {
-                throw new \Exception('could not find Carrier Number with: "'. $reference .'"');
+            if (empty($response)) {
+                throw new \Exception('could not find Carrier Number with reference: "'. $reference .'"');
             }
         }
 
