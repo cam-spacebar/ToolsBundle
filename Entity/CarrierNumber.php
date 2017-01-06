@@ -91,6 +91,13 @@ class CarrierNumber
         return $this->number;
     }
 
+    public function getHumanReadableNumber () {
+        $str = substr_replace($this->getNumber(), '0', 0, 2);
+        $str = substr($str, 0, 4) .' '. substr($str, 4, 3) .' '. substr($str, 7);
+
+        return $str;
+    }
+
     /**
      * @param $number
      * @return $this
