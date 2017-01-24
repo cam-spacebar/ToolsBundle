@@ -94,7 +94,13 @@ class BaseFormType extends AbstractType
 
     // if the webhook url is set, it will be called after when the form is succesfully persisted.
     // object passed in must support the CanNormalize interface
-    public function callWebhook (CanNormalize $object1) {
+    public function callWebhook (CanNormalize $object1, $urlOverride = false) {
+        if (!empty($urlOverride)) {
+            $webHookTargetUrl = $urlOverride;
+        } else {
+            $webHookTargetUrl = $this->webHookURL;
+        }
+
         if ($this->webhookCallsDisabled) {
             $this->logger->info('Webhook calls are disabled. Form webhook was not executed');
         } else {
@@ -106,11 +112,11 @@ class BaseFormType extends AbstractType
                 $jsonPacket = json_encode($normalizedObj);
 
                 $result = true;
-                if (!empty($this->webHookURL)) {
+                if (!empty($webHookTargetUrl)) {
                     $result = $this->webHookManager->sendJson(
                         $this->webHookURL, $jsonPacket
                     );
-                    $this->logger->info('Form: webHookManager sent a JSON packet to URL "' . $this->webHookURL . '"');
+                    $this->logger->info('Form: webHookManager sent a JSON packet to URL "' . $webHookTargetUrl . '"');
                 }
 
                 return $result;
