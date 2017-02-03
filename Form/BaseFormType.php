@@ -114,7 +114,7 @@ class BaseFormType extends AbstractType
                 $result = true;
                 if (!empty($webHookTargetUrl)) {
                     $result = $this->webHookManager->sendJson(
-                        $this->webHookURL, $jsonPacket
+                        $webHookTargetUrl, $jsonPacket
                     );
                     $this->logger->info('Form: webHookManager sent a JSON packet to URL "' . $webHookTargetUrl . '"');
                 }
