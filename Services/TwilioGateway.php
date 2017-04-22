@@ -2,7 +2,10 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use Platypuspie\AnchorcardsBundle\Entity\SMS;
+use Platypuspie\AnchorcardsBundle\Services\SMSManager;
 use Symfony\Bridge\Monolog\Logger;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 use Twilio\Rest\Client;
 use VisageFour\Bundle\ToolsBundle\Interfaces\SmsGatewayInterface;
@@ -13,12 +16,24 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\SmsInterface;
 class TwilioGateway implements SmsGatewayInterface
 {
     private $logger;
+    /** @var SMSManager $smsManager */
+    private $smsManager;
+    /** @var \Platypuspie\AnchorcardsBundle\Services\CarrierNumberManager  */
+    private $carrierNumberManager;
     private $twilioClient;
 
-    public function __construct(Logger $logger, Client $twilioClient)
+    /**
+     * TwilioGateway constructor.
+     * @param Logger $logger
+     * @param Client $twilioClient
+     * @param Container $containerå
+     */
+    public function __construct(Logger $logger, Client $twilioClient, Container $container)
     {
-        $this->logger       = $logger;
-        $this->twilioClient = $twilioClient;
+        $this->logger               = $logger;
+        $this->twilioClient         = $twilioClient;
+        $this->smsManager           = $container->get('anchorcards.sms_manager');
+        $this->carrierNumberManager = $container->get('anchorcards.carrier_number_manager');
     }
 
     // this will send a SMS using the twilio API
@@ -66,19 +81,19 @@ class TwilioGateway implements SmsGatewayInterface
     }
 
     function HydrateSmsFromRequest ($request) {
-        // create from smsManager? but this will create a circular dependency
+        $to = $request->query->get('To');
+        $carrierNumber = $this->carrierNumberManager->getCarrierNumberByNumber($to, true);
 
-        // todo: use recepient to get CarrierNumber
+        $sms =  $this->smsManager->customCreateNew(
+            $request->query->get('From'),
+            new \DateTime('NOW'),
+            $request->query->get('Body'),
+            SMS::INBOUND,
+            $to,
+            $carrierNumber
+        );
 
-        // ->setVendorValue        ($request->query->get('VALUE'))
-        $recipientNumber = $request->query->get('XXX');
-
-        //$carrierNumber = $this->carrierNumberManager->findxxx ($recipientNumber);
-
-        $sms = '';
-
-        die('not yet implemented');
-        // todo: write method
+        //$this->flush();
 
         return $sms;
     }

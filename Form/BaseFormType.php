@@ -89,6 +89,7 @@ class BaseFormType extends AbstractType
 
     // if the webhook url is set, it will be called after when the form is succesfully persisted.
     // object passed in must support the CanNormalize interface
+    // todo: does this have support for datetime normalization (or is this done through the CanNormalize interface?)
     public function callWebhook (CanNormalize $object1) {
         if (empty($this->webHookManager)) {
             $this->logger->info('Form: webHookManager is not populated. No hooks called.');
