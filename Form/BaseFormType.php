@@ -27,6 +27,8 @@ class BaseFormType extends AbstractType
             - "@logger"
     // */
 
+    // todo: convert const in inherited classes form name to a private member used here for use in webhook log notice - form name should be defined in the service definition
+
     protected $em;
     protected $dispatcher;
     protected $logger;
@@ -41,15 +43,18 @@ class BaseFormType extends AbstractType
 
     protected $processingResult;
 
+    private $webhookCallsDisabled;
+
     const FORM_NAME_HUMAN_READABLE = '';
 
-    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv, $webHookManager = null) {
-        $this->em               = $em;
-        $this->dispatcher       = $dispatcher;
-        $this->logger           = $logger;
-        $this->formFactory      = $formFactory;
-        $this->kernelEnv        = $kernelEnv;
-        $this->webHookManager   = $webHookManager;
+    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv, $webHookManager = null, $disable_webhook_calls = false) {
+        $this->em                       = $em;
+        $this->dispatcher               = $dispatcher;
+        $this->logger                   = $logger;
+        $this->formFactory              = $formFactory;
+        $this->kernelEnv                = $kernelEnv;
+        $this->webHookManager           = $webHookManager;
+        $this->webhookCallsDisabled     = $disable_webhook_calls;
     }
 
     public function setProcessingResult ($formResultCode) {
@@ -89,24 +94,33 @@ class BaseFormType extends AbstractType
 
     // if the webhook url is set, it will be called after when the form is succesfully persisted.
     // object passed in must support the CanNormalize interface
-    // todo: does this have support for datetime normalization (or is this done through the CanNormalize interface?)
-    public function callWebhook (CanNormalize $object1) {
-        if (empty($this->webHookManager)) {
-            $this->logger->info('Form: webHookManager is not populated. No hooks called.');
-            return true;
+    public function callWebhook (CanNormalize $object1, $urlOverride = false) {
+        if (!empty($urlOverride)) {
+            $webHookTargetUrl = $urlOverride;
         } else {
-            $normalizedObj      = $object1->normalize();
-            $jsonPacket         = json_encode ($normalizedObj);
+            $webHookTargetUrl = $this->webHookURL;
+        }
 
-            $result = true;
-            if (!empty($this->webHookURL)) {
-                $result = $this->webHookManager->sendJson (
-                    $this->webHookURL, $jsonPacket
-                );
-                $this->logger->info('Form: webHookManager sent a JSON packet to URL "'. $this->webHookURL .'"');
+        if ($this->webhookCallsDisabled) {
+            $this->logger->info('Webhook calls are disabled. Form webhook was not executed');
+        } else {
+            if (empty($this->webHookManager)) {
+                $this->logger->info('Form: webHookManager is not populated when form tried to execute a webhook. The webhook was not called.');
+                return true;
+            } else {
+                $normalizedObj = $object1->normalize();
+                $jsonPacket = json_encode($normalizedObj);
+
+                $result = true;
+                if (!empty($webHookTargetUrl)) {
+                    $result = $this->webHookManager->sendJson(
+                        $webHookTargetUrl, $jsonPacket
+                    );
+                    $this->logger->info('Form: webHookManager sent a JSON packet to URL "' . $webHookTargetUrl . '"');
+                }
+
+                return $result;
             }
-
-            return $result;
         }
     }
 }

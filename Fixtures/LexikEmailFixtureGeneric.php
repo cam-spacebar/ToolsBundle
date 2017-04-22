@@ -23,7 +23,10 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
     --- ??
     --- ??
     - load email fixtures
-    --- sudo php app/console doctrine:fixtures:load --fixtures=src/PlatypusPie/AnchorcardsBundle/DataFixtures/ORM/LoadAppData.php --append
+    --- Photocard project:
+    ----- sudo php app/console doctrine:fixtures:load --fixtures=src/PlatypusPie/AnchorcardsBundle/DataFixtures/ORM/LoadAppData.php --append
+    --- NewInTown project:
+    ----- sudo php bin/console doctrine:fixtures:load --fixtures=src/Twencha/Bundle/EventRegistrationBundle/DataFixtures/ORM/LoadLexikEmailData.php --append
 
     //*/
 
@@ -76,7 +79,7 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\Layout');
         $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\LayoutTranslation');
 
-        print "===\n";
+        print "=== DELETING / PURGING OLD LEXIK LAYOUTS AND TEMPLATES COMPLETE ===\n";
 
         return true;
     }

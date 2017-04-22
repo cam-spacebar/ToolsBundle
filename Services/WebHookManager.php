@@ -104,6 +104,9 @@ class WebHookManager {
      */
     public function sendJson($webhookURL, $json)
     {
+        if (empty($webhookURL)) {
+            throw new \Exception('webhookurl provided cannot be null');
+        }
         $this->logger->info('About to send payload to webhook at URL: ' . $webhookURL);
         $this->logger->info('Payload JSON: ' . $json);
 
