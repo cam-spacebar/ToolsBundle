@@ -54,6 +54,28 @@ class TwilioGateway implements SmsGatewayInterface
                 )
             );
 
+/*
+ * ORIGINAL script from promoter page to test sms. delete if it's all working.
+//      Your Account SID and Auth Token from twilio.com/console
+            //$sid = $this->getParameter('twilio_account_sid');
+            //$token = $this->getParameter('twillio_auth_token');
+            //$client = new Client($sid, $token);
+
+            $client = $this->container->get('anchorcards.twillio.account_one');
+
+            $sms = $client->account->messages->create(
+                '+61449929558',
+                array(
+                    // Step 6: Change the 'From' number below to be a valid Twilio number
+                    // that you've purchased
+                    'from' => "+61439560703",
+
+                    // the sms body
+                    'body' => "Hey cameron, Monkey Party at 6PM. Bring Bananas!"
+                )
+            );
+// */
+
             // todo: update this and give correct error message in logging if failed
             $sendSuccessful = true;
 
