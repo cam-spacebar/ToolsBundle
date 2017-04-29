@@ -16,8 +16,6 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\SmsInterface;
 class TwilioGateway implements SmsGatewayInterface
 {
     private $logger;
-    /** @var SMSManager $smsManager */
-    private $smsManager;
     /** @var \Platypuspie\AnchorcardsBundle\Services\CarrierNumberManager  */
     private $carrierNumberManager;
     private $twilioClient;
@@ -32,7 +30,6 @@ class TwilioGateway implements SmsGatewayInterface
     {
         $this->logger               = $logger;
         $this->twilioClient         = $twilioClient;
-        $this->smsManager           = $container->get('anchorcards.sms_manager');
         $this->carrierNumberManager = $container->get('anchorcards.carrier_number_manager');
     }
 
@@ -90,33 +87,8 @@ class TwilioGateway implements SmsGatewayInterface
 
     }
 
-    // create an SMS object from the $request object passed in
-    function GetSmsFromRequest(Request $request)
-    {
-        // todo: write any authentication needed
-
-        // create new SMS for received SMS
-        $sms = $this->HydrateSmsFromRequest ($request);
-
-        return $sms;
-
-    }
-
-    function HydrateSmsFromRequest ($request) {
-        $to = $request->query->get('To');
-        $carrierNumber = $this->carrierNumberManager->getCarrierNumberByNumber($to, true);
-
-        $sms =  $this->smsManager->customCreateNew(
-            $request->query->get('From'),
-            new \DateTime('NOW'),
-            $request->query->get('Body'),
-            SMS::INBOUND,
-            $to,
-            $carrierNumber
-        );
-
-        //$this->flush();
-
-        return $sms;
+    // todo: write this
+    public function GetSmsFromRequest(Request $request) {
+        die ("getSMS() hasn't been written");
     }
 }
