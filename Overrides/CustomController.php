@@ -23,7 +23,8 @@ class CustomController extends Controller
 
     // creates a new Person object that matches to a user obj
     // need to pass in the applications extended PersonManager for FindOneBy method - although BasePersonRepo will act as an interface
-    public function getPersonLoggedInOrCreate () {
+    public function     getPersonLoggedInOrCreate () {
+        /** @var PersonManager $personManager */
         $personManager  = $this->getPersonManager();
         $person         = $this->getLoggedInPerson();
 
