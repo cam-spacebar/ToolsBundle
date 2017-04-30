@@ -73,6 +73,11 @@ class DataTable
         return $this;
     }
 
+    // return the number of rows in the datatable
+    public function getRowCount () {
+        return count($this->data);
+    }
+
     // Render the default styles (if nessacary) and redner the datatable
     public function renderTable ($renderDefaultStyle = true)
     {
