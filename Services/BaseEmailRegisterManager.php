@@ -170,6 +170,7 @@ class BaseEmailRegisterManager extends BaseEntityManager
             $this->logger->info('EMAIL SPOOLED.');
 
         }
+
         $this->logger->info($msg);
 
         $this->em->persist($email);
