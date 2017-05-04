@@ -19,6 +19,7 @@ class TwilioGateway implements SmsGatewayInterface
     /** @var \Platypuspie\AnchorcardsBundle\Services\CarrierNumberManager  */
     private $carrierNumberManager;
     private $twilioClient;
+    private $smsManager;
 
     /**
      * TwilioGateway constructor.
@@ -31,12 +32,53 @@ class TwilioGateway implements SmsGatewayInterface
         $this->logger               = $logger;
         $this->twilioClient         = $twilioClient;
         $this->carrierNumberManager = $container->get('anchorcards.carrier_number_manager');
+        //$this->smsManager           = $container->get('anchorcards.sms_manager');
+        $this->container            = $container;
+
+    }
+
+    // below is an example of the $_POST values sent to the anchorcards app from twilio:
+    // ToCountry=AU&ToState=&SmsMessageSid=SM262c9216286a86be5b95b18bfb235007&NumMedia=0&ToCity=&FromZip=&SmsSid=SM262c9216286a86be5b95b18bfb235007&FromState=&SmsStatus=received&FromCity=&Body=Hello&FromCountry=AU&To=%2B61439560703&ToZip=&NumSegments=1&MessageSid=SM262c9216286a86be5b95b18bfb235007&AccountSid=AC50299ab980feb8456b26066a4f1b561c&From=%2B61449929558&ApiVersion=2010-04-01
+    public function GetSmsFromRequest(Request $request) {
+        $smsManager = $this->container->get('anchorcards.sms_manager');
+        $this->logger->info('creating SMS obj from request with body text: '. $request->get('Body'));
+
+        $sms = $smsManager->customCreateNew (
+            $request->get('From'),
+            new \DateTime('now'),
+            $request->get('Body'),
+            SMS::INBOUND,
+            $request->get('To')
+        );
+
+        return $sms;
+        /*
+        ToCountry=AU
+        ToState=
+        SmsMessageSid=SM262c9216286a86be5b95b18bfb235007
+        NumMedia=0
+        ToCity=
+        FromZip=
+        SmsSid=SM262c9216286a86be5b95b18bfb235007
+        FromState=
+        SmsStatus=received
+        FromCity=
+        Body=Hello
+        FromCountry=AU
+        To=%2B61439560703
+        ToZip=
+        NumSegments=1
+        MessageSid=SM262c9216286a86be5b95b18bfb235007
+        AccountSid=AC50299ab980feb8456b26066a4f1b561c
+        From=%2B61449929558
+        ApiVersion=2010-04-01
+         */
     }
 
     // this will send a SMS using the twilio API
     public function SendSms(SmsInterface $sms, $isSendingEnabled)
     {
-        $this->logger->info('SMS message ready to send. Message: "'. $sms->getMessageText() .'" phone no.: "'. $sms->getRecipient() .'"');
+        $this->logger->info('SMS message ready to send. To: '. $sms->getRecipient() .', Message: "'. $sms->getMessageText() .'"');
         if (!$isSendingEnabled) {
             $this->logger->info('SMS sending disabled. SMS not sent');
         } else {
@@ -54,23 +96,27 @@ class TwilioGateway implements SmsGatewayInterface
 /*
  * ORIGINAL script from promoter page to test sms. delete if it's all working.
 //      Your Account SID and Auth Token from twilio.com/console
-            //$sid = $this->getParameter('xxfindthis');
-            //$token = $this->getParameter('xxfindthis');
-            //$client = new Client($sid, $token);
 
-            $client = $this->container->get('anchorcards.twillio.account_one');
+        $accountSid         = $this->getParameter('twillio_aus_account_one_account_sid');
+        $testKeySid         = $this->getParameter('twillio_aus_account_one_api_sid');
+        $testKeySecret      = $this->getParameter('twillio_aus_account_one_api_secret');
 
-            $sms = $client->account->messages->create(
-                '+61449929558',
-                array(
-                    // Step 6: Change the 'From' number below to be a valid Twilio number
-                    // that you've purchased
-                    'from' => "+61439560703",
 
-                    // the sms body
-                    'body' => "Hey cameron, Monkey Party at 6PM. Bring Bananas!"
-                )
-            );
+        //$client = new Client($testKeySid, $testKeySecret, $accountSid);
+
+        $client = $this->container->get('anchorcards.twillio.account_one');
+
+        $sms = $client->account->messages->create(
+            '+61449929558',
+            array(
+                // Step 6: Change the 'From' number below to be a valid Twilio number
+                // that you've purchased
+                'from' => "+61439560703",
+
+                // the sms body
+                'body' => "Hey cameron, Monkey Party at 6PM. Bring Bananas!"
+            )
+        );
 // */
 
             // todo: update this and give correct error message in logging if failed
@@ -85,10 +131,5 @@ class TwilioGateway implements SmsGatewayInterface
 
         return true;
 
-    }
-
-    // todo: write this
-    public function GetSmsFromRequest(Request $request) {
-        die ("getSMS() hasn't been written");
     }
 }
