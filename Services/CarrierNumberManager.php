@@ -23,7 +23,7 @@ class CarrierNumberManager extends BaseEntityManager {
     /**
      * @param $number
      * @param bool $throwError
-     * @return null|\VisageFour\Bundle\ToolsBundle\Entity\CarrierNumber
+     * @return null|CarrierNumber
      * @throws \Exception
      */
     function getCarrierNumberByNumber ($number, $throwError = false) {
