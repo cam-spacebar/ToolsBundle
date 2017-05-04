@@ -54,8 +54,8 @@ class TwilioGateway implements SmsGatewayInterface
 /*
  * ORIGINAL script from promoter page to test sms. delete if it's all working.
 //      Your Account SID and Auth Token from twilio.com/console
-            //$sid = $this->getParameter('twilio_account_sid');
-            //$token = $this->getParameter('twillio_auth_token');
+            //$sid = $this->getParameter('xxfindthis');
+            //$token = $this->getParameter('xxfindthis');
             //$client = new Client($sid, $token);
 
             $client = $this->container->get('anchorcards.twillio.account_one');
