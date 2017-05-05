@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Fixtures;
 
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\DBAL\Driver\Connection;
 use Lexik\Bundle\MailerBundle\Entity\Email;
 use Lexik\Bundle\MailerBundle\Entity\EmailTranslation;
 use Lexik\Bundle\MailerBundle\Entity\Layout;
@@ -55,9 +56,11 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
     // delete all records from a DB table
     public function purgeEntityTable ($entityPath) {
         $cmd = $this->em->getClassMetadata($entityPath);
+        /** @var Connection $connection */
         $connection = $this->em->getConnection();
-        $connection->beginTransaction();
+        //$connection->beginTransaction();
 
+        /*
         try {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
             $connection->query('DELETE FROM '.$cmd->getTableName());
@@ -68,6 +71,13 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         } catch (\Exception $e) {
             $connection->rollback();
         }
+        // */
+
+
+        $connection->prepare('SET FOREIGN_KEY_CHECKS=0')->execute();
+        $connection->prepare('DELETE FROM '.$cmd->getTableName())->execute();
+        $connection->prepare('SET FOREIGN_KEY_CHECKS=1')->execute();
+        //$connection->prepare('SET FOREIGN_KEY_CHECKS=0')->execute();
 
         print 'Deleted all records from: "'. $entityPath ."\"\n";
     }
@@ -100,6 +110,7 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         $lexikLayoutTranslation = new LayoutTranslation($layoutParams['locale']);
         print '4'."\n";
         $lexikLayoutTranslation->setBody($layoutParams['body']);
+        print '4.2'."\n";
         $lexikLayoutTranslation->setLayout($lexikLayout);
 
         $this->em->persist($lexikLayout);
