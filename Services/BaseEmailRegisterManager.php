@@ -249,4 +249,20 @@ class BaseEmailRegisterManager extends BaseEntityManager
 
         return $count;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getEmulateSending()
+    {
+        return $this->emulateSending;
+    }
+
+    /**
+     * @param mixed $emulateSending
+     */
+    public function setEmulateSending($emulateSending)
+    {
+        $this->emulateSending = $emulateSending;
+    }
 }
