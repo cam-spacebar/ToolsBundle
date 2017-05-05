@@ -79,6 +79,8 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\Layout');
         $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\LayoutTranslation');
 
+        print 'beginning';
+
         print "=== DELETING / PURGING OLD LEXIK LAYOUTS AND TEMPLATES COMPLETE ===\n";
 
         return true;
@@ -86,18 +88,24 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
 
     // create Lexik Layout and Layout translation DB records
     public function createLexikLayout ($layoutParams) {
+        print '1'."\n";
         // create lexik layout
         $lexikLayout = new Layout();
         $lexikLayout->setReference($layoutParams['reference']);
+        print '2'."\n";
         $lexikLayout->setDescription($layoutParams['description']);
+        print '3'."\n";
 
         // create lexik layout translation
         $lexikLayoutTranslation = new LayoutTranslation($layoutParams['locale']);
+        print '4'."\n";
         $lexikLayoutTranslation->setBody($layoutParams['body']);
         $lexikLayoutTranslation->setLayout($lexikLayout);
 
         $this->em->persist($lexikLayout);
+        print '5'."\n";
         $this->em->persist($lexikLayoutTranslation);
+        print '6'."\n";
 
         print 'Created Lexik Layout with reference: "'. $layoutParams['reference'] ."\"\n";
 
