@@ -5,6 +5,7 @@ namespace VisageFour\Bundle\ToolsBundle\Fixtures;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\DBAL\Driver\Connection;
+use Doctrine\ORM\EntityManager;
 use Lexik\Bundle\MailerBundle\Entity\Email;
 use Lexik\Bundle\MailerBundle\Entity\EmailTranslation;
 use Lexik\Bundle\MailerBundle\Entity\Layout;
@@ -55,12 +56,14 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
 
     // delete all records from a DB table
     public function purgeEntityTable ($entityPath) {
-        $cmd = $this->em->getClassMetadata($entityPath);
-        /** @var Connection $connection */
-        $connection = $this->em->getConnection();
-        //$connection->beginTransaction();
+        /** @var EntityManager $em */
+        $em = $this->em;
+        $repo = $em->getRepository($entityPath);
 
         /*
+        // don't use below, it won't work in PSQL on heroku
+        $connection->beginTransaction();
+
         try {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
             $connection->query('DELETE FROM '.$cmd->getTableName());
@@ -73,11 +76,12 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         }
         // */
 
-
-        $connection->prepare('SET FOREIGN_KEY_CHECKS=0')->execute();
-        $connection->prepare('DELETE FROM '.$cmd->getTableName())->execute();
-        $connection->prepare('SET FOREIGN_KEY_CHECKS=1')->execute();
-        //$connection->prepare('SET FOREIGN_KEY_CHECKS=0')->execute();
+        //$repo = $em->getRepository('SystemBundle:Distributor');
+        $list = $repo->findAll();
+        foreach ($list as $curI => $curItem) {
+            $em->remove($curItem);
+        }
+        $em->flush();
 
         print 'Deleted all records from: "'. $entityPath ."\"\n";
     }
