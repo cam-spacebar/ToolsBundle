@@ -56,6 +56,6 @@ class CarrierNumberManager extends BaseEntityManager {
 
     // returns a number with a leading +61 (if in australia?)
     function normalizeMobileNumber ($number) {
-        return $number;
+        return str_replace('+', '', $number);
     }
 }
