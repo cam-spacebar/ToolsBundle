@@ -40,6 +40,7 @@ class CarrierNumberManager extends BaseEntityManager {
 
         return $response;
     }
+
     function getCarrierNumberByReference ($reference, $throwError = false) {
         $response = $this->repo->findOneBy (array(
             'reference'  => $reference
