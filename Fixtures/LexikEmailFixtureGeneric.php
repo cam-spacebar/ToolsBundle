@@ -93,8 +93,6 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
         $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\Layout');
         $this->purgeEntityTable('Lexik\Bundle\MailerBundle\Entity\LayoutTranslation');
 
-        print 'beginning';
-
         print "=== DELETING / PURGING OLD LEXIK LAYOUTS AND TEMPLATES COMPLETE ===\n";
 
         return true;
