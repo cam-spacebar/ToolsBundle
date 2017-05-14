@@ -34,6 +34,13 @@ services:
             - VisageFour\Bundle\ToolsBundle\Entity\EmailRegister
             - ~
 
+    visage_four.aws_s3_utility:
+        class: VisageFour\Bundle\ToolsBundle\Services\AWSS3Utility
+        arguments:
+            - @doctrine.orm.entity_manager
+            - @logger
+            - "%gaufrette_amazon_s3_key%"
+            - "%gaufrette_amazon_s3_secret%"
 
 # add this to your projects services.yml, not in the shared VisageFour services.yml as it will crash the app if lexik mailer is not installed.
 #    anchorcards.email_register_manager:
