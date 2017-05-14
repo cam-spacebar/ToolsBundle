@@ -29,12 +29,15 @@ class AWSS3Utility {
     private $em;
     private $logger;
 
+    private $awsKey;
+    private $awsSecret;
+
     public function __construct (EntityManager $em, LoggerInterface $logger, $awsKey, $awsSecret) {
         $this->em                   = $em;
         $this->logger               = $logger;
 
         $this->awsKey               = $awsKey;
-        $this->awsSecret            = $awsKey;
+        $this->awsSecret            = $awsSecret;
     }
 
     /**
@@ -58,7 +61,6 @@ class AWSS3Utility {
         $requestType = "aws4_request";
         $expires = "86400"; // 24 Hours
         $successStatus = "201";
-        $url = "http://s3-ap-southeast-2.amazonaws.com";
         $url = "//{$s3Bucket}.{$service}-{$region}.amazonaws.com";
 
         // Step 1: Generate the Scope
