@@ -23,6 +23,8 @@ visage_four.aws_s3_utility:
     arguments:
         - @doctrine.orm.entity_manager
         - @logger
+        - "%gaufrette_amazon_s3_key%"
+        - "%gaufrette_amazon_s3_secret%"
  */
 class AWSS3Utility {
 
