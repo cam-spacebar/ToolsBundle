@@ -1,0 +1,31 @@
+<h1>List Emails</h1>
+
+This page lists the emails available to the app and allows you to view html, txt versions and to test email sending.
+
+<b>Emails:</b>
+<style>
+    td {
+        margin: 5px;
+        padding: 5px;
+        background-color: #eee;
+    }
+</style>
+<br /><br /><table style="" cellspacing="2">
+    <tr>
+        <td>Subject</td>
+        <td>Description</td>
+        <td>View Template</td>
+        <td>Send Email</td>
+    </tr>
+    {% for key,value in emailTemplateList %}
+    <tr>
+        <td>{{ value.subject }}</td>
+        <td>{{ value.description }}</td>
+        <td>
+            <a href="{{ path ('display_email_template', {'type': 'html', 'reference': value.reference}) }}">HTML</a> |
+            <a href="{{ path ('display_email_template', {'type': 'txt', 'reference': value.reference}) }}">TXT</a>
+        </td>
+        <td></td>
+    </tr>
+    {% endfor %}
+</table>

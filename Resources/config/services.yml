@@ -22,18 +22,6 @@ services:
         arguments:
             - "@?doctrine"
 
-    sonata.admin.email_register:
-        class: VisageFour\Bundle\ToolsBundle\Admin\EmailRegisterAdmin
-        tags:
-            - name: sonata.admin
-              manager_type: orm
-              group: "Emails"
-              label: "Registered Email"
-        arguments:
-            - ~
-            - VisageFour\Bundle\ToolsBundle\Entity\EmailRegister
-            - ~
-
     visage_four.aws_s3_utility:
         class: VisageFour\Bundle\ToolsBundle\Services\AWSS3Utility
         arguments:
