@@ -1,8 +1,18 @@
 <h1>List Emails</h1>
 
+{% if app.session.flashBag.has('success') %}
+    <div class="alert alert-success">
+        {% for msg in app.session.flashBag.get('success') %}
+            <div style="max-width: 800px; border: 1px solid #333; padding: 5px; background-color: #eee;">
+                <b>Success: </b> {{ msg }}
+            </div><br />
+        {% endfor %}
+    </div>
+{% endif %}
+
 This page lists the emails available to the app and allows you to view html, txt versions and to test email sending.
 
-<b>Emails:</b>
+<br /><br /><b>Emails:</b>
 <style>
     td {
         margin: 5px;
@@ -27,7 +37,9 @@ This page lists the emails available to the app and allows you to view html, txt
             <a href="{{ path ('display_email_template', {'type': 'html', 'reference': value.reference}) }}">HTML</a> |
             <a href="{{ path ('display_email_template', {'type': 'txt', 'reference': value.reference}) }}">TXT</a>
         </td>
-        <td></td>
+        <td  style="text-align: center">
+            <a href="{{ path ('send_test_email', {'type': 'txt', 'reference': value.reference}) }}">Send</a>
+        </td>
     </tr>
     {% endfor %}
 </table>
