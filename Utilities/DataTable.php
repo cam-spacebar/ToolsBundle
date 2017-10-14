@@ -227,6 +227,10 @@ class DataTable
 
     // will check that the $columnFormat requested for use in dataTable construction is one supported by the dataTable
     protected function checkColumnFormatValid ($requestedColumnFormat) {
+        if (empty($this->supportedColumnFormats)) {
+            throw new \Exception ('The datatable\'s supportedColumnFormats array cannot be empty. Check the datatables constructor.');
+        }
+
         if (!in_array($requestedColumnFormat, $this->supportedColumnFormats)) {
             throw new \Exception ('The requested $columnFormat: '. $requestedColumnFormat .' is not supported in this dataTable');
         }
