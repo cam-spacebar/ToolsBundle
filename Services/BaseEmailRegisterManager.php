@@ -152,6 +152,7 @@ class BaseEmailRegisterManager extends BaseEntityManager
         $this->setLexikMailer($lexikMailer);
     }
 
+    // spools an email for sending via a worker or sends it immediately (depending on apps config)
     public function createEmailAndProcess ($to, $params, $template, $locale, $spoolEmail, $adapter = EmailRegister::LEXIK_ADAPTER) {
         $loggerAction = ($spoolEmail) ? 'spool' : 'send';
         /** @var EmailRegister $email */
