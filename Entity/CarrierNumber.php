@@ -4,13 +4,15 @@ namespace VisageFour\Bundle\ToolsBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\ORM\Mapping\MappedSuperclass;
 
-/**
+/* // entity mapping taken out as it causes errors with inherited entities as there's two database tables
  * CarrierNumber
  *
  * @ORM\Table()
  * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\CarrierNumberRepository")
  */
+/** @MappedSuperclass */
 class CarrierNumber
 {
     /**
