@@ -4,12 +4,12 @@ namespace VisageFour\Bundle\ToolsBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\ORM\Mapping\MappedSuperclass;
 
 /**
  * EmailRegister
  *
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\EmailRegisterRepository")
+ * @MappedSuperclass
  */
 class EmailRegister
 {
