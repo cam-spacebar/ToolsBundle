@@ -1,6 +1,10 @@
 <?php
 
 namespace VisageFour\Bundle\ToolsBundle\Repository;
+use Doctrine\ORM\EntityManager;
+use Platypuspie\AnchorcardsBundle\Entity\Codes;
+use Platypuspie\AnchorcardsBundle\Entity\shoot;
+use VisageFour\Bundle\ToolsBundle\Entity\Code;
 
 /**
  * codeRepository
@@ -10,4 +14,41 @@ namespace VisageFour\Bundle\ToolsBundle\Repository;
  */
 class CodeRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getAllByShootOrderByCardNumber (shoot $shoot) {
+
+        $result = $this->createQueryBuilder('c')
+            ->where('c.relatedShoot = :shoot')
+            ->setParameter('shoot', $shoot)
+            ->orderBy('c.cardNumber', 'DESC')
+            ->getQuery()
+            ->execute();
+
+        return $result;
+    }
+
+    /**
+     * @param Codes $startCode
+     * @param Codes $endCode
+     * @return null|Codes[]
+     * @throws \Exception
+     *
+     * Return all codes between these two codes.
+     */
+    public function getAllCodesBetween (Codes $startCode, Codes $endCode)
+    {
+        if ($endCode->getCardNumber() > $startCode->getCardNumber()) {
+            throw new \Exception('$endCode cannot start after the $startCode');
+        }
+
+        $result = $this->createQueryBuilder('c')
+            ->orderBy('c.cardNumber', 'DESC')
+            ->where('c.cardNumber > :startNumber')
+            ->where('c.cardNumber < :endNumber')
+            ->setParameter('startNumber',   $startCode->getCardNumber())
+            ->setParameter('endNumber',     $endCode->getCardNumber())
+            ->getQuery()
+            ->execute();
+
+        return $result;
+    }
 }
