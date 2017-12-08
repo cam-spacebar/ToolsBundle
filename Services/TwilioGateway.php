@@ -35,30 +35,19 @@ class TwilioGateway implements SmsGatewayInterface
         $this->container            = $container;
     }
 
-    // below is an example of the $_POST values sent to the anchorcards app from twilio:
-    // ToCountry=AU&ToState=&SmsMessageSid=SM262c9216286a86be5b95b18bfb235007&NumMedia=0&ToCity=&FromZip=&SmsSid=SM262c9216286a86be5b95b18bfb235007&FromState=&SmsStatus=received&FromCity=&Body=Hello&FromCountry=AU&To=%2B61439560703&ToZip=&NumSegments=1&MessageSid=SM262c9216286a86be5b95b18bfb235007&AccountSid=AC50299ab980feb8456b26066a4f1b561c&From=%2B61449929558&ApiVersion=2010-04-01
-    public function GetSmsFromRequest(Request $request) {
-        $smsManager = $this->container->get('anchorcards.sms_manager');
-        $to = $request->get('To');
-        $from = $request->get('From');
-        $msgText = $request->get('msgText');
+    public function getTo (Request $request) {
+        return $request->get('To');
+    }
 
-        $this->logger->info('SMS received. Begin processing.');
+    public function getFrom (Request $request) {
+        return $request->get('From');
+    }
 
+    public function getMsgBody (Request $request) {
+        return $request->get('msgText');
+    }
 
-        $carrierNumber = $this->carrierNumberManager->getCarrierNumberByNumber($to);
-
-        $sms = $smsManager->customCreateNew (
-            $from,
-            $carrierNumber,
-            new \DateTime('now'),
-            $request->get('msgText'),
-            SMS::INBOUND,
-            SMS::RECEIVED
-        );
-
-        return $sms;
-        /*
+    /*
          * Twillio parameter names below:
         ToCountry=AU
         ToState=
@@ -80,7 +69,6 @@ class TwilioGateway implements SmsGatewayInterface
         From=%2B61449929558
         ApiVersion=2010-04-01
          */
-    }
 
     // this will send a SMS using the twilio API
     public function SendSms(SmsInterface $sms)
