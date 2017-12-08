@@ -9,8 +9,6 @@ namespace VisageFour\Bundle\ToolsBundle\Interfaces;
  */
 
 interface SmsInterface {
-    public function getOriginator();
-    public function getRecipient();
     public function getMessageText();
 }
 ?>

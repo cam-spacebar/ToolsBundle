@@ -19,7 +19,6 @@ class TwilioGateway implements SmsGatewayInterface
     /** @var \Platypuspie\AnchorcardsBundle\Services\CarrierNumberManager  */
     private $carrierNumberManager;
     private $twilioClient;
-    private $smsManager;
 
     /**
      * TwilioGateway constructor.
@@ -34,25 +33,33 @@ class TwilioGateway implements SmsGatewayInterface
         $this->carrierNumberManager = $container->get('anchorcards.carrier_number_manager');
         //$this->smsManager           = $container->get('anchorcards.sms_manager');
         $this->container            = $container;
-
     }
 
     // below is an example of the $_POST values sent to the anchorcards app from twilio:
     // ToCountry=AU&ToState=&SmsMessageSid=SM262c9216286a86be5b95b18bfb235007&NumMedia=0&ToCity=&FromZip=&SmsSid=SM262c9216286a86be5b95b18bfb235007&FromState=&SmsStatus=received&FromCity=&Body=Hello&FromCountry=AU&To=%2B61439560703&ToZip=&NumSegments=1&MessageSid=SM262c9216286a86be5b95b18bfb235007&AccountSid=AC50299ab980feb8456b26066a4f1b561c&From=%2B61449929558&ApiVersion=2010-04-01
     public function GetSmsFromRequest(Request $request) {
         $smsManager = $this->container->get('anchorcards.sms_manager');
-        $this->logger->info('creating SMS obj from request with body text: '. $request->get('Body'));
+        $to = $request->get('To');
+        $from = $request->get('From');
+        $msgText = $request->get('msgText');
+
+        $this->logger->info('SMS received. Begin processing.');
+
+
+        $carrierNumber = $this->carrierNumberManager->getCarrierNumberByNumber($to);
 
         $sms = $smsManager->customCreateNew (
-            $request->get('From'),
+            $from,
+            $carrierNumber,
             new \DateTime('now'),
-            $request->get('Body'),
+            $request->get('msgText'),
             SMS::INBOUND,
-            $request->get('To')
+            SMS::RECEIVED
         );
 
         return $sms;
         /*
+         * Twillio parameter names below:
         ToCountry=AU
         ToState=
         SmsMessageSid=SM262c9216286a86be5b95b18bfb235007
@@ -76,22 +83,16 @@ class TwilioGateway implements SmsGatewayInterface
     }
 
     // this will send a SMS using the twilio API
-    public function SendSms(SmsInterface $sms, $isSendingEnabled)
+    public function SendSms(SmsInterface $sms)
     {
-        $this->logger->info('SMS message ready to send. To: '. $sms->getRecipient() .', Message: "'. $sms->getMessageText() .'"');
-        if (!$isSendingEnabled) {
-            $this->logger->info('SMS sending disabled. SMS not sent');
-        } else {
-            $this->logger->info('Attempting to send SMS.');
-
-            // Twilio API call
-            $result = $this->twilioClient->account->messages->create(
-                $sms->getRecipient(),
-                array (
-                    'from' => $sms->getOriginator(),
-                    'body' => $sms->getMessageText()
-                )
-            );
+        // Twilio API call
+        $result = $this->twilioClient->account->messages->create(
+            $sms->getRecipient(),
+            array (
+                'from' => $sms->getOriginator(),
+                'body' => $sms->getMessageText()
+            )
+        );
 
 /*
  * ORIGINAL script from promoter page to test sms. delete if it's all working.
@@ -119,17 +120,13 @@ class TwilioGateway implements SmsGatewayInterface
         );
 // */
 
-            // todo: update this and give correct error message in logging if failed
-            $sendSuccessful = true;
+        // todo: update this and give correct error message in logging if failed
+        $sendSuccessful = true;
 
-            if ($sendSuccessful) {
-                $this->logger->info('SMS SENT');
-            } else {
-                $this->logger->info('SMS SEND UNSUCCESSFUL - more details should be provided here');
-            }
+        if ($sendSuccessful) {
+            return SMS::SENT_SUCCESSFULLY;
+        } else {
+            return SMS::ERROR_DURING_SEND;
         }
-
-        return true;
-
     }
 }

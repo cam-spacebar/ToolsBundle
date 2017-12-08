@@ -5,12 +5,10 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 use Platypuspie\AnchorcardsBundle\Entity\SMS;
 use VisageFour\Bundle\ToolsBundle\Interfaces\SmsGateway;
 
-// Class acts as a wrapper for Twilio API
-// used to send SMSes via twilio, the alternative is to use SMSCentral gateway or another classes
 class SmsCentralGateway implements SmsGateway
 {
 
-// todo: organise methods below as they were pulled straight from the SMSManager (don't need to do this now as using TwilioGateway)
+    // todo: organise methods below as they were pulled straight from the SMSManager (don't need to do this now as using TwilioGateway)
 
 
     public function GetSmsFromRequest ($request) {
@@ -49,8 +47,8 @@ class SmsCentralGateway implements SmsGateway
     {
         $sms = new SMS();
         //todo: update to use SMS manager to create new (will it create a circular dependency?)
-        $sms->setOriginator         ($request->query->get('ORIGINATOR'))
-            ->setRecipient          ($request->query->get('RECIPIENT'))
+        $sms->setUserNumber         ($request->query->get('ORIGINATOR'))
+            //->setRecipient          ($request->query->get('RECIPIENT'))
             ->setProvider           ($request->query->get('PROVIDER'))
             ->setCampaign           ($request->query->get('CAMPAIGN'))
             ->setMessageText        ($request->query->get('MESSAGE_TEXT'))

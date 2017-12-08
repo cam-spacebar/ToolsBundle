@@ -9,6 +9,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\Code;
 
 class CarrierNumberManager extends BaseEntityManager {
+
+
     /**
      * CarrierNumberManager constructor.
      * @param EntityManager $em

@@ -51,6 +51,8 @@ class CarrierNumber
      * @var string
      *
      * @ORM\Column(name="reference", type="string", length=50, nullable=false)
+     *
+     * reference is used to findByOne
      */
     protected $reference;
 
