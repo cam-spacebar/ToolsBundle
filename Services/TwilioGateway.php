@@ -17,22 +17,17 @@ class TwilioGateway implements SmsGatewayInterface
 {
     private $logger;
     /** @var \Platypuspie\AnchorcardsBundle\Services\CarrierNumberManager  */
-    private $carrierNumberManager;
     private $twilioClient;
 
     /**
      * TwilioGateway constructor.
      * @param Logger $logger
      * @param Client $twilioClient
-     * @param Container $containerå
      */
-    public function __construct(Logger $logger, Client $twilioClient, Container $container)
+    public function __construct(Logger $logger, Client $twilioClient)
     {
         $this->logger               = $logger;
         $this->twilioClient         = $twilioClient;
-        $this->carrierNumberManager = $container->get('anchorcards.carrier_number_manager');
-        //$this->smsManager           = $container->get('anchorcards.sms_manager');
-        $this->container            = $container;
     }
 
     public function getTo (Request $request) {
@@ -89,7 +84,6 @@ class TwilioGateway implements SmsGatewayInterface
         $accountSid         = $this->getParameter('twillio_aus_account_one_account_sid');
         $testKeySid         = $this->getParameter('twillio_aus_account_one_api_sid');
         $testKeySecret      = $this->getParameter('twillio_aus_account_one_api_secret');
-
 
         //$client = new Client($testKeySid, $testKeySecret, $accountSid);
 
