@@ -39,7 +39,7 @@ class TwilioGateway implements SmsGatewayInterface
     }
 
     public function getMsgBody (Request $request) {
-        return $request->get('msgText');
+        return $request->get('Body');
     }
 
     /*
