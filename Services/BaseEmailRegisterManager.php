@@ -173,7 +173,6 @@ class BaseEmailRegisterManager extends BaseEntityManager
         }
 
         $this->logger->info($msg);
-
         $this->em->persist($email);
 
         return $email;
@@ -199,21 +198,23 @@ class BaseEmailRegisterManager extends BaseEntityManager
                 if ($toSend) {
                     // then send the email
                     if ($this->emulateSending) {
-                        $this->logger->info('emulate sending: ON (email not sent to gateway).');
+                        $this->logger->info('Email NOT sent to gateway (emulate_email_sending: true).');
+
                     } else {
                         $this->mailer->send($message);
-                        $this->logger->info('Sent email successfully (emulate sending set to: OFF).');
+                        $this->logger->info('Sent email successfully (emulate_email_sending: false).');
                     }
 
                     $email->setSendStatus(EmailRegister::SENT);
                 } else {
                     $this->logger->info('EMAIL NOT SENT (Send email turned off - as mobile internet creates problems on dev machine). Email id: '. $email->getId());
                 }
-                $this->em->persist($email);
             }
         } elseif ($email->getSendStatus() == EmailRegister::SENT) {
             throw new \Exception('Email with id: '. $email->getId() .' has already been sent');
         }
+
+        return true;
     }
 
     // chooses the next email to send and sends it

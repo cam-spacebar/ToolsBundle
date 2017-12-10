@@ -32,18 +32,18 @@ class EmailRegister
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="createdAt", type="datetime", nullable=true)
-     * @Gedmo\Timestampable(on="create")
-     */
-    protected $createdAt;
-
-    /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="updatedAt", type="datetime", nullable=true)
      * @Gedmo\Timestampable(on="update")
      */
     protected $updatedAt;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="createdAt", type="datetime", nullable=true)
+     * @Gedmo\Timestampable(on="create")
+     */
+    protected $createdAt;
 
     /**
      * @var string
