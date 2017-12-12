@@ -290,4 +290,13 @@ class EmailRegister
         $this->setLocale(           $locale);
         $this->setAdapter(          $adapter);
     }
+
+    public function getLoggerDetails ($format = 1) {
+        return '(Email register, email to: '. $this->getToEmail() .', email template: '. $this->emailTemplate .', created at: '. $this->getCreatedAt() .', id: '. $this->getId() .')';
+    }
+
+    public function __toString()
+    {
+        return 'email register: '. $this->getId();
+    }
 }

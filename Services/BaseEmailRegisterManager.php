@@ -217,9 +217,13 @@ class BaseEmailRegisterManager extends BaseEntityManager
         return true;
     }
 
-    // chooses the next email to send and sends it
-    // could order based on priotity fields or via a 'set' column to
-    // process a particular batch of emails (will need to program these fields later on)
+    /**
+     * @return bool|EmailRegister
+     *
+     * chooses the next email to send and sends it
+     * could order based on priotity fields or via a 'set' column to
+     * process a particular batch of emails (will need to program these fields later on)
+     */
     public function sendNextSpooled ()
     {
         // get a spooled email
@@ -227,13 +231,17 @@ class BaseEmailRegisterManager extends BaseEntityManager
 
         if (!empty($email)) {
             $this->sendEmail($email);
-            return true;
+            return $email;
         }
 
         return false;
     }
 
     // return a spooled email
+
+    /**
+     * @return null|EmailRegister
+     */
     public function getSpooled () {
         $email = $this->repo->findOneBy(array (
             'sendStatus'   => EmailRegister::SPOOLED
