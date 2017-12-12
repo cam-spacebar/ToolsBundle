@@ -199,16 +199,19 @@ class BaseEmailRegisterManager extends BaseEntityManager
                     // then send the email
                     if ($this->emulateSending) {
                         $this->logger->info('Email NOT sent to gateway (emulate_email_sending: true).');
-
+                        $email->setSendStatus(EmailRegister::EMULATED_SEND);
                     } else {
                         $this->mailer->send($message);
                         $this->logger->info('Sent email successfully (emulate_email_sending: false).');
+                        $email->setSendStatus(EmailRegister::SENT);
                     }
 
-                    $email->setSendStatus(EmailRegister::SENT);
+
                 } else {
                     $this->logger->info('EMAIL NOT SENT (Send email turned off - as mobile internet creates problems on dev machine). Email id: '. $email->getId());
                 }
+            } else {
+                throw new \Exception ('Lexik email adapter not selected, no other email adapters known.');
             }
         } elseif ($email->getSendStatus() == EmailRegister::SENT) {
             throw new \Exception('Email with id: '. $email->getId() .' has already been sent');

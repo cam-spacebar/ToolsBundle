@@ -16,6 +16,7 @@ class EmailRegister
     // used for SendStatus
     const SPOOLED           = 0;
     const SENT              = 1;
+    const EMULATED_SEND     = 2;
 
     // used for adapter
     const LEXIK_ADAPTER     = 1;
@@ -292,7 +293,7 @@ class EmailRegister
     }
 
     public function getLoggerDetails ($format = 1) {
-        return '(Email register, email to: '. $this->getToEmail() .', email template: '. $this->emailTemplate .', created at: '. $this->getCreatedAt() .', id: '. $this->getId() .')';
+        return '(Email register, email to: '. $this->getToEmail() .', email template: '. $this->emailTemplate .', created at: '. $this->getCreatedAt()->format('Y-m-j H:i') .', id: '. $this->getId() .')';
     }
 
     public function __toString()
