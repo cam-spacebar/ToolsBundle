@@ -56,6 +56,10 @@ class LexikEmailFixtureGeneric implements ContainerAwareInterface
 
     // delete all records from a DB table
     public function purgeEntityTable ($entityPath) {
+        if (empty($this->em)) {
+            throw new \Exception ('$em cannot be empty!');
+        }
+
         /** @var EntityManager $em */
         $em = $this->em;
         $repo = $em->getRepository($entityPath);
