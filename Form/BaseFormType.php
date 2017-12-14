@@ -19,8 +19,8 @@ class BaseFormType extends AbstractType
     }
 
     SERVICE DEFINITION:
-    twencha.xxxx_form:
-        class: Twencha\Bundle\EventRegistrationBundle\Form\xxxx
+    twencha.yyy_form:
+        class: Twencha\Bundle\EventRegistrationBundle\Form\yyy
         arguments:
             - "@doctrine.orm.entity_manager"
             - "@event_dispatcher"

@@ -206,7 +206,6 @@ class BaseEmailRegisterManager extends BaseEntityManager
                         $email->setSendStatus(EmailRegister::SENT);
                     }
 
-
                 } else {
                     $this->logger->info('EMAIL NOT SENT (Send email turned off - as mobile internet creates problems on dev machine). Email id: '. $email->getId());
                 }
