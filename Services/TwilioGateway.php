@@ -15,9 +15,14 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\SmsInterface;
 // used to send SMSes via twilio, the alternative is to use SMSCentral gateway or another classes
 class TwilioGateway implements SmsGatewayInterface
 {
+    /** @var Logger */
     private $logger;
     /** @var \Platypuspie\AnchorcardsBundle\Services\CarrierNumberManager  */
     private $twilioClient;
+
+    // when console logging is on, all logs will be printed.
+    // This is used for printing results to a console when a worker script is running (not web based).
+    private $consoleLoggingOn;
 
     /**
      * TwilioGateway constructor.
@@ -69,7 +74,7 @@ class TwilioGateway implements SmsGatewayInterface
     public function SendSms(SmsInterface $sms)
     {
         // Twilio API call
-        $result = $this->twilioClient->account->messages->create(
+        $result = $this->twilioClient->account->messages->create (
             $sms->getRecipient(),
             array (
                 'from' => $sms->getOriginator(),
@@ -102,13 +107,34 @@ class TwilioGateway implements SmsGatewayInterface
         );
 // */
 
+        $log1 = 'SMS send result: '. $result .'. (from twilio SMS gateway)';
+        if ($this->consoleLoggingOn) { print $log1 ."\n"; }
+        $this->logger->info($log1);
+
         // todo: update this and give correct error message in logging if failed
         $sendSuccessful = true;
 
         if ($sendSuccessful) {
-            return SMS::SENT_SUCCESSFULLY;
+            $log2 = 'SMS SENT SUCCESSFULLY';
+            $sendFlag = SMS::SENT_SUCCESSFULLY;
         } else {
-            return SMS::ERROR_DURING_SEND;
+            $log2 = 'SMS SEND UNSUCCESSFUL - more details should be provided here';
+            $sendFlag = SMS::ERROR_DURING_SEND;
         }
+
+        if ($this->consoleLoggingOn) { print $log2 ."\n"; }
+        $this->logger->info($log2);
+
+        $sms->setSendFlag($sendFlag);
+
+        return $sms;
+    }
+
+    /**
+     * @param mixed $consoleLoggingOn
+     */
+    public function setConsoleLoggingOn($consoleLoggingOn)
+    {
+        $this->consoleLoggingOn = $consoleLoggingOn;
     }
 }

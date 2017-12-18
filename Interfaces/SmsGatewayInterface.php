@@ -17,5 +17,6 @@ interface SmsGatewayInterface {
     function getTo(Request $request);
     function getFrom(Request $request);
     function getMsgBody(Request $request);
+    function setConsoleLoggingOn ($consoleLoggingOn);
 }
 ?>

@@ -13,5 +13,6 @@ interface SmsInterface {
 
     function getRecipient ();
     function getOriginator ();
+    function setSendFlag ($sendFlag);
 }
 ?>
