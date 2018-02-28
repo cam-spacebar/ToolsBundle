@@ -1,0 +1,7 @@
+{
+    "name": "camburns/toolsbundle",
+    "description": "utilities bundle",
+    "type": "project",
+    "minimum-stability": "dev",
+    "require": {}
+}
