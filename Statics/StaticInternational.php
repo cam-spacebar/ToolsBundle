@@ -302,6 +302,7 @@ class StaticInternational
         'cu' => 'Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic',
         'cv' => 'Chuvash',
         'cy' => 'Welsh',
+        'cz' => 'Chinese',
         'da' => 'Danish',
         'de' => 'German',
         'dv' => 'Divehi; Dhivehi; Maldivian;',
@@ -346,7 +347,8 @@ class StaticInternational
         'is' => 'Icelandic',
         'it' => 'Italian',
         'iu' => 'Inuktitut',
-        'ja' => 'Japanese',
+        'ja' => 'Japanese (ja)',
+        'jc' => 'Javanese (jv)',
         'ka' => 'Georgian',
         'kg' => 'Kongo',
         'ki' => 'Kikuyu, Gikuyu',
@@ -402,7 +404,8 @@ class StaticInternational
         'pi' => 'Pali',
         'pl' => 'Polish',
         'ps' => 'Pashto, Pushto',
-        'pt' => 'Portuguese',
+        'pt' => 'Jamaican Patois',
+        'pr' => 'Portuguese',
         'qu' => 'Quechua',
         'rm' => 'Romansh',
         'rn' => 'Kirundi',
@@ -455,8 +458,7 @@ class StaticInternational
         'yi' => 'Yiddish',
         'yo' => 'Yoruba',
         'za' => 'Zhuang, Chuang',
-        'zu' => 'Zulu',
-        'ps' => 'Jamaican Patois'
+        'zu' => 'Zulu'
     );
 
     // a list of country keys that map to their default native language (uses array keys from other statics on this page.)
