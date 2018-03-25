@@ -434,7 +434,6 @@ class StaticInternational
         'te' => 'Telugu',
         'tg' => 'Tajik',
         'th' => 'Thai',
-        'tj' => 'Tajiki',
         'ti' => 'Tigrinya',
         'tk' => 'Turkmen',
         'tl' => 'Tagalog',
@@ -515,7 +514,7 @@ class StaticInternational
         'CG' => null,           // Congo
         'CD' => null,           // Congo, Democratic Republic
         'CK' => null,           // Cook Islands
-        'CR' => 'ex',           // Costa Rica -> Spanish
+        'CR' => 'es',           // Costa Rica -> Spanish
         'CI' => null,           // Cote D\'Ivoire
         'HR' => 'hr',           // Croatia -> Croatian
         'CU' => 'es',           // Cuba -> Spanish
@@ -638,7 +637,7 @@ class StaticInternational
         'PH' => 'fl',           // Philippines -> Filipino
         'PN' => null,           // Pitcairn
         'PL' => 'pl',           // Poland -> Polish
-        'PT' => 'pt',           // Portugal -> Portuguese
+        'PT' => 'pr',           // Portugal -> Portuguese
         'PR' => 'es',           // Puerto Rico -> Spanish
         'QA' => 'ar',           // Qatar -> Arabic
         'RE' => null,           // Reunion
@@ -677,7 +676,7 @@ class StaticInternational
         'CH' => 'fr',           // Switzerland -> French, Italian, German, Romansh
         'SY' => 'ar',           // Syrian Arab Republic -> Arabic
         'TW' => 'cz',           // Taiwan -> Mandarin
-        'TJ' => 'tj',           // Tajikistan -> Tajiki
+        'TJ' => 'tg',           // Tajikistan -> Tajik
         'TZ' => 'sw',           // Tanzania -> Swahili
         'TH' => 'th',           // Thailand -> Thai
         'TL' => null,           // Timor-Leste
