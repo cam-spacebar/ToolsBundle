@@ -270,6 +270,7 @@ class StaticInternational
 
     // languages - remember to use sort() to get inalphabetical order (if required)
     public static $languages = array (
+        'Empty' => 'Empty',
         'aa' => 'Afar',
         'ab' => 'Abkhaz',
         'ae' => 'Avestan',
@@ -373,7 +374,6 @@ class StaticInternational
         'lt' => 'Lithuanian',
         'lu' => 'Luba-Katanga',
         'lv' => 'Latvian',
-        'ma' => 'Mandarin',
         'mg' => 'Malagasy',
         'mh' => 'Marshallese',
         'mi' => 'Maori',
@@ -506,8 +506,8 @@ class StaticInternational
         'KY' => null,           // Cayman Islands
         'CF' => null,           // Central African Republic
         'TD' => null,           // Chad
-        'CL' => 'ex',           // Chile -> spanish
-        'CN' => 'ma',           // China -> Mandarin
+        'CL' => 'es',           // Chile -> spanish
+        'CN' => 'cz',           // China -> Mandarin
         'CX' => null,           // Christmas Island
         'CC' => null,           // Cocos (Keeling) Islands
         'CO' => null,           // Colombia
@@ -560,7 +560,7 @@ class StaticInternational
         'HM' => null,           // Heard Island & Mcdonald Islands
         'VA' => null,           // Holy See (Vatican City State)
         'HN' => null,           // Honduras
-        'HK' => 'ma',           // Hong Kong -> Mandarin, English
+        'HK' => 'cz',           // Hong Kong -> Mandarin, English
         'HU' => null,           // Hungary
         'IS' => 'is',           // Iceland -> Icelandic
         'IN' => 'hi',           // India -> Hindi
@@ -676,7 +676,7 @@ class StaticInternational
         'SE' => 'sv',           // Sweden -> Swedish
         'CH' => 'fr',           // Switzerland -> French, Italian, German, Romansh
         'SY' => 'ar',           // Syrian Arab Republic -> Arabic
-        'TW' => 'ma',           // Taiwan -> Mandarin
+        'TW' => 'cz',           // Taiwan -> Mandarin
         'TJ' => 'tj',           // Tajikistan -> Tajiki
         'TZ' => 'sw',           // Tanzania -> Swahili
         'TH' => 'th',           // Thailand -> Thai
