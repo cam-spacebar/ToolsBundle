@@ -15,6 +15,7 @@ abstract class BaseEntityManager
      * @param EntityManager $em
      * @param $class
      * @param EventDispatcherInterface $dispatcher
+     * @param EventDispatcherInterface $dispatcher
      * @param LoggerInterface $logger
 
     public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
@@ -103,6 +104,9 @@ abstract class BaseEntityManager
         return $object;
     }
     public function getAllBy($criteriaArray) {
+        return $this->findBy($criteriaArray);
+    }
+    public function findBy($criteriaArray) {
         $result = $this->repo->findBy(
             $criteriaArray
         );
@@ -110,6 +114,10 @@ abstract class BaseEntityManager
     }
 
     public function getOneBy($criteriaArray) {
+        return $this->findOneBy($criteriaArray);
+    }
+
+    public function findOneBy($criteriaArray) {
         $result = $this->repo->findOneBy(
             $criteriaArray
         );
