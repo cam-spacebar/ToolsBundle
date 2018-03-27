@@ -102,7 +102,6 @@ abstract class BaseEntityManager
 
         return $object;
     }
-
     public function getAllBy($criteriaArray) {
         $result = $this->repo->findBy(
             $criteriaArray
