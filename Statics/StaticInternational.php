@@ -312,7 +312,7 @@ class StaticInternational
         'el' => 'Greek, Modern',
         'en' => 'English',
         'eo' => 'Esperanto',
-        'es' => 'Spanish; Castilian',
+        'es' => 'Spanish; Castilian',       // todo: needs to be updated to 'Spanish' only
         'et' => 'Estonian',
         'eu' => 'Basque',
         'fa' => 'Persian',

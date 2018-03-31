@@ -132,7 +132,7 @@ abstract class BaseEntityManager
     }
 
     public function findAll () {
-        return $this->repo->findAll();
+        return $this->repo->findall();
     }
 
     /**
