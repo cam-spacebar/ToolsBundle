@@ -89,7 +89,7 @@ abstract class BaseEntityManager
         // todo: alert logger that manager has been created
     }
 
-    public function createNew ($persist = true) {
+    public function createNew ($persist = true, $logObjCreation = true) {
         // instantiate
         $object = new $this->class();
 
@@ -98,11 +98,14 @@ abstract class BaseEntityManager
             $this->em->persist($object);
         }
 
-        $persistStatus = ($persist) ? 'true' : 'false';
-        $this->logger->info('Create new '. $this->class .' obj. Persist is ('. $persistStatus .')');
+        if ($logObjCreation) {
+            $persistStatus = ($persist) ? 'true' : 'false';
+            $this->logger->info('Create new '. $this->class .' obj. Persist is ('. $persistStatus .')');
+        }
 
         return $object;
     }
+
     public function getAllBy($criteriaArray) {
         return $this->findBy($criteriaArray);
     }
