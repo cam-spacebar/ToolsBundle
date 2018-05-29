@@ -270,7 +270,7 @@ class StaticInternational
 
     // languages - remember to use sort() to get inalphabetical order (if required)
     public static $languages = array (
-        'Empty' => 'Empty',
+        'ey' => 'Empty',
         'aa' => 'Afar',
         'ab' => 'Abkhaz',
         'ae' => 'Avestan',
