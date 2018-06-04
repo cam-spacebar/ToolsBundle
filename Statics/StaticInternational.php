@@ -712,4 +712,14 @@ class StaticInternational
 
     // todo: Victorian suburbs
 
+
+    public static function getLangAsString ($langCode) {
+        $str = StaticInternational::$languages [$langCode];
+
+        if (empty($str)) {
+            throw new \Exception ('could not find a language in staticInternational for langCode: '. $langCode);
+        }
+
+        return $str;
+    }
 }
