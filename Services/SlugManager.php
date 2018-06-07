@@ -4,7 +4,6 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
-use NewInTown\NewInTownBundle\Entity\JobApplication;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
