@@ -10,6 +10,24 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormFactoryInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
 
+/**
+ * Class BaseFormType
+ * @package VisageFour\Bundle\ToolsBundle\Form
+ *
+ * There's a number of different forms out there with different levels of sophistication. Below I've detailed these.
+ * Try to use the most recent / advanced version of the form when constructing a new one.
+ * Also refer to the list of 'forms constructed' as this may be a good base to start from when building a form.
+ *
+ * Forms Constructed list:
+ * - Twencha:EventRegistrationBundle:PersonType         version: ?          date created: ?
+ * - Twencha:EventRegistrationBundle:EmailSignInType    version: 1.0        date created: 6-june-2018
+ *
+ * v1.0: (search marker: FORM_CLASS_#1)
+ * features:
+ * - result codes
+ * - setProcessingResult() method
+ * Example: Twencha:EventRegistrationBundle:EmailSignInType
+ */
 class BaseFormType extends AbstractType
 {
     /* implementation:
@@ -34,14 +52,14 @@ class BaseFormType extends AbstractType
     protected $logger;
     protected $kernelEnv;
     protected $formFactory;
-    protected $resultCodes;
     protected $webHookManager;
 
     protected $webHookURL;
 
     protected $formResult;
 
-    protected $processingResult;
+    protected $resultCodes;         // array of possible result processingResults values
+    protected $processingResult;    // result of processing a form that corresponds to a value within the resultCodes array.
 
     private $webhookCallsDisabled;
 
@@ -57,6 +75,13 @@ class BaseFormType extends AbstractType
         $this->webhookCallsDisabled     = $disable_webhook_calls;
     }
 
+    /**
+     * @param $formResultCode
+     * @return mixed
+     * @throws \Exception
+     *
+     * Checks the form result code provided is valid
+     */
     public function setProcessingResult ($formResultCode) {
         if (empty($this->resultCodes[$formResultCode])) {
             $errorString = 'Code: "'. $formResultCode .'" could not be identified in the "'. self::FORM_NAME_HUMAN_READABLE .'" form';
