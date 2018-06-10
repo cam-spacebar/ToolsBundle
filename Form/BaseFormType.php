@@ -20,14 +20,23 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * Also refer to the list of 'forms constructed' as this may be a good base to start from when building a form.
  *
  * Forms Constructed list:
- * - Twencha:EventRegistrationBundle:PersonType         version: ?          date created: ?
- * - Twencha:EventRegistrationBundle:EmailSignInType    version: 1.0        date created: 6-june-2018
+ * - Photocards Project:
+ * --- todo: find them.
+ *
+ * - Twencha Project:
+ * --- Twencha:EventRegistrationBundle:PersonType           version: ?          date created: ?
+ * --- Twencha:EventRegistrationBundle:EmailSignInType      version: 1.1        date created: 6-june-2018
+ * --- Twencha:EventRegistrationBundle:BadgeValidationType  version: 1.1        date created: 10-june-2018
  *
  * v1.0: (search marker: FORM_CLASS_#1)
  * features:
  * - result codes
  * - setProcessingResult() method
  * Example: Twencha:EventRegistrationBundle:EmailSignInType
+ *
+ * v1.1: (search marker: FORM_CLASS_#1.1) changelog:
+ * - constructor parameters changed (will make all forms using baseform incompatible)
+ * - added createForm() method that uses $formPath to create the form.
  */
 class BaseFormType extends AbstractType
 {
