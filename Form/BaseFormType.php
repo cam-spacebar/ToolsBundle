@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\Request;
 use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
 
 /**
@@ -63,16 +64,40 @@ class BaseFormType extends AbstractType
 
     private $webhookCallsDisabled;
 
+    /**
+     * @var string
+     *
+     * example:
+     * 'Twencha\Bundle\EventRegistrationBundle\Form\BadgeValidationType'
+     */
+    protected $formPath;
+
     const FORM_NAME_HUMAN_READABLE = '';
 
-    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv, $webHookManager = null, $disable_webhook_calls = false) {
+    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv, $formPath, $webHookManager = null, $disable_webhook_calls = false) {
         $this->em                       = $em;
         $this->dispatcher               = $dispatcher;
         $this->logger                   = $logger;
         $this->formFactory              = $formFactory;
         $this->kernelEnv                = $kernelEnv;
+        $this->formPath                 = $formPath;
         $this->webHookManager           = $webHookManager;
         $this->webhookCallsDisabled     = $disable_webhook_calls;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * create form and handle request.
+     * (this used to be in the controller)
+     */
+    public function createForm (Request $request) {
+        $defaultData = array ();
+        $form = $this->formFactory->create($this->formPath, $defaultData);
+        $form->handleRequest($request);
+
+        return $form;
+
     }
 
     /**
