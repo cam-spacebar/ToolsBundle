@@ -7,6 +7,7 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
@@ -37,6 +38,11 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * v1.1: (search marker: FORM_CLASS_#1.1) changelog:
  * - constructor parameters changed (will make all forms using baseform incompatible)
  * - added createForm() method that uses $formPath to create the form.
+ * - added form to baseFormType
+ * - removed "$kernelEnv" - replaced with isDevEnvironment
+ *
+ * * v1.2: (search marker: FORM_CLASS_#1.2) changelog:
+ * - added a form creation checklist
  */
 class BaseFormType extends AbstractType
 {
@@ -60,7 +66,6 @@ class BaseFormType extends AbstractType
     protected $em;
     protected $dispatcher;
     protected $logger;
-    protected $kernelEnv;
     protected $formFactory;
     protected $webHookManager;
 
@@ -70,6 +75,16 @@ class BaseFormType extends AbstractType
 
     protected $resultCodes;         // array of possible result processingResults values
     protected $processingResult;    // result of processing a form that corresponds to a value within the resultCodes array.
+
+    /**
+     * @var Form
+     */
+    protected $form;
+
+    /**
+     * @var bool
+     */
+    protected $isDevEnvironment;
 
     private $webhookCallsDisabled;
 
@@ -88,10 +103,12 @@ class BaseFormType extends AbstractType
         $this->dispatcher               = $dispatcher;
         $this->logger                   = $logger;
         $this->formFactory              = $formFactory;
-        $this->kernelEnv                = $kernelEnv;
+//        $this->kernelEnv                = $kernelEnv;
+        $this->isDevEnvironment         = ($kernelEnv == 'dev') ? true : false;
         $this->formPath                 = $formPath;
         $this->webHookManager           = $webHookManager;
         $this->webhookCallsDisabled     = $disable_webhook_calls;
+
     }
 
     /**
@@ -100,13 +117,21 @@ class BaseFormType extends AbstractType
      * create form and handle request.
      * (this used to be in the controller)
      */
-    public function createForm (Request $request) {
+    public function createForm (Request $request, $allowDefaultValuePopulation = true) {
         $defaultData = array ();
-        $form = $this->formFactory->create($this->formPath, $defaultData);
-        $form->handleRequest($request);
+        
+        $this->form = $this->formFactory->create($this->formPath, $defaultData);
+        $this->form->handleRequest($request);
 
-        return $form;
+        return $this->form;
+    }
 
+    public function getForm () {
+        if (empty($this->form)) {
+            throw new \Exception ('form has not been created.');
+        }
+
+        return $this->form;
     }
 
     /**
