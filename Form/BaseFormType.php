@@ -43,6 +43,8 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  *
  * * v1.2: (search marker: FORM_CLASS_#1.2) changelog:
  * - added a form creation checklist
+ * - uses self::class instead of a service definition parameter
+ * - removed CLASS_NAME constant and replaced with $this->className
  */
 class BaseFormType extends AbstractType
 {
@@ -86,7 +88,13 @@ class BaseFormType extends AbstractType
      */
     protected $isDevEnvironment;
 
+    /**
+     * @var string
+     */
+    protected $className;
+
     private $webhookCallsDisabled;
+
 
     /**
      * @var string
@@ -109,6 +117,8 @@ class BaseFormType extends AbstractType
         $this->webHookManager           = $webHookManager;
         $this->webhookCallsDisabled     = $disable_webhook_calls;
 
+        $classPathPieces            = explode('\\', self::class);
+        $this->className            = end($classPathPieces);
     }
 
     /**
@@ -119,7 +129,7 @@ class BaseFormType extends AbstractType
      */
     public function createForm (Request $request, $allowDefaultValuePopulation = true) {
         $defaultData = array ();
-        
+
         $this->form = $this->formFactory->create($this->formPath, $defaultData);
         $this->form->handleRequest($request);
 
@@ -179,6 +189,9 @@ class BaseFormType extends AbstractType
     // if the webhook url is set, it will be called after when the form is succesfully persisted.
     // object passed in must support the CanNormalize interface
     public function callWebhook (CanNormalize $object1, $urlOverride = false) {
+        if (empty($this->webHookManager)) {
+            throw new \Exception ('this form class ('. $this->className .' does not have a webhookManager');
+        }
         if (!empty($urlOverride)) {
             $webHookTargetUrl = $urlOverride;
         } else {
