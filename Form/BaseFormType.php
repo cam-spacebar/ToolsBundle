@@ -128,7 +128,7 @@ class BaseFormType extends AbstractType
      * (this used to be in the controller)
      */
     public function createForm (Request $request, $options = array ()) {
- 
+
         $defaultData = array ();
 
         $this->form = $this->formFactory->create($this->formPath, $defaultData, $options);
