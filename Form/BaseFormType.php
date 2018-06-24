@@ -127,10 +127,11 @@ class BaseFormType extends AbstractType
      * create form and handle request.
      * (this used to be in the controller)
      */
-    public function createForm (Request $request, $allowDefaultValuePopulation = true) {
+    public function createForm (Request $request, $options = array ()) {
+
         $defaultData = array ();
 
-        $this->form = $this->formFactory->create($this->formPath, $defaultData);
+        $this->form = $this->formFactory->create($this->formPath, $defaultData, $options);
         $this->form->handleRequest($request);
 
         return $this->form;
