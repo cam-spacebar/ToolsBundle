@@ -123,6 +123,7 @@ class BaseFormType extends AbstractType
 
     /**
      * @param Request $request
+     * @return Form|\Symfony\Component\Form\FormInterface
      *
      * create form and handle request.
      * (this used to be in the controller)
