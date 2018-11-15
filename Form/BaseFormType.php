@@ -95,7 +95,6 @@ class BaseFormType extends AbstractType
 
     private $webhookCallsDisabled;
 
-
     /**
      * @var string
      *
@@ -140,7 +139,7 @@ class BaseFormType extends AbstractType
 
     public function getForm () {
         if (empty($this->form)) {
-            throw new \Exception ('form has not been created.');
+            throw new \Exception ('form has not been built. Please build the form before trying to get access to it.');
         }
 
         return $this->form;
