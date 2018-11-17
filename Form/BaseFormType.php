@@ -29,11 +29,15 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * --- Twencha:EventRegistrationBundle:EmailSignInType      version: 1.1        date created: 6-june-2018
  * --- Twencha:EventRegistrationBundle:BadgeValidationType  version: 1.1        date created: 10-june-2018
  *
- * v1.0: (search marker: FORM_CLASS_#1)
+ * ===== CLASS VERSIONS =====
+ * v1.3: (search marker: FORM_CLASS_#1.3)
  * features:
- * - result codes
- * - setProcessingResult() method
- * Example: Twencha:EventRegistrationBundle:EmailSignInType
+ * - added: populateFormInputs() and getDefaultData() to BaseFormType class
+ *
+ * v1.2: (search marker: FORM_CLASS_#1.2) changelog:
+ * - added a form creation checklist
+ * - uses self::class instead of a service definition parameter
+ * - removed CLASS_NAME constant and replaced with $this->className
  *
  * v1.1: (search marker: FORM_CLASS_#1.1) changelog:
  * - constructor parameters changed (will make all forms using baseform incompatible)
@@ -41,10 +45,11 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * - added form to baseFormType
  * - removed "$kernelEnv" - replaced with isDevEnvironment
  *
- * * v1.2: (search marker: FORM_CLASS_#1.2) changelog:
- * - added a form creation checklist
- * - uses self::class instead of a service definition parameter
- * - removed CLASS_NAME constant and replaced with $this->className
+ * v1.0: (search marker: FORM_CLASS_#1)
+ * features:
+ * - result codes
+ * - setProcessingResult() method
+ * Example: Twencha:EventRegistrationBundle:EmailSignInType
  */
 class BaseFormType extends AbstractType
 {
@@ -128,10 +133,13 @@ class BaseFormType extends AbstractType
      * (this used to be in the controller)
      */
     public function createForm (Request $request, $options = array ()) {
+        // getDefaultData is implemented in the super class
+        $this->logger->info('populating form: "'. $this->className  .'" inputs with prefill/default values');
+        $defaultData = $this->getDefaultData();
 
-        $defaultData = array ();
 
         $this->form = $this->formFactory->create($this->formPath, $defaultData, $options);
+
         $this->form->handleRequest($request);
 
         return $this->form;
@@ -220,5 +228,35 @@ class BaseFormType extends AbstractType
                 return $result;
             }
         }
+    }
+
+    /**
+     * @return Form
+     *
+     * Populate the form with dev data and/or with prefill data determined by the super class (ussually from an object)
+     */
+    public function populateFormInputs()
+    {
+        // if the form has been submitted, get the form data from the POST vars - not here.
+        if ($this->form->isSubmitted()) {
+            return false;
+        }
+
+        if ($this->isDevEnvironment) {
+            // (if in dev environment) test data will override any prefill data
+            $this->logger->info('populating form: "'. $this->className  .'" with DEV environment testing values');
+            $this->setFormTestDefaults();
+        }
+
+        return $this->form;
+    }
+
+    /**
+     * override in the sub-class (if required) to pre-fill form input data with obj values.
+     * This is used for cases where the form should have pre-existing values such as during an "edit" or a "back" button click.
+     */
+    protected function prefillInputs () {
+//        $this->logger->info('populating form: "'. $this->className  .'" with prefill values');
+//        $this->form->get('email')->setData('cameron@newtomelbourne.org');
     }
 }
