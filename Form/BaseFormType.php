@@ -10,6 +10,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Intl\Exception\NotImplementedException;
+use Twencha\Bundle\EventRegistrationBundle\Entity\Person;
 use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
 
 /**
@@ -30,6 +32,10 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * --- Twencha:EventRegistrationBundle:BadgeValidationType  version: 1.1        date created: 10-june-2018
  *
  * ===== CLASS VERSIONS =====
+ * v1.4 (search marker: FORM_CLASS_#1.4)
+ * features:
+ * - added handleSubmission() and processInput() processInpu
+ *
  * v1.3: (search marker: FORM_CLASS_#1.3)
  * features:
  * - added: populateFormInputs() and getDefaultData() to BaseFormType class
@@ -68,7 +74,9 @@ class BaseFormType extends AbstractType
             - "@logger"
     // */
 
-    // todo: convert const in inherited classes form name to a private member used here for use in webhook log notice - form name should be defined in the service definition
+    // Basic input processing flags. See the super class for other possibilities.
+    const FORM_NOT_SUBMITTED            = 100;
+    const SUCCESS                       = 200;
 
     protected $em;
     protected $dispatcher;
@@ -158,7 +166,8 @@ class BaseFormType extends AbstractType
      * @return mixed
      * @throws \Exception
      *
-     * Checks the form result code provided is valid
+     * Checks the form result code provided is valid and
+     * also logs the form processing result.
      */
     public function setProcessingResult ($formResultCode) {
         if (empty($this->resultCodes[$formResultCode])) {
@@ -258,5 +267,35 @@ class BaseFormType extends AbstractType
     protected function prefillInputs () {
 //        $this->logger->info('populating form: "'. $this->className  .'" with prefill values');
 //        $this->form->get('email')->setData('cameron@newtomelbourne.org');
+    }
+
+    // cannot implement as some super classes pass parameters.
+//    public function handleFormSubmission () {
+//        throw new \Exception ('handleFormSubmission() is deprecated. Please use handleSubmission() instead, which will in turn call: processInput() that must be implemented by your form\'s super class.');
+//    }
+
+    private function processInput () {
+        throw new NotImplementedException('processInput() must be overriden by the super class.');
+    }
+
+    /**
+     * @return mixed
+     * @throws \Doctrine\ORM\ORMException
+     *
+     * Used to process the form input data.
+     * customer input handling logic is implemented in the super calss in this method: processInput: processInput()
+     */
+    public function handleSubmission () {
+//        $this->processInput();      // the form input processing logic is implemented by the super class.
+
+        if ($this->form->isSubmitted() && $this->form->isValid()) {
+            $this->logger->info('form with class: '. $this->className .' isSubmitted and isValid. Now processing the form.');
+
+            $processingResult = $this->processInput();
+        } else {
+            $processingResult = self::FORM_NOT_SUBMITTED;
+        }
+
+        return $this->setProcessingResult ($processingResult);
     }
 }
