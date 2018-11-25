@@ -11,7 +11,6 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Exception\NotImplementedException;
-use Twencha\Bundle\EventRegistrationBundle\Entity\Person;
 use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
 
 /**
@@ -22,19 +21,18 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * Try to use the most recent / advanced version of the form when constructing a new one.
  * Also refer to the list of 'forms constructed' as this may be a good base to start from when building a form.
  *
- * Forms Constructed list:
- * - Photocards Project:
- * --- todo: find them.
- *
- * - Twencha Project:
- * --- Twencha:EventRegistrationBundle:PersonType           version: ?          date created: ?
- * --- Twencha:EventRegistrationBundle:EmailSignInType      version: 1.1        date created: 6-june-2018
- * --- Twencha:EventRegistrationBundle:BadgeValidationType  version: 1.1        date created: 10-june-2018
+ * === Symfony form creation process: ===
+ * https://docs.google.com/presentation/d/1xezcX-6mi3aqMWU-cYvqNoCMrMYSZ4qTRUD6AgTI_Y4/edit#slide=id.p
  *
  * ===== CLASS VERSIONS =====
+ * v1.5 (search marker: FORM_CLASS_#1.5)
+ * features:
+ * - moved create form process to an external slide-deck
+ * - added markers for each process step for quick referencing of the form class.
+ *
  * v1.4 (search marker: FORM_CLASS_#1.4)
  * features:
- * - added handleSubmission() and processInput() processInpu
+ * - added handleSubmission() and processInput() processInput
  *
  * v1.3: (search marker: FORM_CLASS_#1.3)
  * features:
