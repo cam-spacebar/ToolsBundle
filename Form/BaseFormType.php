@@ -274,7 +274,7 @@ class BaseFormType extends AbstractType
 //        throw new \Exception ('handleFormSubmission() is deprecated. Please use handleSubmission() instead, which will in turn call: processInput() that must be implemented by your form\'s super class.');
 //    }
 
-    private function processInput () {
+    protected function processInput () {
         throw new NotImplementedException('processInput() must be overriden by the super class.');
     }
 
