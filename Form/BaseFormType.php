@@ -24,6 +24,9 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * === Symfony form creation process: ===
  * https://docs.google.com/presentation/d/1xezcX-6mi3aqMWU-cYvqNoCMrMYSZ4qTRUD6AgTI_Y4/edit#slide=id.p
  *
+ * Todo:
+ * - automatically populate the flashBag - use an array that stores a standard message response to each result flag after form submission.
+ *
  * ===== CLASS VERSIONS =====
  * v1.5 (search marker: FORM_CLASS_#1.5)
  * features:
