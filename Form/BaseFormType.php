@@ -117,8 +117,6 @@ class BaseFormType extends AbstractType
      */
     protected $formPath;
 
-    const FORM_NAME_HUMAN_READABLE = '';
-
     public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger, FormFactoryInterface $formFactory, $kernelEnv, $formPath, $webHookManager = null, $disable_webhook_calls = false) {
         $this->em                       = $em;
         $this->dispatcher               = $dispatcher;
@@ -130,7 +128,7 @@ class BaseFormType extends AbstractType
         $this->webHookManager           = $webHookManager;
         $this->webhookCallsDisabled     = $disable_webhook_calls;
 
-        $classPathPieces            = explode('\\', self::class);
+        $classPathPieces            = explode('\\', get_class($this));
         $this->className            = end($classPathPieces);
     }
 
@@ -178,7 +176,7 @@ class BaseFormType extends AbstractType
 
         $this->processingResult = $formResultCode;
 
-        $this->logger->info(self::FORM_NAME_HUMAN_READABLE .' form processing result: "'. $this->resultCodes[$formResultCode] .'"');
+        $this->logger->info($this->className .' form processing result: "'. $this->resultCodes[$formResultCode] .'"');
 
         return $this->processingResult;
     }
