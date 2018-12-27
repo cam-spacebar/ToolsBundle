@@ -282,7 +282,10 @@ class BaseFormType extends AbstractType
      * @throws \Doctrine\ORM\ORMException
      *
      * Used to process the form input data.
-     * customer input handling logic is implemented in the super calss in this method: processInput: processInput()
+     * customer input handling logic is implemented in the super class via this method: processInput: processInput()
+     *
+     * the processInput() method will return a const value representing a "flag" for the outcome of the form
+     * This "flag" is then interpreted by the caller to take appropriate action.
      */
     public function handleSubmission () {
 //        $this->processInput();      // the form input processing logic is implemented by the super class.
