@@ -445,6 +445,7 @@ class StaticInternational
         'su' => 'Sundanese',
         'sv' => 'Swedish',
         'sw' => 'Swahili',
+        'tz' => 'Taiwanese',
         'ta' => 'Tamil',
         'te' => 'Telugu',
         'tg' => 'Tajik',
@@ -690,7 +691,7 @@ class StaticInternational
         'SE' => 'sv',           // Sweden -> Swedish
         'CH' => 'fr',           // Switzerland -> French, Italian, German, Romansh
         'SY' => 'ar',           // Syrian Arab Republic -> Arabic
-        'TW' => 'cz',           // Taiwan -> Mandarin
+        'TW' => 'tz',           // Taiwan -> Taiwanese
         'TJ' => 'tg',           // Tajikistan -> Tajik
         'TZ' => 'sw',           // Tanzania -> Swahili
         'TH' => 'th',           // Thailand -> Thai
