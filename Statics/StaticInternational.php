@@ -95,6 +95,7 @@ class StaticInternational
         'EC' => 'Ecuador',
         'EG' => 'Egypt',
         'SV' => 'El Salvador',
+        'EN' => 'England',
         'GQ' => 'Equatorial Guinea',
         'ER' => 'Eritrea',
         'EE' => 'Estonia',
@@ -145,7 +146,8 @@ class StaticInternational
         'KZ' => 'Kazakhstan',
         'KE' => 'Kenya',
         'KI' => 'Kiribati',
-        'KR' => 'Korea',
+        'KS' => 'South Korean',
+        'KO' => 'North Korean',
         'KW' => 'Kuwait',
         'KG' => 'Kyrgyzstan',
         'LA' => 'Lao People\'s Democratic Republic',
@@ -226,6 +228,8 @@ class StaticInternational
         'SN' => 'Senegal',
         'RS' => 'Serbia',
         'SC' => 'Seychelles',
+        'SS' => 'Scotland',
+        'SD' => 'Sudan',
         'SL' => 'Sierra Leone',
         'SG' => 'Singapore',
         'SK' => 'Slovakia',
@@ -236,7 +240,6 @@ class StaticInternational
         'GS' => 'South Georgia And Sandwich Isl.',
         'ES' => 'Spain',
         'LK' => 'Sri Lanka',
-        'SD' => 'Sudan',
         'SR' => 'Suriname',
         'SJ' => 'Svalbard And Jan Mayen',
         'SZ' => 'Swaziland',
@@ -304,6 +307,7 @@ class StaticInternational
         'br' => 'Breton',
         'bs' => 'Bosnian',
         'ca' => 'Catalan; Valencian',
+        'cj' => 'Cantonese',
         'ce' => 'Chechen',
         'ch' => 'Chamorro',
         'cm' => 'Comorian',
@@ -322,7 +326,7 @@ class StaticInternational
         'el' => 'Greek, Modern',
         'en' => 'English',
         'eo' => 'Esperanto',
-        'es' => 'Spanish; Castilian',       // todo: needs to be updated to 'Spanish' only
+        'es' => 'Spanish',       // todo: needs to be updated to 'Spanish' only
         'et' => 'Estonian',
         'eu' => 'Basque',
         'fa' => 'Persian',
@@ -575,7 +579,7 @@ class StaticInternational
         'HM' => 'en',           // Heard Island & Mcdonald Islands -> English
         'VA' => 'en',           // Holy See (Vatican City State) -> Italian
         'HN' => 'es',           // Honduras -> Spanish
-        'HK' => 'cz',           // Hong Kong -> Mandarin, English
+        'HK' => 'cj',           // Hong Kong -> Cantonese, Mandarin, English
         'HU' => 'hu',           // Hungary -> Hungarian
         'IS' => 'is',           // Iceland -> Icelandic
         'IN' => 'hi',           // India -> Hindi
@@ -593,7 +597,8 @@ class StaticInternational
         'KZ' => 'kk',           // Kazakhstan -> kazakh
         'KE' => 'sw',           // Kenya -> Swahili
         'KI' => 'en',           // Kiribati -> English
-        'KR' => 'ko',           // Korea -> Korean
+        'KS' => 'ko',           // South Korea -> Korean
+        'KO' => 'ko',           // South Korea -> Korean
         'KW' => 'ar',           // Kuwait -> Arabic
         'KG' => 'ky',           // Kyrgyzstan -> Kyrgyz
         'LA' => 'lo',           // Lao People's Democratic Republic -> Lao
@@ -728,14 +733,51 @@ class StaticInternational
 
     // todo: Victorian suburbs
 
-
-    public static function getLangAsString ($langCode) {
-        $str = StaticInternational::$languages [$langCode];
-
-        if (empty($str)) {
-            throw new \Exception ('could not find a language in staticInternational for langCode: '. $langCode);
+    public static function checkCountryExistsByCode ($countryCode, $throwOnError = true)
+    {
+        if (empty(self::$countries[$countryCode])) {
+            if ($throwOnError) {
+                throw new \Exception('country code with value: '. $countryCode .' does not exist.');
+            }
+            return false;
         }
 
-        return $str;
+        return true;
+    }
+
+    public static function checkLanguageExistsByCode ($langCode, $throwOnError = true)
+    {
+        if (empty(self::$languages[$langCode])) {
+            if ($throwOnError) {
+                throw new \Exception('Language code with value: '. $langCode .' does not exist.');
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $langCode
+     * @return array
+     *
+     * return an array of country codes for countries that have $langCode
+     * as it's default langauge.
+     */
+    public static function getDefaultCountriesByLangCode($langCode)
+    {
+        $langs = self::$defaultNativeLanguage;
+        // don't use array flip, as there may be multiple countries that use that language as their default.
+//        $langs = array_flip($langs);
+
+        // build an array of country codes that have $curLangCode as it's default language
+        $countires = [];
+        foreach (self::$defaultNativeLanguage as $curCountryCode => $curLangCode) {
+            if ($langCode == $curLangCode) {
+                array_push($countires, $curCountryCode);
+            }
+        }
+
+        return $countires;
     }
 }
