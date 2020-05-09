@@ -21,6 +21,7 @@ services:
             - { name: request.param_converter, converter: code_slug_converter }
         arguments:
             - "@?doctrine"
+            - "@doctrine.orm.entity_manager"
 
 # add this to your projects services.yml, not in the shared VisageFour services.yml as it will crash the app if lexik mailer is not installed.
 #    anchorcards.email_register_manager:

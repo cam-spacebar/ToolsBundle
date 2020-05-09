@@ -26,11 +26,14 @@ class CodeSlugParamConverter implements ParamConverterInterface
      */
     private $registry;
 
+    private $em;
+
     /**
      * @param ManagerRegistry $registry Manager registry
      */
-    public function __construct(ManagerRegistry $registry = null)
+    public function __construct(ManagerRegistry $registry = null, EntityManager $em)
     {
+        $this->em       = $em;
         $this->registry = $registry;
     }
 
@@ -53,10 +56,15 @@ class CodeSlugParamConverter implements ParamConverterInterface
         }
 
         // Get actual entity manager for class
-        $em = $this->registry->getManagerForClass($configuration->getClass());
+//        $em = $this->registry->getManagerForClass($configuration->getClass());
 
         // Check, if class provided can be converted
-        if ('Twencha\Bundle\EventRegistrationBundle\Entity\Slug' !== $em->getClassMetadata($configuration->getClass())->getName()) {
+//        dump($configuration->getClass()); die('xxx');
+//        dump($this->em->getClassMetadata($configuration->getClass())->getName()); die('xx');
+        // this was throwing a really strange error when I was trying to do autowired dependicy injections on a controller. so I've simplified it with the new code - left here, in case this is useful in the future.
+        //        if ('Twencha\Bundle\EventRegistrationBundle\Entity\Slug' !== $this->em->getClassMetadata($configuration->getClass())->getName()) {
+        if ('Twencha\Bundle\EventRegistrationBundle\Entity\Slug' !== $configuration->getClass()) {
+
             return false;
         }
 
