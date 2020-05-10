@@ -1,4 +1,12 @@
 services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+#    VisageFour\Bundle\ToolsBundle\:
+#        resource: '../../src/VisageFour/Bundle/ToolsBundle/*'
+#        exclude: '../../src/VisageFour/Bundle/ToolsBundle/{Entity,Exceptions,Classes/noAutowire}'
+
     tools_bundle.webhookmanager:
         class: VisageFour\Bundle\ToolsBundle\Services\WebHookManager
         arguments:
@@ -22,6 +30,10 @@ services:
         arguments:
             - "@?doctrine"
             - "@doctrine.orm.entity_manager"
+#
+#    VisageFour\Bundle\ToolsBundle\Form\BaseFormType:
+#        arguments:
+#            $kernelEnv: "%kernel.environment%"
 
 # add this to your projects services.yml, not in the shared VisageFour services.yml as it will crash the app if lexik mailer is not installed.
 #    anchorcards.email_register_manager:
