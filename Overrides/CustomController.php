@@ -126,7 +126,7 @@ class CustomController extends Controller
     // METHODS TO OVERRIDE IN APP'S IMPLEMENTATION
     // todo: should be made abstract?
     /**
-     * @return \VisageFour\Bundle\PersonBundle\Services\UserSecurity
+     * @return \Twencha\Bundle\EventRegistrationBundle\Services\UserSecurity
      */
     public function getUserSecurity () {
         return $this->container->get('usersecurity');
