@@ -196,6 +196,7 @@ class BaseEmailRegisterManager extends BaseEntityManager
                 // set to false when in dev mode and in particular when using mobile internet - as the send will fail
                 $toSend = true;
                 if ($toSend) {
+                    // todo: create AppSettings emulate_email_sending variable?
                     // then send the email
                     if ($this->emulateSending) {
                         $this->logger->info('Email NOT sent to gateway (emulate_email_sending: true).');

@@ -13,7 +13,7 @@ services:
             - "@doctrine.orm.entity_manager"
             - "@buzz"
             - "@logger"
-            - "%disable_webhook_calls%"
+            - "%env(DISABLE_WEBHOOK_CALLS)%"
 
     tools_bundle.code_manager:
         class: VisageFour\Bundle\ToolsBundle\Services\CodeManager
