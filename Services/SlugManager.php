@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -24,9 +25,9 @@ class SlugManager extends BaseEntityManager
      * @param EntityManager $em
      * @param $class
      * @param EventDispatcherInterface $dispatcher
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, Logger $logger, Router $router, CodeManager $codeManager) {
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, Router $router, CodeManager $codeManager) {
         parent::__construct($em, $class, $dispatcher, $logger);
 
         $this->router       = $router;

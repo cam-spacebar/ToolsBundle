@@ -57,6 +57,9 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * - result codes
  * - setProcessingResult() method
  * Example: Twencha:EventRegistrationBundle:EmailSignInType
+ *
+ * todo: get all super classes to use: __NAMESPACE__ for $formPath and turn class name into variable instead of constant: CLASS_NAME - use get_class()
+ * todo: create self::FORM_NOT_SUBMITTED in base class - then extend it in inheriting classes
  */
 class BaseFormType extends AbstractType
 {

@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Platypuspie\AnchorcardsBundle\Entity\SMS;
 use Platypuspie\AnchorcardsBundle\Services\SMSManager;
+use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,10 +27,10 @@ class TwilioGateway implements SmsGatewayInterface
 
     /**
      * TwilioGateway constructor.
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      * @param Client $twilioClient
      */
-    public function __construct(Logger $logger, Client $twilioClient)
+    public function __construct(LoggerInterface $logger, Client $twilioClient)
     {
         $this->logger               = $logger;
         $this->twilioClient         = $twilioClient;
