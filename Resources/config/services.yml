@@ -33,7 +33,7 @@ services:
 #
 #    VisageFour\Bundle\ToolsBundle\Form\BaseFormType:
 #        arguments:
-#            $kernelEnv: "%kernel.environment%"
+#            $kernelEnv: '%env(APP_ENV)%'
 
 # add this to your projects services.yml, not in the shared VisageFour services.yml as it will crash the app if lexik mailer is not installed.
 #    anchorcards.email_register_manager:
