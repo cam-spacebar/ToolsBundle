@@ -35,7 +35,7 @@ services:
 #        arguments:
 #            $kernelEnv: '%env(APP_ENV)%'
 
-# add this to your projects services.yml, not in the shared VisageFour services.yml as it will crash the app if lexik mailer is not installed.
+# add this to your projects services.yaml, not in the shared VisageFour services.yaml as it will crash the app if lexik mailer is not installed.
 #    anchorcards.email_register_manager:
 #        class: VisageFour\Bundle\ToolsBundle\Services\EmailRegisterManager
 #        arguments:
