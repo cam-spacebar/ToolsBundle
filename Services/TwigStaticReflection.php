@@ -2,6 +2,9 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
+
 /**
  * Class TwigStaticReflection
  * @package VisageFour\Bundle\ToolsBundle\Services
@@ -13,17 +16,17 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
  *
  * Service definition:
  *services:
-    twig.static_reflection_extension:
-        class: VisageFour\Bundle\ToolsBundle\Services\TwigStaticReflection
-        tags:
-        - { name: twig.extension }
+    * twig.static_reflection_extension:
+        * class: VisageFour\Bundle\ToolsBundle\Services\TwigStaticReflection
+        * tags:
+        * - { name: twig.extension }
  *
  *
  * usage:
  * {{ get_static("Twencha\\Bundle\\EventRegistrationBundle\\Entity\\Badge", 'propertyName') }}
  *
  */
-class TwigStaticReflection extends \Twig_Extension
+class TwigStaticReflection extends AbstractExtension
 {
     /**
      * {@inheritdoc}
@@ -31,8 +34,8 @@ class TwigStaticReflection extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            new \Twig_SimpleFunction('call_static', [$this, 'callStaticMethod']),
-            new \Twig_SimpleFunction('get_static', [$this, 'getStaticProperty']),
+            new TwigFunction('call_static', [$this, 'callStaticMethod']),
+            new TwigFunction('get_static', [$this, 'getStaticProperty']),
         );
     }
 
