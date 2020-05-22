@@ -10,6 +10,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
 
@@ -17,70 +19,19 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
  * Class BaseFormType
  * @package VisageFour\Bundle\ToolsBundle\Form
  *
- * There's a number of different forms out there with different levels of sophistication. Below I've detailed these.
- * Try to use the most recent / advanced version of the form when constructing a new one.
- * Also refer to the list of 'forms constructed' as this may be a good base to start from when building a form.
- *
  * === Symfony form creation process: ===
- * https://docs.google.com/presentation/d/1xezcX-6mi3aqMWU-cYvqNoCMrMYSZ4qTRUD6AgTI_Y4/edit#slide=id.p
+ * Create a new form [P-CB-050]:
+ * https://bit.ly/36m8s4i
  *
- * Todo:
- * - automatically populate the flashBag - use an array that stores a standard message response to each result flag after form submission.
- *
- * ===== CLASS VERSIONS =====
- * v1.5 (search marker: FORM_CLASS_#1.5)
- * features:
- * - moved create form process to an external slide-deck
- * - added markers for each process step for quick referencing of the form class.
- *
- * v1.4 (search marker: FORM_CLASS_#1.4)
- * features:
- * - added handleSubmission() and processInput() processInput
- *
- * v1.3: (search marker: FORM_CLASS_#1.3)
- * features:
- * - added: populateFormInputs() and getDefaultData() to BaseFormType class
- *
- * v1.2: (search marker: FORM_CLASS_#1.2) changelog:
- * - added a form creation checklist
- * - uses self::class instead of a service definition parameter
- * - removed CLASS_NAME constant and replaced with $this->className
- *
- * v1.1: (search marker: FORM_CLASS_#1.1) changelog:
- * - constructor parameters changed (will make all forms using baseform incompatible)
- * - added createForm() method that uses $formPath to create the form.
- * - added form to baseFormType
- * - removed "$kernelEnv" - replaced with isDevEnvironment
- *
- * v1.0: (search marker: FORM_CLASS_#1)
- * features:
- * - result codes
- * - setProcessingResult() method
- * Example: Twencha:EventRegistrationBundle:EmailSignInType
- *
- * todo: get all super classes to use: __NAMESPACE__ for $formPath and turn class name into variable instead of constant: CLASS_NAME - use get_class()
- * todo: create self::FORM_NOT_SUBMITTED in base class - then extend it in inheriting classes
  */
 class BaseFormType extends AbstractType
 {
-    /* implementation:
-    TYPE CLASS:
-    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
-        parent::__construct($em, $dispatcher, $logger);
-    }
-
-    SERVICE DEFINITION:
-    twencha.yyy_form:
-        class: Twencha\Bundle\EventRegistrationBundle\Form\yyy
-        arguments:
-            - "@doctrine.orm.entity_manager"
-            - "@event_dispatcher"
-            - "@logger"
-    // */
-
-    // Basic input processing flags. See the super class for other possibilities.
+    // these are "result flags" (constants used by handleFormSubmission() to inform the controller what action to take)
+    // they are used by: $formResult
+    // See the super class for other possibilities (if they apply)
     const FORM_NOT_SUBMITTED            = 100;
     const SUCCESS                       = 200;
+    const INVALID_INPUT                 = 300;
 
     protected $em;
     protected $dispatcher;
@@ -90,10 +41,16 @@ class BaseFormType extends AbstractType
 
     protected $webHookURL;
 
+    // a flag to indicate the outcome of processInput() (in the super class)
     protected $formResult;
+
+    // An array of strings that explain the error discovered in processInput() (in the super class)
+    protected $processingErrors;
 
     protected $resultCodes;         // array of possible result processingResults values
     protected $processingResult;    // result of processing a form that corresponds to a value within the resultCodes array.
+
+    protected $formData;
 
     /**
      * @var Form
@@ -133,6 +90,8 @@ class BaseFormType extends AbstractType
 
         $classPathPieces            = explode('\\', get_class($this));
         $this->className            = end($classPathPieces);
+
+        $this->processingErrors     = array ();
     }
 
     /**
@@ -181,6 +140,11 @@ class BaseFormType extends AbstractType
 
         $this->logger->info($this->className .' form processing result: "'. $this->resultCodes[$formResultCode] .'"');
 
+        return $this->processingResult;
+    }
+
+    public function getProcessingResult()
+    {
         return $this->processingResult;
     }
 
@@ -302,5 +266,92 @@ class BaseFormType extends AbstractType
         }
 
         return $this->setProcessingResult ($processingResult);
+    }
+
+    /**
+     * if there was processing errors while running processInput() in the child class
+     * this will return true.
+     */
+    public function isHasErrors()
+    {
+        if (!empty($this->processingErrors)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * if there was processing errors while running processInput() in the child class
+     * this will return each of the errors (or error) as a string
+     */
+    public function getErrorsAsString ()
+    {
+//        dd($this->processingErrors);
+        return implode(", \n", $this->processingErrors);
+    }
+
+    /**
+     * populates a flashbag with each error in the form
+     */
+    public function populateFlashBagWithErrors (FlashBagInterface $flashBag)
+    {
+        if (!empty($this->processingErrors)) {
+            foreach ($this->processingErrors as $curI => $curErrorMsg) {
+                $flashBag->add('error', $curErrorMsg);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * if there was processing errors while running processInput() in the child class
+     * add an error message to the flash bag through this method
+     * It adds the error line to monolog to help with error tracking on prod environments in particular
+     *
+     * set $errorFlag to null to prevent if from modifying the previously set processingResult value
+     */
+    public function addErrorMsg ($errorMsg, $fieldName, $errorFlag = self::INVALID_INPUT)
+    {
+        $submittedValue = $this->getFormValue($fieldName);
+
+        if (!empty($this->processingErrors [$fieldName])) {
+            throw new \Exception('Form: '. __CLASS__ .' is (currently) unable to handle multiple error lines for the same field.');
+        }
+        $this->processingErrors [$fieldName] = $errorMsg;
+
+        $errorMsg = 'form field: '. $fieldName .' has the following error: "'. $fieldName .'". The sumitted value is: '. $submittedValue;
+        $this->logger->error($errorMsg);
+
+        // update error flag (but only if it's not null)
+        if (!empty($errorFlag)) {
+            $this->setProcessingResult($errorFlag);
+        }
+
+        return;
+    }
+
+    /**
+     * @param $fieldName
+     * @throws \Exception
+     *
+     * return the submitted field value from the form's data.
+     * Throw a useful error if the form field does not exist (and tell the dev about available options)
+     */
+    protected function getFormValue ($fieldName) {
+        // populate the formData value if not currently populated.
+        if (empty($this->formData)) {
+            $this->formData = $this->form->getData();
+        }
+
+        // attempt to get the field's value
+        if (isset($this->formData[$fieldName])) {
+            return $this->formData[$fieldName];
+        } else {
+            // throw a useful error if the fieldname doesn't exist.
+            $formFieldOptions = "'". implode ("', '", array_keys($this->formData)) ."'";
+            throw new \Exception("no form field with name: '". $fieldName ."' exists. The only available form fields are: ". $formFieldOptions);
+        }
     }
 }
