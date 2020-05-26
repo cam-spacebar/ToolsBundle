@@ -41,7 +41,6 @@ class Code
      */
     protected $code;
 
-
     /**
      * Get id
      *

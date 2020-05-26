@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Request\ParamConverter;
 
+use App\Repository\SlugCodeRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -9,7 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInte
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twencha\Bundle\EventRegistrationBundle\Entity\Code;
-use Twencha\Bundle\EventRegistrationBundle\Repository\CodeRepository;
+use Twencha\Bundle\EventRegistrationBundle\Repository\BadgeCodeRepository;
 
 /**
  * User: Cameron Burns
@@ -90,7 +91,8 @@ class CodeSlugParamConverter implements ParamConverterInterface
         $em = $this->registry->getManagerForClass($configuration->getClass());
 
         // get code
-        /** @var CodeRepository $codeRepo */
+        throw new \Exception('this code needs to be updated: 24twfvwe');
+        /** @var SlugCodeRepository $codeRepo */
         $codeRepo = $em->getRepository('EventRegistrationBundle:Code');
         /** @var Code $code */
         $code = $codeRepo->findOneBy(array ('code' => $slugCode));
