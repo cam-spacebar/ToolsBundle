@@ -63,7 +63,6 @@ class CodeManager extends BaseEntityManager {
         }
 
         return $newUniqueCodes;
-
     }
 
     // continue looping until found a unique code
