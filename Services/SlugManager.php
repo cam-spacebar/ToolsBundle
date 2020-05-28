@@ -22,6 +22,14 @@ class SlugManager extends BaseEntityManager
     private $codeManager;
 
     /**
+     * @return SlugRepository
+     */
+    public function getRepo()
+    {
+        return $this->repo;
+    }
+
+    /**
      * EventSeriesManager constructor.
      * @param EntityManager $em
      * @param $class
@@ -43,14 +51,6 @@ class SlugManager extends BaseEntityManager
         );
 
         return $URL;
-    }
-
-    /**
-     * @return SlugRepository
-     */
-    public function getRepo()
-    {
-        return $this->repo;
     }
 
     /**
