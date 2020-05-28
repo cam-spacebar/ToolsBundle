@@ -13,6 +13,7 @@ use Twencha\Bundle\EventRegistrationBundle\Entity\EventSeries;
 use Twencha\Bundle\EventRegistrationBundle\Entity\Slug;
 use Twencha\Bundle\EventRegistrationBundle\Entity\Source;
 use Twencha\Bundle\EventRegistrationBundle\Entity\Code;
+use VisageFour\Bundle\ToolsBundle\Repository\SlugRepository;
 use VisageFour\Bundle\ToolsBundle\Services\BaseEntityManager;
 
 class SlugManager extends BaseEntityManager
@@ -42,6 +43,14 @@ class SlugManager extends BaseEntityManager
         );
 
         return $URL;
+    }
+
+    /**
+     * @return SlugRepository
+     */
+    public function getRepo()
+    {
+        return $this->repo;
     }
 
     /**

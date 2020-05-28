@@ -106,9 +106,16 @@ abstract class BaseEntityManager
         return $object;
     }
 
+    /*
+     * this method should be overwritten so that the inheriting class can return a type hint to correct
+     * entity repository and allow for autocomplete when using: $this->repo->
+     */
+    abstract protected function getRepo ();
+
     public function getAllBy($criteriaArray) {
         return $this->findBy($criteriaArray);
     }
+
     public function findBy($criteriaArray) {
         $result = $this->repo->findBy(
             $criteriaArray
