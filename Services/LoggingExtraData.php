@@ -67,7 +67,7 @@ class LoggingExtraData
     public function checkClassHasLoggingDataMethod (BaseEntityInterface $obj) {
         $this->classname = get_class($obj);
         // check entity compatibility
-        if (!method_exists($obj, 'loggingData')) {
+        if (!method_exists($obj, 'getLoggingData')) {
             throw new \Exception(
                 'entity with classname: '. $this->classname.
                 ' does not extend the BaseEntity class and implement method: loggingData().'.
