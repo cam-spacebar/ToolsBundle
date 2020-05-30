@@ -37,7 +37,7 @@ class SlugManager extends BaseEntityManager
      * @param LoggerInterface $logger
      */
     public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, Router $router, CodeManager $codeManager) {
-        parent::__construct($em, $class, $dispatcher, $logger);
+        parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
 
         $this->router       = $router;
         $this->codeManager  = $codeManager;

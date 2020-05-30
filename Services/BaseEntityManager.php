@@ -21,7 +21,7 @@ abstract class BaseEntityManager
      * @param LoggerInterface $logger
 
     public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
-        parent::__construct($em, $class, $dispatcher, $logger);
+        parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
         // custom config
         // ...
     }

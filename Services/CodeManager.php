@@ -2,7 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
-use App\VisageFour\Bundle\ToolsBundle\Classes\LoggingExtraData;
+use VisageFour\Bundle\ToolsBundle\Services\LoggingExtraData;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
