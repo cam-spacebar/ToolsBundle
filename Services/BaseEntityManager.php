@@ -2,9 +2,11 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use App\VisageFour\Bundle\ToolsBundle\Classes\LoggingExtraData;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 
 abstract class BaseEntityManager
 {
@@ -64,6 +66,11 @@ abstract class BaseEntityManager
     protected $logger;
     protected $repo;
 
+    /**
+     * @var LoggingExtraData
+     */
+    protected $loggingExtraData;
+
     protected $class;
 
     // used to output result when using Doctrine fixtures > set to true when in LoadUserData.php (or other fixtures file)
@@ -71,39 +78,94 @@ abstract class BaseEntityManager
 
     /**
      * BaseEntityManager constructor.
-     * @param EntityManager             $em
-     * @param                           $class
-     * @param EventDispatcherInterface  $eventDispatcher
-     * @param LoggerInterface           $logger
+     * @param EntityManager $em
+     * @param $class
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param LoggerInterface $logger
+     * @param LoggingExtraData $loggingExtraData
      */
-    public function __construct($em, $class, $eventDispatcher, $logger) {
+    public function __construct(EntityManager$em, $class, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData) {
         $this->em               = $em;
         $this->repo             = $this->em->getRepository($class);
         $this->dispatcher       = $eventDispatcher;     // this should be phased out as a variable
         $this->eventDispatcher  = $eventDispatcher;
         $this->logger           = $logger;
+        $this->loggingExtraData = $loggingExtraData;
 
         $metadata               = $this->em->getClassMetadata($class);
         $this->class            = $metadata->getName();
-
-        // todo: alert logger that manager has been created
     }
 
+    /**
+     * @param bool $persist
+     * @param bool $logObjCreation
+     * @param bool $provideObjValsInLog
+     * @return mixed
+     * @throws \Doctrine\ORM\ORMException
+     *
+     * Create a new obj based
+     *
+     * You must override this if you want a factory method that sets values.
+     * remember to add $this->lobObjCreation() to overriden createNew.
+     */
     public function createNew ($persist = true, $logObjCreation = true) {
         // instantiate
-        $object = new $this->class();
+        $obj = new $this->class();
+
+        $this->loggingExtraData->checkClassHasLoggingDataMethod($obj);
 
         // persist?
         if ($persist) {
-            $this->em->persist($object);
+            $this->em->persist($obj);
         }
 
         if ($logObjCreation) {
-            $persistStatus = ($persist) ? 'true' : 'false';
-            $this->logger->info('Create new '. $this->class .' obj. Persist is ('. $persistStatus .')');
+            $this->logObjCreation($obj, false);
         }
 
-        return $object;
+        return $obj;
+    }
+
+    /**
+     * @param $obj
+     * @param $persist
+     * @param bool $provideObjValsInLog
+     *
+     * Create a log for the objs creation
+     */
+    protected function logObjCreation (BaseEntity $obj, $provideObjValsInLog = true) {
+        $arr    = $this->loggingExtraData->getObjLoggingData($obj);
+        $logStr = 'Create new '. $this->class .' obj.';
+        if ($provideObjValsInLog) {
+            $objValues = $this->getObjLoggerValuesString ($obj);
+            $logStr .= $objValues;
+        }
+        $this->logger->info($logStr);
+    }
+
+    /**
+     * Return a string (that represent the obj values) that can
+     * be used in the logger (for better logging!)
+     */
+    public function getObjLoggerValuesString ($obj)
+    {
+        $arr    = $obj->getLoggingData(BaseEntity::LOG_DETAIL_BASIC);
+
+        if (empty($arr)) {
+            return '';
+        }
+
+        $orgStr     = '. (Object values: ';
+        $returnStr  = $orgStr;
+        foreach ($arr as $curI => $curVal) {
+            if ($returnStr != $orgStr) {
+                $returnStr .= ', ';
+            }
+            $returnStr = '"'. $curI .'" = '. $curVal;
+        }
+        $returnStr =')';
+
+        return $returnStr;
     }
 
     /*

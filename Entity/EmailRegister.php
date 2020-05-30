@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
  *
  * @MappedSuperclass
  */
-class EmailRegister
+class EmailRegister extends BaseEntity
 {
     // used for SendStatus
     const SPOOLED           = 0;

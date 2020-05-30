@@ -8,7 +8,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * @ORM\MappedSuperclass
  */
-class Code
+class Code extends BaseEntity
 {
     /**
      * @var int
@@ -122,5 +122,21 @@ class Code
     {
         return $this->code;
     }
-}
 
+    // see BaseEntity (base) class for more information on this method.
+    public function getLoggingData($detailLevel)
+    {
+        if ($detailLevel >= BaseEntity::LOG_DETAIL_BASIC) {
+            $arr = [
+                'id'                => $this->id,
+                'code'              => $this->code
+            ];
+        }
+
+        if ($detailLevel >= BaseEntity::LOG_DETAIL_MORE) {
+//            $arr ['??'] = ";"
+        }
+
+        return $arr;
+    }
+}
