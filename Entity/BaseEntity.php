@@ -2,7 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
-use App\VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
 
 /**
  *

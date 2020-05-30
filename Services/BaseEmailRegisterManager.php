@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
 use Lexik\Bundle\MailerBundle\Message\MessageFactory;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
@@ -133,15 +134,15 @@ class BaseEmailRegisterManager extends BaseEntityManager
 
     /**
      * BaseEntityManager constructor.
-     * @param EntityManager             $em
+     * @param              $em
      * @param                           $class
-     * @param EventDispatcherInterface  $dispatcher
-     * @param LoggerInterface           $logger
-     * @param MessageFactory            $lexikMailer
-     * @param Swift_Mailer              $mailer
+     * @param   $dispatcher
+     * @param            $logger
+     * @param             $lexikMailer
+     * @param               $mailer
      */
-    public function __construct($em, $class, $dispatcher, $logger, $lexikMailer, $mailer, $emulateSending) {
-        parent::__construct($em, $class, $dispatcher, $logger);
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface$dispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData, MessageFactory $lexikMailer, Swift_Mailer $mailer, $emulateSending) {
+        parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
 
         $this->emulateSending = $emulateSending;
         if ($this->emulateSending) {

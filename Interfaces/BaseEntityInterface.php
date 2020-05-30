@@ -4,8 +4,7 @@
 * by: cameronrobertburns
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Interfaces;
-
+namespace VisageFour\Bundle\ToolsBundle\Interfaces;
 
 interface BaseEntityInterface
 {

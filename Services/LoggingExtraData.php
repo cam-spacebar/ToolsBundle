@@ -4,9 +4,9 @@
 * by: cameronrobertburns
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Classes;
+namespace VisageFour\Bundle\ToolsBundle\Services;
 
-use App\VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
 use Psr\Log\LoggerInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 

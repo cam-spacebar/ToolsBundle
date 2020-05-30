@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use App\VisageFour\Bundle\ToolsBundle\Classes\LoggingExtraData;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -15,8 +16,8 @@ class CodeManager extends BaseEntityManager {
      * @param EventDispatcherInterface $dispatcher
      * @param LoggerInterface $logger
     */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
-        parent::__construct($em, $class, $dispatcher, $logger);
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData) {
+        parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
     }
 
     /**
