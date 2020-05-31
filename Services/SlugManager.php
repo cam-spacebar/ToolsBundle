@@ -24,7 +24,7 @@ class SlugManager extends BaseEntityManager
     /**
      * @return SlugRepository
      */
-    public function getRepo()
+    protected function getRepo()
     {
         return $this->repo;
     }

@@ -2,8 +2,6 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -13,97 +11,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * @ORM\MappedSuperclass
  */
-class Slug
+class Slug extends Code
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
-
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="CreatedAt", type="datetime")
-     */
-    protected $createdAt;
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="UpdatedAt", type="datetime")
-     */
-    protected $updatedAt;
-
-    /*---
-     * @var Code
-     *
-     * @ORM\OneToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Code", cascade={"persist"})
-     * @ORM\JoinColumn(name="related_code_id", referencedColumnName="id")
-     */
-    // MUST IMPLEMENT THIS IN THE EXTENDING CLASS - CANNOT BE CREATED IN THIS ONE. As it creates issues with relationships
-    //protected $relatedCode;
-
-    // START: GETTERS AND SETTERS
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Slug
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * Set updatedAt
-     *
-     * @param \DateTime $updatedAt
-     *
-     * @return Slug
-     */
-    public function setUpdatedAt($updatedAt)
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
-    }
 }

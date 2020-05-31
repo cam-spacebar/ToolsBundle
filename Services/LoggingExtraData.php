@@ -41,7 +41,8 @@ class LoggingExtraData
     public function getObjLoggingData(BaseEntityInterface $obj, $detailLevel = BaseEntity::LOG_DETAIL_BASIC)
     {
         $arr = $obj->getLoggingData($detailLevel);
-        if (!empty($arr)) {
+
+        if (empty($arr)) {
             $warn =
                 'getLoggingdata() for class: '. $this->classname .' must be populated';
             ;

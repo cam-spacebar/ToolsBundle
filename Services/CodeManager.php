@@ -31,7 +31,7 @@ class CodeManager extends BaseEntityManager {
     public function createNew ($persist = true, $codeNumber = null) {
         // instantiate
         /** @var Code $code */
-        $code = parent::createNew(false);
+        $code = parent::createNew(false, false);
 
         // configure
         if (empty($codeNumber)) {
@@ -44,6 +44,8 @@ class CodeManager extends BaseEntityManager {
         if ($persist) {
             $this->em->persist($code);
         }
+
+        $this->logObjCreation($code);
 
         return $code;
     }

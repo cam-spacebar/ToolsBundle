@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use Doctrine\ORM\EntityRepository;
 use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
@@ -135,6 +136,7 @@ abstract class BaseEntityManager
      */
     protected function logObjCreation (BaseEntity $obj, $provideObjValsInLog = true) {
         $arr    = $this->loggingExtraData->getObjLoggingData($obj);
+
         $logStr = 'Create new '. $this->class .' obj.';
         if ($provideObjValsInLog) {
             $objValues = $this->getObjLoggerValuesString ($obj);
@@ -256,4 +258,12 @@ abstract class BaseEntityManager
     {
         $this->eventDispatcher = $eventDispatcher;
     }
+
+    /**
+     * @return EntityRepository
+     *
+     * implement this simply to get autocompletion in your inheriting class
+     * as each implementation of BaseEntityManager will have it's (different) own repo obj.
+     */
+    abstract protected function getRepo ();
 }
