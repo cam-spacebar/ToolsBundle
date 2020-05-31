@@ -8,7 +8,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\Code;
 use VisageFour\Bundle\ToolsBundle\Repository\CodeRepository;
 
-class CodeManager extends BaseEntityManager {
+/*
+ * You must extend this class, it must stay abstract, if it's concrete,
+ * then there's issues with the return type of getRepo()
+ */
+abstract class CodeManager extends BaseEntityManager {
     /**
      * CodeManager constructor.
      * @param EntityManager $em
@@ -18,11 +22,6 @@ class CodeManager extends BaseEntityManager {
     */
     public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData) {
         parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
-    }
-
-    protected function getRepo() : CodeRepository
-    {
-        return $this->repo;
     }
 
     /**

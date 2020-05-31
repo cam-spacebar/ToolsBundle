@@ -11,7 +11,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Swift_Mailer;
 
-class BaseEmailRegisterManager extends BaseEntityManager
+abstract class BaseEmailRegisterManager extends BaseEntityManager
 {
     /*
                 === USAGE BELOW! ===

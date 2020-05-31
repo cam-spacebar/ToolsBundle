@@ -7,6 +7,7 @@ use Platypuspie\AnchorcardsBundle\Entity\CarrierNumber;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\Code;
+use VisageFour\Bundle\ToolsBundle\Repository\CarrierNumberRepository;
 
 class CarrierNumberManager extends BaseEntityManager {
 
@@ -18,8 +19,13 @@ class CarrierNumberManager extends BaseEntityManager {
      * @param EventDispatcherInterface $dispatcher
      * @param LoggerInterface $logger
      */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData) {
         parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
+    }
+
+    protected function getRepo() : CarrierNumberRepository
+    {
+        return $this->repo;
     }
 
     /**
