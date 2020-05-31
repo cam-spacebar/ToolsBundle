@@ -111,6 +111,7 @@ abstract class BaseEntityManager
      */
     public function createNew ($persist = true, $logObjCreation = true) {
         // instantiate
+        /** @var BaseEntityInterface $obj */
         $obj = new $this->class();
 
         $this->loggingExtraData->checkClassHasLoggingDataMethod($obj);
@@ -134,7 +135,7 @@ abstract class BaseEntityManager
      *
      * Create a log for the objs creation
      */
-    protected function logObjCreation (BaseEntity $obj, $provideObjValsInLog = true) {
+    protected function logObjCreation (BaseEntityInterface $obj, $provideObjValsInLog = true) {
         $arr    = $this->loggingExtraData->getObjLoggingData($obj);
 
         $logStr = 'Create new '. $this->class .' obj.';

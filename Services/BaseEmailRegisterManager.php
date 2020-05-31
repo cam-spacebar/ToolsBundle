@@ -157,7 +157,7 @@ class BaseEmailRegisterManager extends BaseEntityManager
     public function createEmailAndProcess ($to, $params, $template, $locale, $spoolEmail, $adapter = EmailRegister::LEXIK_ADAPTER) {
         $loggerAction = ($spoolEmail) ? 'spool' : 'send';
         /** @var EmailRegister $email */
-        $email = $this->createNew(false);
+        $email = $this->createNew(false, false);
         $email->configure($to, $params, $template, $locale, $adapter);
 
         $this->logger->info('Attempting to '. $loggerAction .' email.'.
@@ -173,8 +173,9 @@ class BaseEmailRegisterManager extends BaseEntityManager
 
         }
 
-        $this->logger->info($msg);
+//        $this->logger->info($msg);
         $this->em->persist($email);
+        $this->logObjCreation($email);
 
         return $email;
     }

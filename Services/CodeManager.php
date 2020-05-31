@@ -2,11 +2,11 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
-use VisageFour\Bundle\ToolsBundle\Services\LoggingExtraData;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\Code;
+use VisageFour\Bundle\ToolsBundle\Repository\CodeRepository;
 
 class CodeManager extends BaseEntityManager {
     /**
@@ -20,6 +20,11 @@ class CodeManager extends BaseEntityManager {
         parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
     }
 
+    protected function getRepo() : CodeRepository
+    {
+        return $this->repo;
+    }
+
     /**
      * @param bool $persist
      * @param null $codeNumber
@@ -28,7 +33,7 @@ class CodeManager extends BaseEntityManager {
      *
      * Check the DB to see if the code is already used.
      */
-    public function createNew ($persist = true, $codeNumber = null) {
+    public function createNew ($flush = true, $codeNumber = null) {
         // instantiate
         /** @var Code $code */
         $code = parent::createNew(false, false);
@@ -40,9 +45,9 @@ class CodeManager extends BaseEntityManager {
         }
         $code->setCode ($codeNumber);
 
-        // persist
-        if ($persist) {
-            $this->em->persist($code);
+        $this->em->persist($code);
+        if ($flush) {
+            $this->flush->persist($code);    // this will load the obj into the database so the code isn't duplicated on the next loop accidentally
         }
 
         $this->logObjCreation($code);
@@ -62,7 +67,6 @@ class CodeManager extends BaseEntityManager {
         $newUniqueCodes = array ();
         for ($i = 1; $i <= $numOfCodes; $i++) {
             $newUniqueCodes = $this->createNew (true);
-            $this->em->flush();     // this will load the obj into the database so the code isn't duplicated on the next loop accidentally
         }
 
         return $newUniqueCodes;
