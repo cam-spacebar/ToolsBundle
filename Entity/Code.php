@@ -124,7 +124,7 @@ class Code extends BaseEntity
     }
 
     // see BaseEntity (base) class for more information on this method.
-    public function getLoggingData($detailLevel) : array
+    public function getLoggingData($detailLevel = BaseEntity::LOG_DETAIL_BASIC) : array
     {
         if ($detailLevel >= BaseEntity::LOG_DETAIL_BASIC) {
             $arr = [
