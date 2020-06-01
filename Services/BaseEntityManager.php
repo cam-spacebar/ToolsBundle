@@ -138,12 +138,14 @@ abstract class BaseEntityManager
     protected function logObjCreation (BaseEntityInterface $obj, $provideObjValsInLog = true) {
         $arr    = $this->loggingExtraData->getObjLoggingData($obj);
 
-        $logStr = 'Create new '. $this->class .' obj.';
-        if ($provideObjValsInLog) {
-            $objValues = $this->getObjLoggerValuesString ($obj);
-            $logStr .= $objValues;
-        }
-        $this->logger->info($logStr);
+        $shortCN = substr($this->class, strrpos($this->class, '\\')+1);
+        $logStr = 'Created a new '. $shortCN .' object ('. $this->class .').';
+//        if ($provideObjValsInLog) {
+//            $objValues = $this->getObjLoggerValuesString ($obj);
+//            $logStr .= $objValues;
+//        }
+        $context = $obj->getLoggingData(BaseEntity::LOG_DETAIL_BASIC);
+        $this->logger->info($logStr, $context);
     }
 
     /**

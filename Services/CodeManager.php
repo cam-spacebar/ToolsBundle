@@ -32,7 +32,7 @@ abstract class CodeManager extends BaseEntityManager {
      *
      * Check the DB to see if the code is already used.
      */
-    public function createNew ($flush = true, $codeNumber = null) {
+    public function createNew ($flush = true, $logObjCreation = true, $codeNumber = null) {
         // instantiate
         /** @var Code $code */
         $code = parent::createNew(false, false);
@@ -49,7 +49,9 @@ abstract class CodeManager extends BaseEntityManager {
             $this->flush->persist($code);    // this will load the obj into the database so the code isn't duplicated on the next loop accidentally
         }
 
-        $this->logObjCreation($code);
+        if ($logObjCreation) {
+           $this->logObjCreation($code);
+        }
 
         return $code;
     }
@@ -65,7 +67,7 @@ abstract class CodeManager extends BaseEntityManager {
     public function bulkBuildCodes ($numOfCodes) {
         $newUniqueCodes = array ();
         for ($i = 1; $i <= $numOfCodes; $i++) {
-            $newUniqueCodes = $this->createNew (true);
+            $newUniqueCodes = $this->createNew (true, false);
         }
 
         return $newUniqueCodes;
