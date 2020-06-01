@@ -12,26 +12,17 @@ use Gedmo\Mapping\Annotation as Gedmo;
 abstract class BaseEntity implements BaseEntityInterface
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
-
-    /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(name="createdAt", type="datetime")
      */
     protected $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated_at", type="datetime")
+     * @ORM\Column(name="updatedAt", type="datetime")
      */
     protected $updatedAt;
 
@@ -45,15 +36,6 @@ abstract class BaseEntity implements BaseEntityInterface
             /// it's used to detect if the method has bee overridden or not.
             'methodNotImplemented'      => true,
         );
-    }
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
     }
 
     /**
