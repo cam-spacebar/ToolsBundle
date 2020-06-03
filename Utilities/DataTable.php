@@ -15,6 +15,7 @@ use Swift_Mailer;
 // rendered in a datatable or into a .CSV
 // Note: can be extended to add useful sorting / reordering algorythms for specific use cases.
 // (or is it better to have this logic in the manger class?)
+// todo: use CSVMaker class for some methods instead
 class DataTable
 {
     /*
