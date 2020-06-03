@@ -37,9 +37,14 @@ class Code extends BaseEntity
     /**
      * @var string
      *
-     * @ORM\Column(name="code", type="string", length=10, unique=false)
+     * @ORM\Column(name="code", type="string", length=32, unique=false)
      */
     protected $code;
+
+    // code generation strategy
+    const CODE_GEN_STRAT_BASIC              = 100;      // e.g. ecz348
+    const CODE_GEN_STRAT_RAND_ALPHA_NUMBERIC           = 200;      // md5 hashes a randomly generated string.
+//    const CODE_GEN_STRAT_20_alpha_numberic  = 300;      // 20 characters alpha-numberic
 
     /**
      * Get id

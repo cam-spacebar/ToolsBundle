@@ -6,12 +6,15 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use App\Traits\LoggerTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\Response;
 
 class CSVMaker
 {
+    use LoggerTrait;
+
     public function __construct()
     {
         
@@ -43,6 +46,10 @@ class CSVMaker
         $response = new Response($this->getFinishedCSVContent($objArray));
         $response->headers->set('Content-Type', 'text/csv');
         $response->headers->set('Content-Disposition', 'attachment; filename='. $filename );
+
+        $this->logger->info(
+            'Sent a downloadable .csv file named: "'. $filename .'"'
+        );
 
         return $response;
     }

@@ -13,6 +13,8 @@ use VisageFour\Bundle\ToolsBundle\Repository\CodeRepository;
  * then there's issues with the return type of getRepo()
  */
 abstract class CodeManager extends BaseEntityManager {
+
+    private $alphaNumbericMapping;
     /**
      * CodeManager constructor.
      * @param EntityManager $em
@@ -32,7 +34,7 @@ abstract class CodeManager extends BaseEntityManager {
      *
      * Check the DB to see if the code is already used.
      */
-    public function createNew ($flush = true, $logObjCreation = true, $codeNumber = null) {
+    public function createNew ($flush = true, $logObjCreation = true, $codeNumber = null, $codeGenStrat = Code::CODE_GEN_STRAT_BASIC) {
         // instantiate
         /** @var Code $code */
         $code = parent::createNew(false, false);
@@ -40,7 +42,7 @@ abstract class CodeManager extends BaseEntityManager {
         // configure
         if (empty($codeNumber)) {
             // generated randomized code string
-            $codeNumber = $this->createUniqueCodeStr ();
+            $codeNumber = $this->createUniqueCodeStr ($codeGenStrat);
         }
         $code->setCode ($codeNumber);
 
@@ -64,18 +66,29 @@ abstract class CodeManager extends BaseEntityManager {
         return $response;
     }
 
-    public function bulkBuildCodes ($numOfCodes) {
+    public function bulkBuildCodes ($numOfCodes, $codeGenStrat = Code::CODE_GEN_STRAT_BASIC) {
         $newUniqueCodes = array ();
         for ($i = 1; $i <= $numOfCodes; $i++) {
-            $newUniqueCodes = $this->createNew (true, false);
+            $newUniqueCodes = $this->createNew (true, false, null, $codeGenStrat);
         }
 
         return $newUniqueCodes;
     }
 
     // continue looping until found a unique code
-    public function createUniqueCodeStr ($curLayersDeep = 1) {
-        $newCodeStr     = $this->createRandomCode (3, 3);
+    public function createUniqueCodeStr ($codeGenStrat, $curLayersDeep = 1) {
+        switch ($codeGenStrat) {
+            case CODE::CODE_GEN_STRAT_BASIC:
+                $newCodeStr = $this->createRandomCode(3, 3);
+                break;
+            case CODE::CODE_GEN_STRAT_RAND_ALPHA_NUMBERIC:
+                $newCodeStr = $this->genAlphaNumericCode(32);
+                break;
+            default:
+                throw new \Exception(
+                    'code generation strategy flag with value: '. $codeGenStrat .' is not recognized.'
+                );
+        }
 
         $maxAllowedLayersDeep = 1000;
         if ($curLayersDeep > $maxAllowedLayersDeep) {
@@ -85,7 +98,7 @@ abstract class CodeManager extends BaseEntityManager {
 
         // test if code is unique, if not, try generating a new code again (go one "layer deeper")
         if (!empty($this->getCodeByCode($newCodeStr))) {
-            $newCodeStr = $this->createUniqueCodeStr($curLayersDeep+1);
+            $newCodeStr = $this->createUniqueCodeStr($codeGenStrat, $curLayersDeep+1);
         }
         return $newCodeStr;
     }
@@ -107,5 +120,69 @@ abstract class CodeManager extends BaseEntityManager {
 
     public function buildUniqueCodes ($existingCodes, $numOfCodes = 400) {
         throw new \Exception('please use bulkBuildCodes() instead');
+    }
+
+    private function genAlphaNumericCode (int $noOfChars) {
+        $ANmapping = $this->getAlphaNumericMapping();
+        $newCode = '';
+        $noOfChars = 20;
+
+        for ($i=1; $i <= $noOfChars; $i++) {
+            $curVal = rand(1, 34);
+//            print $curVal .'-';
+            $newCode .= $ANmapping[$curVal];
+        }
+//        dd($newCode);
+//        dump(strlen($newCode));
+//        dump( is_string($newCode));
+//        dd($newCode);
+
+        return $newCode;
+    }
+
+    private function getAlphaNumericMapping () {
+        if (empty($this->alphaNumbericMapping)) {
+
+            $this->alphaNumbericMapping = array (
+                '1'             => 1,
+                '2'             => 2,
+                '3'             => 3,
+                '4'             => 4,
+                '5'             => 5,
+                '6'             => 6,
+                '7'             => 7,
+                '8'             => 8,
+                '9'             => 9,
+                '10'             => 9,
+                'a'             => 'a',
+                'b'             => 'b',
+                '11'             => 'c',
+                '12'             => 'd',
+                '13'             => 'e',
+                '14'             => 'f',
+                '15'             => 'g',
+                '16'             => 'h',
+                '17'             => 'i',
+                '18'             => 'j',
+                '19'             => 'k',
+                '20'             => 'l',
+                '21'             => 'm',
+                '22'             => 'n',
+                '23'             => 'o',
+                '24'             => 'p',
+                '25'             => 'q',
+                '26'             => 'r',
+                '27'             => 's',
+                '28'             => 't',
+                '29'             => 'u',
+                '30'             => 'v',
+                '31'             => 'w',
+                '32'             => 'x',
+                '33'             => 'y',
+                '34'             => 'z'
+            );
+        }
+
+        return $this->alphaNumbericMapping;
     }
 }
