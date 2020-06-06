@@ -28,8 +28,15 @@ class StaticInternational
         'Cit'   => "Australian Citizen"
     );
 
+    /**
+     * note: please use getCountryNameByCode if you need a language name string
+     */
+    public static function getCountriesArray() {
+        return self::$countries;
+    }
     // countries
-    public static $countries = array(
+    // you must now use getCountryNameByCode() method to access these values
+    private static $countries = array(
         'AF' => 'Afghanistan',
         'AX' => 'Aland Islands',
         'AL' => 'Albania',
@@ -280,8 +287,15 @@ class StaticInternational
         'ZW' => 'Zimbabwe'
     );
 
+    /**
+     * note: please use getLangByCode if you need a language name string
+     */
+    public static function getLanguages () {
+        return self::$languages;
+    }
+
     // languages - remember to use sort() to get inalphabetical order (if required)
-    public static $languages = array (
+    private static $languages = array (
         'ey' => 'Empty',
         'aa' => 'Afar',
         'ab' => 'Abkhaz',
@@ -481,15 +495,16 @@ class StaticInternational
     );
 
     // a list of country keys that map to their default native language (uses array keys from other statics on this page.)
+    // must now use: getDefaultNativeLanguage() method to access this array.
     public static $defaultNativeLanguage = array (
-        'AF' => 'ps',           // Afghanistan -> Pashto and dari
-        'AX' => 'sv',           // Aland Islands -> swedish
-        'AL' => 'sq',           // Albania -> Albanian
-        'DZ' => 'ar',           // Algeria -> arabic
-        'AS' => 'sm',           // American Samoa -> samoan
-        'AD' => 'ca',           // Andorra -> Catalan
-        'AO' => 'pr',           // Angola -> Portuguese
-        'AI' => 'cl',           // Anguilla -> Creole
+        'AF' => 'ps',           // Afghanistan          -> Pashto and dari
+        'AX' => 'sv',           // Aland Islands        -> swedish
+        'AL' => 'sq',           // Albania              -> Albanian
+        'DZ' => 'ar',           // Algeria              -> arabic
+        'AS' => 'sm',           // American Samoa       -> samoan
+        'AD' => 'ca',           // Andorra              -> Catalan
+        'AO' => 'pr',           // Angola               -> Portuguese
+        'AI' => 'cl',           // Anguilla             -> Creole
         'AQ' => 'ru',           // Antarctica -> Russian
         'AG' => 'en',           // Antigua And Barbuda - > English
         'AR' => 'es',           // Argentina -> spanish
@@ -733,11 +748,37 @@ class StaticInternational
 
     // todo: Victorian suburbs
 
+    public static function getDefaultNativeLanguageCode ($countryCode) {
+        $defaultLang = self::$defaultNativeLanguage[$countryCode];
+
+        if (empty($defaultLang)) {
+            throw new \Exception('Country with code: '. $countryCode .' does not have a default langauge.');
+        }
+
+        return $defaultLang;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getCountryNameByCode($countryCode)
+    {
+        self::checkCountryExistsByCode($countryCode, true);
+
+        return self::$countries[$countryCode];
+    }
+
+    public static function getLangNameByCode ($langCode) {
+        self::checkLanguageExistsByCode($langCode, true);
+
+        return self::$languages[$langCode];
+    }
+
     public static function checkCountryExistsByCode ($countryCode, $throwOnError = true)
     {
         if (empty(self::$countries[$countryCode])) {
             if ($throwOnError) {
-                throw new \Exception('country code with value: '. $countryCode .' does not exist.');
+                throw new \Exception('Country code: '. $countryCode .' does not exist in the $countries array.');
             }
             return false;
         }
@@ -749,7 +790,7 @@ class StaticInternational
     {
         if (empty(self::$languages[$langCode])) {
             if ($throwOnError) {
-                throw new \Exception('Language code with value: '. $langCode .' does not exist.');
+                throw new \Exception('Lang code: '. $langCode .' does not exist in the $languages array.');
             }
             return false;
         }
@@ -762,22 +803,21 @@ class StaticInternational
      * @return array
      *
      * return an array of country codes for countries that have $langCode
-     * as it's default langauge.
+     * as it's default language.
      */
     public static function getDefaultCountriesByLangCode($langCode)
     {
-        $langs = self::$defaultNativeLanguage;
         // don't use array flip, as there may be multiple countries that use that language as their default.
 //        $langs = array_flip($langs);
 
         // build an array of country codes that have $curLangCode as it's default language
-        $countires = [];
+        $countries = [];
         foreach (self::$defaultNativeLanguage as $curCountryCode => $curLangCode) {
             if ($langCode == $curLangCode) {
-                array_push($countires, $curCountryCode);
+                array_push($countries, $curCountryCode);
             }
         }
 
-        return $countires;
+        return $countries;
     }
 }
