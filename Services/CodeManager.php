@@ -34,12 +34,14 @@ abstract class CodeManager extends BaseEntityManager {
     }
 
     /**
+     * Create a blankbadge
+     * Check the DB to see if the code is already used.
+     *
      * @param bool $persist
      * @param null $codeNumber
      * @return mixed|Code
      * @throws \Doctrine\ORM\ORMException
      *
-     * Check the DB to see if the code is already used.
      */
     public function createNew ($flush = true, $logObjCreation = true, $codeNumber = null, $codeGenStrat = Code::CODE_GEN_STRAT_BASIC) {
         // instantiate
@@ -55,7 +57,7 @@ abstract class CodeManager extends BaseEntityManager {
 
         $this->em->persist($code);
         if ($flush) {
-            $this->flush->persist($code);    // this will load the obj into the database so the code isn't duplicated on the next loop accidentally
+            $this->em->flush($code);    // this will load the obj into the database so the code isn't duplicated on the next loop accidentally
         }
 
         if ($logObjCreation) {
@@ -84,7 +86,7 @@ abstract class CodeManager extends BaseEntityManager {
     }
 
     // continue looping until found a unique code
-    public function createUniqueCodeStr ($codeGenStrat, $curLayersDeep = 1) {
+    private function createUniqueCodeStr ($codeGenStrat, $curLayersDeep = 1) {
         switch ($codeGenStrat) {
             case CODE::CODE_GEN_STRAT_BASIC:
                 $newCodeStr = $this->codeGenerator->createRandomCode(3, 3);
