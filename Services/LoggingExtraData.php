@@ -51,10 +51,10 @@ class LoggingExtraData
 
         // check if the method has been overridden:
         if (!empty($arr['methodNotImplemented'])) {
-            $warn =
-                'class with FQCN: '. $this->classname .' likely hasn\'t implemented the getLoggingData() method.'.
-                'Please implement it, see: BaseEntity::getLoggingData() for documentation.'
-            ;
+            $warn = '';
+//                'class with FQCN: '. $this->classname .' likely hasn\'t implemented the getLoggingData() method.'.
+//                'Please implement it, see: BaseEntity::getLoggingData() for documentation.'
+//            ;
         }
 
         unset($arr['methodNotImplemented']);

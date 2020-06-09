@@ -2,6 +2,9 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Statics;
 
+use App\Exceptions\LanguageCodeDoesNotExist;
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\CountryCodeDoesNotExist;
+
 /**
  * Created by PhpStorm.
  * User: CamBurns
@@ -409,13 +412,13 @@ class StaticInternational
         'ml' => 'Malayalam',
         'mn' => 'Mongolian',
         'mo' => 'Montenegrin',
-        'mr' => 'Marathi (Mara?hi)',
+        'mr' => 'Marathi (Marathi)',
         'ms' => 'Malay',
         'mt' => 'Maltese',
         'md' => 'Mandingo',                     // newly created.
         'my' => 'Burmese',
         'na' => 'Nauru',                        // todo: change this to Nauruan
-        'nb' => 'Norwegian BokmÃ¥l',            // remove this
+        'nb' => 'Norwegian',            // remove this
         'nd' => 'North Ndebele',
         'ne' => 'Nepali',
         'ng' => 'Ndonga',
@@ -748,11 +751,13 @@ class StaticInternational
 
     // todo: Victorian suburbs
 
-    public static function getDefaultNativeLanguageCode ($countryCode) {
+    public static function getDefaultNativeLanguageCode (string $countryCode) : string {
+        self::checkCountryExistsByCode($countryCode);
+
         $defaultLang = self::$defaultNativeLanguage[$countryCode];
 
         if (empty($defaultLang)) {
-            throw new \Exception('Country with code: '. $countryCode .' does not have a default langauge.');
+            throw new \Exception('Country with code: '. $countryCode .' does not have a default language.');
         }
 
         return $defaultLang;
@@ -778,7 +783,7 @@ class StaticInternational
     {
         if (empty(self::$countries[$countryCode])) {
             if ($throwOnError) {
-                throw new \Exception('Country code: '. $countryCode .' does not exist in the $countries array.');
+                throw new CountryCodeDoesNotExist($countryCode);
             }
             return false;
         }
@@ -786,12 +791,13 @@ class StaticInternational
         return true;
     }
 
-    public static function checkLanguageExistsByCode ($langCode, $throwOnError = true)
+    public static function checkLanguageExistsByCode (string $langCode, $throwOnError = true)
     {
         if (empty(self::$languages[$langCode])) {
             if ($throwOnError) {
-                throw new \Exception('Lang code: '. $langCode .' does not exist in the $languages array.');
+                throw new LanguageCodeDoesNotExist($langCode);
             }
+
             return false;
         }
 
@@ -805,7 +811,7 @@ class StaticInternational
      * return an array of country codes for countries that have $langCode
      * as it's default language.
      */
-    public static function getDefaultCountriesByLangCode($langCode)
+    public static function getCountriesByDefaultLangCode($langCode)
     {
         // don't use array flip, as there may be multiple countries that use that language as their default.
 //        $langs = array_flip($langs);

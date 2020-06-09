@@ -31,7 +31,7 @@ abstract class BaseEntity implements BaseEntityInterface
     public function getLoggingData (int $detailLevel) : array {
 
         return array (
-            'id'                        => $this->id,
+            'id'                        => $this->getId(),
             // this element should be wiped out when overriding this class.
             /// it's used to detect if the method has bee overridden or not.
             'methodNotImplemented'      => true,
