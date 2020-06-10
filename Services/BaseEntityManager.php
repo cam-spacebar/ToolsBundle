@@ -144,6 +144,7 @@ abstract class BaseEntityManager
 //            $objValues = $this->getObjLoggerValuesString ($obj);
 //            $logStr .= $objValues;
 //        }
+
         $context = $obj->getLoggingData(BaseEntity::LOG_DETAIL_BASIC);
         $this->logger->info($logStr, $context);
     }
