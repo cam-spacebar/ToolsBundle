@@ -5,7 +5,7 @@
 */
 
 
-namespace App\Exceptions;
+namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 
 use VisageFour\Bundle\ToolsBundle\Statics\StaticInternational;

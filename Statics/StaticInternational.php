@@ -2,8 +2,9 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Statics;
 
-use App\Exceptions\LanguageCodeDoesNotExist;
+
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\CountryCodeDoesNotExist;
+use VisageFour\Bundle\ToolsBundle\Exceptions\LanguageCodeDoesNotExist;
 
 /**
  * Created by PhpStorm.
@@ -507,7 +508,7 @@ class StaticInternational
         'AS' => 'sm',           // American Samoa       -> samoan
         'AD' => 'ca',           // Andorra              -> Catalan
         'AO' => 'pr',           // Angola               -> Portuguese
-        'AI' => 'cl',           // Anguilla             -> Creole
+        'AI' => 'ht',           // Anguilla             -> Creole
         'AQ' => 'ru',           // Antarctica -> Russian
         'AG' => 'en',           // Antigua And Barbuda - > English
         'AR' => 'es',           // Argentina -> spanish
@@ -569,6 +570,7 @@ class StaticInternational
         'ER' => 'ti',           // Eritrea -> Tigrigna
         'EE' => 'et',           // Estonia -> Estonian
         'ET' => 'an',           // Ethiopia -> Amharic
+        'EN' => 'en',           // England -> English
         'FK' => 'en',           // Falkland Islands (Malvinas) -> English
         'FO' => 'fo',           // Faroe Islands -> Faroese
         'FJ' => 'fj',           // Fiji -> Fijian
@@ -712,6 +714,7 @@ class StaticInternational
         'SJ' => 'no',           // Svalbard And Jan Mayen -> Norwegian
         'SZ' => 'ss',           // Swaziland -> Swati
         'SE' => 'sv',           // Sweden -> Swedish
+        'SS' => 'en',           // Scotland -> English
         'CH' => 'fr',           // Switzerland -> French, Italian, German, Romansh
         'SY' => 'ar',           // Syrian Arab Republic -> Arabic
         'TW' => 'tz',           // Taiwan -> Taiwanese
@@ -754,11 +757,11 @@ class StaticInternational
     public static function getDefaultNativeLanguageCode (string $countryCode) : string {
         self::checkCountryExistsByCode($countryCode);
 
-        $defaultLang = self::$defaultNativeLanguage[$countryCode];
-
-        if (empty($defaultLang)) {
-            throw new \Exception('Country with code: '. $countryCode .' does not have a default language.');
+        if (empty(self::$defaultNativeLanguage[$countryCode])) {
+            throw new \Exception('Country with code: '. $countryCode .' does not have a default language. Please set one.');
         }
+
+        $defaultLang = self::$defaultNativeLanguage[$countryCode];
 
         return $defaultLang;
     }
@@ -805,11 +808,36 @@ class StaticInternational
     }
 
     /**
+     * Check all $countries have a (valid) default language
+     * throw an exception if a country does not have a default language set
+     */
+    public static function checkCountriesHaveADefaultLanguage () {
+        print "Begin checking countries have a (valid) language code: \n";
+        foreach (self::$countries as $curCode => $curCountryName) {
+            $defaultLangCode = self::getDefaultNativeLanguageCode($curCode);
+            print "- ". $curCountryName .' ('. $curCode ."): ". $defaultLangCode ."\n";
+            if (empty($defaultLangCode)) {
+                throw new \Exception(
+                    'there is no default language code for country code: '. $curCode .
+                    'please set this'
+                );
+            }
+
+            // check if the code is a valid lang
+            self::checkLanguageExistsByCode($defaultLangCode);
+        }
+
+        print "[Finished check]\n\n";
+
+        return true;
+    }
+
+    /**
      * @param $langCode
      * @return array
      *
      * return an array of country codes for countries that have $langCode
-     * as it's default language.
+     * as it"s default language.
      */
     public static function getCountriesByDefaultLangCode($langCode)
     {
