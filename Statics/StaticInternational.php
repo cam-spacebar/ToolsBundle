@@ -38,9 +38,13 @@ class StaticInternational
     public static function getCountriesArray() {
         return self::$countries;
     }
+
+    const EMPTY_CODE = '_-';
+
     // countries
     // you must now use getCountryNameByCode() method to access these values
     private static $countries = array(
+        self::EMPTY_CODE => 'Empty',            // could not find a physical flag (used for badges)
         'AF' => 'Afghanistan',
         'AX' => 'Aland Islands',
         'AL' => 'Albania',
@@ -300,7 +304,7 @@ class StaticInternational
 
     // languages - remember to use sort() to get inalphabetical order (if required)
     private static $languages = array (
-        'ey' => 'Empty',
+        self::EMPTY_CODE => 'Empty',            // could not find a physical flag (used for badges)
         'aa' => 'Afar',
         'ab' => 'Abkhaz',
         'ae' => 'Avestan',
@@ -501,6 +505,7 @@ class StaticInternational
     // a list of country keys that map to their default native language (uses array keys from other statics on this page.)
     // must now use: getDefaultNativeLanguage() method to access this array.
     public static $defaultNativeLanguage = array (
+        StaticInternational::EMPTY_CODE => StaticInternational::EMPTY_CODE,
         'AF' => 'ps',           // Afghanistan          -> Pashto and dari
         'AX' => 'sv',           // Aland Islands        -> swedish
         'AL' => 'sq',           // Albania              -> Albanian

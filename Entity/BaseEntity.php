@@ -77,4 +77,20 @@ abstract class BaseEntity implements BaseEntityInterface
     const LOG_DETAIL_NONE       = 0;
     const LOG_DETAIL_BASIC      = 1;
     const LOG_DETAIL_MORE       = 2;
+
+    // used to implode an array with logging data into a string that can be printed.
+    // just a cleaner alternative to dump() - particularly if there's a lot of information.
+    protected function implodeLoggingExtraDataArray (array $arr) {
+        $text='';
+        $firstLoop = true;
+        foreach ($arr as $curProperty => $curValue) {
+            if (!$firstLoop) {
+                $text .= ', ';
+            }
+            $firstLoop = false;
+            $text .= $curProperty .': ' . $curValue;
+        }
+
+        return $text;
+    }
 }
