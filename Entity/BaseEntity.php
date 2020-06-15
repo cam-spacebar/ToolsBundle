@@ -26,18 +26,6 @@ abstract class BaseEntity implements BaseEntityInterface
      */
     protected $updatedAt;
 
-    // this is part of a Custom Reusable Component (CRC), you can learn
-    // more about is via it’s CRC readme here: https://bit.ly/2XIrgab
-    public function getLoggingData (int $detailLevel) : array {
-
-        return array (
-            'id'                        => $this->getId(),
-            // this element should be wiped out when overriding this class.
-            /// it's used to detect if the method has bee overridden or not.
-            'methodNotImplemented'      => true,
-        );
-    }
-
     /**
      * Set createdAt
      *

@@ -782,6 +782,28 @@ class StaticInternational
         return self::$languages[$langCode];
     }
 
+    /**
+     * @param $code
+     *
+     * this will determine if it's a country or lang
+     * and then return the full name of either
+     */
+    public static function getNameByCountryOrLanguageCode($code)
+    {
+        try {
+            $text = self::getLangNameByCode($code);
+        } catch (LanguageCodeDoesNotExist $e) {
+            // try matching with a country instead
+            try {
+                $text = self::getCountryNameByCode($code);
+            } catch (CountryCodeDoesNotExist $e) {
+                throw new \Exception ('code: '. $code .' is neither a language code or a country code. Please check the code and try again.');
+            }
+        }
+
+        return $text;
+    }
+
     public static function checkCountryExistsByCode ($countryCode, $throwOnError = true)
     {
         if (empty(self::$countries[$countryCode])) {

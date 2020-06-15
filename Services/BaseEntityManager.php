@@ -140,38 +140,9 @@ abstract class BaseEntityManager
 
         $shortCN = substr($this->class, strrpos($this->class, '\\')+1);
         $logStr = 'Created a new '. $shortCN .' object ('. $this->class .').';
-//        if ($provideObjValsInLog) {
-//            $objValues = $this->getObjLoggerValuesString ($obj);
-//            $logStr .= $objValues;
-//        }
 
-        $context = $obj->getLoggingData(BaseEntity::LOG_DETAIL_BASIC);
+        $context = [$shortCN => $obj];
         $this->logger->info($logStr, $context);
-    }
-
-    /**
-     * Return a string (that represent the obj values) that can
-     * be used in the logger (for better logging!)
-     */
-    public function getObjLoggerValuesString ($obj)
-    {
-        $arr    = $obj->getLoggingData(BaseEntity::LOG_DETAIL_BASIC);
-
-        if (empty($arr)) {
-            return '';
-        }
-
-        $orgStr     = '. (Object values: ';
-        $returnStr  = $orgStr;
-        foreach ($arr as $curI => $curVal) {
-            if ($returnStr != $orgStr) {
-                $returnStr .= ', ';
-            }
-            $returnStr = '"'. $curI .'" = '. $curVal;
-        }
-        $returnStr =')';
-
-        return $returnStr;
     }
 
     /*

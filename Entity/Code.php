@@ -127,21 +127,4 @@ class Code extends BaseEntity
     {
         return $this->code;
     }
-
-    // see BaseEntity (base) class for more information on this method.
-    public function getLoggingData($detailLevel = BaseEntity::LOG_DETAIL_BASIC) : array
-    {
-        if ($detailLevel >= BaseEntity::LOG_DETAIL_BASIC) {
-            $arr = [
-                'id'                => $this->id,
-                'code'              => $this->code
-            ];
-        }
-
-        if ($detailLevel >= BaseEntity::LOG_DETAIL_MORE) {
-//            $arr ['??'] = ";"
-        }
-
-        return $arr;
-    }
 }

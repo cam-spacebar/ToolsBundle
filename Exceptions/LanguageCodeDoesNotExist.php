@@ -24,7 +24,7 @@ class LanguageCodeDoesNotExist extends \Exception
         if (!empty($countries[$langCode])) {
             $this->message =
                 'it looks like you have submitted a $country code (code: "'.
-                $langCode .'" for "'. $countries($langCode) .'") '.
+                $langCode .'" for "'. StaticInternational::getCountryNameByCode($langCode) .'") '.
                 'when you should be supplying a $country code'
             ;
         } else {
