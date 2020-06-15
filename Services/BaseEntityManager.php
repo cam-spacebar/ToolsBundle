@@ -22,7 +22,7 @@ abstract class BaseEntityManager
      * @param LoggerInterface $logger
 
     public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger) {
-        parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
+        parent::__construct($em, $class, $dispatcher, $loggerw);
         // custom config
         // ...
     }
@@ -67,11 +67,6 @@ abstract class BaseEntityManager
     protected $logger;
     protected $repo;
 
-    /**
-     * @var LoggingExtraData
-     */
-    protected $loggingExtraData;
-
     protected $class;
 
     // used to output result when using Doctrine fixtures > set to true when in LoadUserData.php (or other fixtures file)
@@ -83,15 +78,13 @@ abstract class BaseEntityManager
      * @param $class
      * @param EventDispatcherInterface $eventDispatcher
      * @param LoggerInterface $logger
-     * @param LoggingExtraData $loggingExtraData
      */
-    public function __construct(EntityManager$em, $class, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData) {
+    public function __construct(EntityManager$em, $class, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger) {
         $this->em               = $em;
         $this->repo             = $this->em->getRepository($class);
         $this->dispatcher       = $eventDispatcher;     // this should be phased out as a variable
         $this->eventDispatcher  = $eventDispatcher;
         $this->logger           = $logger;
-        $this->loggingExtraData = $loggingExtraData;
 
         $metadata               = $this->em->getClassMetadata($class);
         $this->class            = $metadata->getName();
@@ -114,8 +107,6 @@ abstract class BaseEntityManager
         /** @var BaseEntityInterface $obj */
         $obj = new $this->class();
 
-        $this->loggingExtraData->checkClassHasLoggingDataMethod($obj);
-
         // persist?
         if ($persist) {
             $this->em->persist($obj);
@@ -136,8 +127,6 @@ abstract class BaseEntityManager
      * Create a log for the objs creation
      */
     protected function logObjCreation (BaseEntityInterface $obj, $provideObjValsInLog = true) {
-        $arr    = $this->loggingExtraData->getObjLoggingData($obj);
-
         $shortCN = substr($this->class, strrpos($this->class, '\\')+1);
         $logStr = 'Created a new '. $shortCN .' object ('. $this->class .').';
 

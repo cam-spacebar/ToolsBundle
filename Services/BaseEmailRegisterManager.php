@@ -141,8 +141,8 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
      * @param             $lexikMailer
      * @param               $mailer
      */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface$dispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData, MessageFactory $lexikMailer, Swift_Mailer $mailer, $emulateSending) {
-        parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface$dispatcher, LoggerInterface $logger, MessageFactory $lexikMailer, Swift_Mailer $mailer, $emulateSending) {
+        parent::__construct($em, $class, $dispatcher, $logger);
 
         $this->emulateSending = $emulateSending;
         if ($this->emulateSending) {

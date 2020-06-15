@@ -28,8 +28,8 @@ abstract class CodeManager extends BaseEntityManager {
      * @param EventDispatcherInterface $dispatcher
      * @param LoggerInterface $logger
     */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, LoggingExtraData $loggingExtraData, CodeGeneration $codeGenerator) {
-        parent::__construct($em, $class, $dispatcher, $logger, $loggingExtraData);
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, CodeGeneration $codeGenerator) {
+        parent::__construct($em, $class, $dispatcher, $logger);
         $this->codeGenerator = $codeGenerator;
     }
 
