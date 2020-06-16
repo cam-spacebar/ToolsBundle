@@ -24,6 +24,7 @@ class CountryCodeDoesNotExist extends \Exception
                 $countryCode .'" for "'. $languages($countryCode) .'") '.
                 'when you should be supplying a $country code.'
             ;
+            return;
         }
 
         $this->message = 'Country code: "'. $countryCode .'" does not exist in the StaticInternational::$countries array.';

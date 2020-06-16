@@ -795,6 +795,9 @@ class StaticInternational
      */
     public static function getNameByCountryOrLanguageCode($code)
     {
+        if (empty($code)) {
+            return null;
+        }
         try {
             $text = self::getLangNameByCode($code);
         } catch (LanguageCodeDoesNotExist $e) {

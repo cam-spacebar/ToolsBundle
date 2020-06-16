@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use VisageFour\Bundle\ToolsBundle\Entity\Code;
 
 /**
  * codeRepository
@@ -11,4 +12,10 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  */
 class CodeRepository  extends ServiceEntityRepository
 {
+    public function getByCode($code) : ?Code
+    {
+        return $this->findOneBy([
+            'code' => $code
+        ]);
+    }
 }
