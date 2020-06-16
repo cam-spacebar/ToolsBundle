@@ -6,6 +6,9 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Classes;
 
+use App\Classes\Flaggers\BadgeWorkflowFlagger;
+use VisageFour\Bundle\ToolsBundle\Exceptions\FlagOptionDoesNotExistException;
+
 /**
  *
  * A flagger that indicates the "status" of a badge or "what part" of the
@@ -18,7 +21,6 @@ namespace VisageFour\Bundle\ToolsBundle\Classes;
  */
 abstract class BaseFlagger
 {
-
     /**
      * The class name that the flagger belongs to.
      * @var string
@@ -32,6 +34,7 @@ abstract class BaseFlagger
      * the name of your flags, such as: "workflow status" flag or "login form result" flag.
      */
     static protected $name;
+
     /**
      * the flag value as the key and the "string" version as the value.
      * @var array
@@ -46,14 +49,28 @@ abstract class BaseFlagger
        );
     }
 
+    const RETURN_TEXT_ONLY = 103;                   // just return the flag's text. e.g. "to disassemble"
+    const RETURN_TEXT_AND_VALUE_ONLY_STYLE_1 = 103; // just return the flag's text. e.g. "to disassemble (300)"
     /**
      * enter in the flag value and return it's string equivalent
+     * use $format to configure the appearance of the returned string.
      */
-    public static function getFlagAsString ($flagValue) {
+    public static function getFlagAsString ($flagValue, $format = self::RETURN_TEXT_ONLY) {
         self::checkStringVersionAvailable();
-        self::checkFlagToTextExists($flagValue);
+        switch ($format) {
+            case self::RETURN_TEXT_ONLY:
+                $string1 = self::getFlagAsAString($flagValue);
+                break;
+            case self::RETURN_TEXT_AND_VALUE_ONLY_STYLE_1:
+                $string1 = self::getFlagAsAString($flagValue) .'('. $flagValue .')';
+                break;
+            default:
+                throw new \Exception(
+                    'you must set $className in the populate() method of your '. self::$name .' flagger. Flagger classname: '. __CLASS__
+                );
+        }
 
-        return self::$flagsToText[$flagValue];
+        return $string1;
     }
 
     private static function getClassNameIsSet () {
@@ -70,13 +87,16 @@ abstract class BaseFlagger
      * Check that a text version of the flag is available,
      * if not, throw an exception.
      */
-    private static function checkFlagToTextExists (string $flagValue) {
+    private static function getFlagAsAString (string $flagValue) {
         if (empty(self::$flagsToText[$flagValue])) {
-            throw new \Exception(
-                self::$name .' flag with value: '. $flagValue .' does not have a string equivalent '.
-                 'to translate it into. Check that you have populated the $flagsToTtext array correctly'
+            throw new FlagOptionDoesNotExistException(
+                BadgeWorkflowFlagger::getFlaggerName(),
+                $flagValue,
+                self::$flagsToText
             );
         }
+
+        return self::$flagsToText[$flagValue];
     }
 
     /**
@@ -89,5 +109,45 @@ abstract class BaseFlagger
         if (empty(self::$flagsToText)) {
             self::PopulateOptionsAsText();
         }
+    }
+
+    public static function populate ()
+    {
+        throw new \Exception('the ::populate() method must be overridden in your child class that extends BaseFlagger. Please fix this.');
+    }
+
+    public static function getFlaggerName () : string
+    {
+        if (empty(self::$name)) {
+            self::populate();
+        }
+        return self::$name;
+    }
+
+    const FLAG_NAME_AND_VALUE = 106;
+    /**
+     * output a string of the flag options, used (for example) in presenting flag options
+     * (and the corresponding flag value) when throwing an exception.
+     * @param int $format
+     */
+    public static function stringifyAllFlagOptions (array $flagOptions, $format = self::FLAG_NAME_AND_VALUE)
+    {
+        $string1 = '';
+        switch ($format) {
+            case self::FLAG_NAME_AND_VALUE:
+                $firstLoop = false;
+                foreach ($flagOptions as $curValue => $curString) {
+                    if (!$firstLoop) {
+                        $string1 .= ', ';
+                    }
+                    $string1 .= $curString .' ('. $curValue .')';
+                    $firstLoop = false;
+                }
+                break;
+            default:
+                throw new \Exception ('$format: '. $format.' not recognised');
+        }
+
+        return $string1;
     }
 }

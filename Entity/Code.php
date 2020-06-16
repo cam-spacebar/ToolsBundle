@@ -37,7 +37,7 @@ class Code extends BaseEntity
     /**
      * @var string
      *
-     * @ORM\Column(name="code", type="string", length=32, unique=false)
+     * @ORM\Column(name="code", type="string", length=32, unique=true)
      *
      * a randomly generated code that identifies this badge uniquely
      */

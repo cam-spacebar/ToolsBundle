@@ -14,6 +14,9 @@ class CodeRepository  extends ServiceEntityRepository
 {
     public function getByCode($code) : ?Code
     {
+        dd($this->findBy([
+            'code' => $code
+        ]));
         return $this->findOneBy([
             'code' => $code
         ]);
