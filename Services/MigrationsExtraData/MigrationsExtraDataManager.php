@@ -27,7 +27,10 @@ class MigrationsExtraDataManager
     public function findAndExecuteMED($medFQCN)
     {
         echo ' == Executing Migrations Extra Data (MED CRC): "'. $medFQCN ."\" ==\n\n";
+        /** @var BaseMED $med */
         $med = $this->container->get($medFQCN);
+
+        echo 'this Migrations Extra Data (MED) is used to: '. $med->getDescription();
 
         $med->executeUp();
 
