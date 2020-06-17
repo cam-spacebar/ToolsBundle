@@ -41,16 +41,21 @@ abstract class BaseFlagger
      */
     static protected $flagsToText;
 
-    public static function PopulateOptionsAsText()
-    {
-       throw new \Exception(
-           'the BaseFlagger::PopulateOptionsAsText() method has not been overridden (it must return'.
-           ' an array with a string of array elements.'
-       );
-    }
+//    abstract public static function populate();
+//    {
+//       throw new \Exception(
+//           'the BaseFlagger::PopulateOptionsAsText() method has not been overridden (it must return'.
+//           ' an array with a string of array elements.'
+//       );
+//    }
+
+//    public static function populate ()
+//    {
+//        throw new \Exception('the ::populate() method must be overridden in your child class that extends BaseFlagger. Please fix this.');
+//    }
 
     const RETURN_TEXT_ONLY = 103;                   // just return the flag's text. e.g. "to disassemble"
-    const RETURN_TEXT_AND_VALUE_ONLY_STYLE_1 = 103; // just return the flag's text. e.g. "to disassemble (300)"
+    const RETURN_TEXT_AND_VALUE_ONLY_STYLE_1 = 105; // just return the flag's text. e.g. "to disassemble (300)"
     /**
      * enter in the flag value and return it's string equivalent
      * use $format to configure the appearance of the returned string.
@@ -62,7 +67,7 @@ abstract class BaseFlagger
                 $string1 = self::getFlagAsAString($flagValue);
                 break;
             case self::RETURN_TEXT_AND_VALUE_ONLY_STYLE_1:
-                $string1 = self::getFlagAsAString($flagValue) .'('. $flagValue .')';
+                $string1 = '"'. self::getFlagAsAString($flagValue) .'" ('. $flagValue .')';
                 break;
             default:
                 throw new \Exception(
@@ -107,19 +112,14 @@ abstract class BaseFlagger
      */
     private static function checkStringVersionAvailable() {
         if (empty(self::$flagsToText)) {
-            self::PopulateOptionsAsText();
+            static::populate();
         }
-    }
-
-    public static function populate ()
-    {
-        throw new \Exception('the ::populate() method must be overridden in your child class that extends BaseFlagger. Please fix this.');
     }
 
     public static function getFlaggerName () : string
     {
         if (empty(self::$name)) {
-            self::populate();
+            static::populate();
         }
         return self::$name;
     }
