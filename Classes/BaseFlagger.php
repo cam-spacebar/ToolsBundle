@@ -7,6 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use App\Classes\Flaggers\BadgeWorkflowFlagger;
+use App\VisageFour\Bundle\ToolsBundle\Classes\FlaggerOptions;
 use VisageFour\Bundle\ToolsBundle\Exceptions\FlagOptionDoesNotExistException;
 
 /**
@@ -19,27 +20,8 @@ use VisageFour\Bundle\ToolsBundle\Exceptions\FlagOptionDoesNotExistException;
  * Class BadgeWorkflowFlagger
  * @package App\Classes\Flaggers
  */
-abstract class BaseFlagger
+abstract class BaseFlagger extends FlaggerOptions
 {
-    /**
-     * The class name that the flagger belongs to.
-     * @var string
-     */
-    static protected $className;
-
-    /**
-     * name of the flagger
-     * @var string
-     *
-     * the name of your flags, such as: "workflow status" flag or "login form result" flag.
-     */
-    static protected $name;
-
-    /**
-     * the flag value as the key and the "string" version as the value.
-     * @var array
-     */
-    static protected $flagsToText;
 
 //    abstract public static function populate();
 //    {
@@ -54,34 +36,10 @@ abstract class BaseFlagger
 //        throw new \Exception('the ::populate() method must be overridden in your child class that extends BaseFlagger. Please fix this.');
 //    }
 
-    const RETURN_TEXT_ONLY = 103;                   // just return the flag's text. e.g. "to disassemble"
-    const RETURN_TEXT_AND_VALUE_ONLY_STYLE_1 = 105; // just return the flag's text. e.g. "to disassemble (300)"
-    /**
-     * enter in the flag value and return it's string equivalent
-     * use $format to configure the appearance of the returned string.
-     */
-    public static function getFlagAsString ($flagValue, $format = self::RETURN_TEXT_ONLY) {
-        self::checkStringVersionAvailable();
-        switch ($format) {
-            case self::RETURN_TEXT_ONLY:
-                $string1 = self::getFlagAsAString($flagValue);
-                break;
-            case self::RETURN_TEXT_AND_VALUE_ONLY_STYLE_1:
-                $string1 = '"'. self::getFlagAsAString($flagValue) .'" ('. $flagValue .')';
-                break;
-            default:
-                throw new \Exception(
-                    'you must set $className in the populate() method of your '. self::$name .' flagger. Flagger classname: '. __CLASS__
-                );
-        }
-
-        return $string1;
-    }
-
     private static function getClassNameIsSet () {
-        if (empty(self::$className)) {
+        if (empty(self::getClassName())) {
             throw new \Exception(
-                'you must set $className in the populate() method of your '. self::$name .' flagger. Flagger classname: '. __CLASS__
+                'you must set $className in the populate() method of your '. self::getFlaggerName() .' flagger. Flagger classname: '. __CLASS__
             );
         }
     }
@@ -93,45 +51,48 @@ abstract class BaseFlagger
      * if not, throw an exception.
      */
     private static function getFlagAsAString (string $flagValue) {
-        if (empty(self::$flagsToText[$flagValue])) {
-            throw new FlagOptionDoesNotExistException(
-                BadgeWorkflowFlagger::getFlaggerName(),
-                $flagValue,
-                self::$flagsToText
-            );
-        }
+        self::checkValueIsValid($flagValue);
 
-        return self::$flagsToText[$flagValue];
+        return self::getFlagOptions()[$flagValue];
     }
 
     /**
-     * Ensures that ::PopulateOptionsAsText() has been overriden and
-     * that the $flagsAsText is populated with string versions of each flag.
-     *
-     * @throws \Exception
+     * enter in the flag value and return it's string equivalent
+     * use $format to configure the appearance of the returned string.
      */
-    private static function checkStringVersionAvailable() {
-        if (empty(self::$flagsToText)) {
-            static::populate();
+    const RETURN_TEXT_ONLY = 103;                   // just return the flag's text. e.g. "to disassemble"
+    const RETURN_TEXT_AND_VALUE_ONLY_STYLE_1 = 105; // just return the flag's text. e.g. "to disassemble (300)"
+    public static function getFlagAsString ($flagValue, $format = self::RETURN_TEXT_ONLY) {
+        self::checkValueIsValid($flagValue);
+        switch ($format) {
+            case self::RETURN_TEXT_ONLY:
+                $string1 = self::getFlagAsAString($flagValue);
+                break;
+            case self::RETURN_TEXT_AND_VALUE_ONLY_STYLE_1:
+                $string1 = '"'. self::getFlagAsAString($flagValue) .'" ('. $flagValue .')';
+                break;
+            default:
+                throw new \Exception(
+                    'you must set $className in the populate() method of your '. self::getFlaggerName() .' flagger. Flagger classname: '. __CLASS__
+                );
         }
+
+        return $string1;
     }
 
-    public static function getFlaggerName () : string
-    {
-        if (empty(self::$name)) {
-            static::populate();
-        }
-        return self::$name;
-    }
-
-    const FLAG_NAME_AND_VALUE = 106;
     /**
-     * output a string of the flag options, used (for example) in presenting flag options
+     * Output a string of the flag options, used (for example) in presenting flag options
      * (and the corresponding flag value) when throwing an exception.
+     *
+     * example return values below:
+     * [$format =self::FLAG_NAME_AND_VALUE]:
+     * - ???
      * @param int $format
      */
-    public static function stringifyAllFlagOptions (array $flagOptions, $format = self::FLAG_NAME_AND_VALUE)
+    const FLAG_NAME_AND_VALUE = 106;
+    public static function getFlagOptionsAsString ($format = self::FLAG_NAME_AND_VALUE)
     {
+        $flagOptions = self::getFlagOptions();
         $string1 = '';
         switch ($format) {
             case self::FLAG_NAME_AND_VALUE:
@@ -151,6 +112,10 @@ abstract class BaseFlagger
         return $string1;
     }
 
+    protected function stringifyAllFlagOptions ($format = self::FLAG_NAME_AND_VALUE) {
+        return self::getFlagOptionsAsString($format);
+    }
+
     /**
      * add a 'flag option'. Using a method (instead of direct array access) prevents flags
      * being loaded with the same value. This isn't normally a problem until you have
@@ -162,14 +127,36 @@ abstract class BaseFlagger
      * @param string $flagString
      */
     protected static function addFlagOption (int $flagValue, string $flagString) {
-        if (!empty(self::$flagsToText[$flagValue])) {
+        if (!empty(self::getFlagOptions()[$flagValue])) {
             throw new \Exception (
                 'a flag with the value: '. $flagValue .' ("'. self::getFlagAsString($flagValue) .')'.
                 ' already exists, the new flag cannot be added.'
             );
         }
 
-        self::$flagsToText[$flagValue] = $flagString;
+        self::getFlagOptions()[$flagValue] = $flagString;
+
+        return true;
+    }
+
+    /**
+     * Check the argument against valid flag values
+     * if it doesn't exist, return false (or throw exception)
+     *
+     * @param $flagVal
+     */
+    public static function checkValueIsValid($flagVal, $throwExceptionOnFail = true)
+    {
+        if (empty(self::getFlagOptions()[$flagVal])) {
+            if ($throwExceptionOnFail) {
+                throw new FlagOptionDoesNotExistException(
+                    BadgeWorkflowFlagger::class,
+                    $flagVal
+                );
+            } else {
+                return false;
+            }
+        }
 
         return true;
     }
