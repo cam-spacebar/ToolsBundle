@@ -19,6 +19,8 @@ use VisageFour\Bundle\ToolsBundle\Exceptions\FlagOptionDoesNotExistException;
  *
  * Class BadgeWorkflowFlagger
  * @package App\Classes\Flaggers
+ *
+ * todo: (status vs as_a_sentence output): add a get "flagAsASentence()" method as in: badge " has been disabled" or " needs to be constructed (urgently)" (instead of simply something like: "disabled" or "to construct (urgent))
  */
 abstract class BaseFlagger extends FlaggerOptions
 {
