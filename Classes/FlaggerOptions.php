@@ -14,7 +14,7 @@ namespace App\VisageFour\Bundle\ToolsBundle\Classes;
  * @package App\VisageFour\Bundle\ToolsBundle\Classes
  *
  */
-class FlaggerOptions
+abstract class FlaggerOptions
 {
     /**
      * the flag value as the key and the "string" version as the value.
@@ -72,7 +72,7 @@ class FlaggerOptions
             return true;
         } else {
             self::$isPopulated = true;
-            self::populate();
+            static::populate();
         }
     }
 
@@ -82,5 +82,28 @@ class FlaggerOptions
 
     public static function setName ($name) {
         self::$name = $name;
+    }
+
+    /**
+     * add a 'flag option'. Using a method (instead of direct array access) prevents flags
+     * being loaded with the same value. This isn't normally a problem until you have
+     * flagger classes that inherit from other flagger classes and that build on the flagOptions
+     * array in two different places (such as happens with the formFlagger where there's generic flags
+     * and then more specific flags.)
+     *
+     * @param int $flagValue
+     * @param string $flagString
+     */
+    protected static function addFlagOption (int $flagValue, string $flagString) {
+        if (!empty(self::$flagOptions[$flagValue])) {
+            throw new \Exception (
+                'a flag with the value: '. $flagValue .' ("'. static::getFlagAsString($flagValue) .')'.
+                ' already exists, the new flag cannot be added.'
+            );
+        }
+
+        self::$flagOptions[$flagValue] = $flagString;
+
+        return true;
     }
 }
