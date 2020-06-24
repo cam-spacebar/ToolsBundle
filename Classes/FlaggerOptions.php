@@ -37,8 +37,11 @@ abstract class FlaggerOptions
     static private $name;
 
     /**
-     * The class name that the flagger belongs to.
-     * (not the actual flaggers classname)
+     * (note: this is *not* the actual flaggers classname)
+     *
+     * The class name that the flagger belongs to (if applicable)
+     * for instance: the badge's classname, when it has a prperty that's managed by a workflow flagger
+     *
      * @var string
      */
     static protected $className;
@@ -52,6 +55,17 @@ abstract class FlaggerOptions
 
         return self::$flagOptions;
     }
+
+    protected static function isFlagOptionValid ($flagVal) {
+        self::ensureIsPopulated();
+
+        if (empty(self::$flagOptions[$flagVal])) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     public static function getFlaggerName () : string
     {

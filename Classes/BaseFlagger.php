@@ -50,10 +50,10 @@ abstract class BaseFlagger extends FlaggerOptions
      * Check that a text version of the flag is available,
      * if not, throw an exception.
      */
-    private static function getFlagAsAString (string $flagValue) {
+    private static function getFlagAsAFormattedString (string $flagValue) {
         self::checkValueIsValid($flagValue);
 
-        return self::getFlagOptions()[$flagValue];
+        return self::getFlagAsString($flagValue);
     }
 
     /**
@@ -66,10 +66,10 @@ abstract class BaseFlagger extends FlaggerOptions
         self::checkValueIsValid($flagValue);
         switch ($format) {
             case self::RETURN_TEXT_ONLY:
-                $string1 = self::getFlagAsAString($flagValue);
+                $string1 = self::getFlagAsAFormattedString($flagValue);
                 break;
             case self::RETURN_TEXT_AND_VALUE_ONLY_STYLE_1:
-                $string1 = '"'. self::getFlagAsAString($flagValue) .'" ('. $flagValue .')';
+                $string1 = '"'. self::getFlagAsAFormattedString($flagValue) .'" ('. $flagValue .')';
                 break;
             default:
                 throw new \Exception(
@@ -93,7 +93,6 @@ abstract class BaseFlagger extends FlaggerOptions
     public static function getFlagOptionsAsString ($format = self::FLAG_NAME_AND_VALUE)
     {
         $flagOptions = self::getFlagOptions();
-        dd($flagOptions);
         $string1 = '';
         switch ($format) {
             case self::FLAG_NAME_AND_VALUE:
@@ -125,7 +124,7 @@ abstract class BaseFlagger extends FlaggerOptions
      */
     public static function checkValueIsValid($flagVal, $throwExceptionOnFail = true)
     {
-        if (empty(self::getFlagOptions()[$flagVal])) {
+        if (!self::isFlagOptionValid($flagVal)) {
             if ($throwExceptionOnFail) {
                 throw new FlagOptionDoesNotExistException(
                     BadgeWorkflowFlagger::class,
@@ -137,5 +136,24 @@ abstract class BaseFlagger extends FlaggerOptions
         }
 
         return true;
+    }
+
+    /**
+     * @param $flag
+     *
+     * throws a pre-written exception for use in app logic like a 'switch'
+     * where the flag value is valid, but the flags 'case' hasn't been implemented.
+     * It will write out a nice message and save the time of the developer writing
+     * error messages in each default: switch condition.
+     * it will even check if the flag is accually valid first.
+     *
+     */
+    public static function notHandledPreWrittenException ($flag) {
+        self::checkValueIsValid($flag);
+
+        $flagStr = self::getFlagAsAFormattedString(self::RETURN_TEXT_AND_VALUE_ONLY_STYLE_1);
+        throw new \Exception (
+            'The flag option: '. $flagStr ." is a valid flag, but it has not been handled by the apps logic. In flagger: ". static::getFlaggerName()
+        );
     }
 }
