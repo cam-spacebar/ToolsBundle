@@ -60,7 +60,6 @@ class CodeSlugParamConverter implements ParamConverterInterface
 //        $em = $this->registry->getManagerForClass($configuration->getClass());
 
         // Check, if class provided can be converted
-//        dump($configuration->getClass()); die('xxx');
 //        dump($this->em->getClassMetadata($configuration->getClass())->getName()); die('xx');
         // this was throwing a really strange error when I was trying to do autowired dependicy injections on a controller. so I've simplified it with the new code - left here, in case this is useful in the future.
         //        if ('Twencha\Bundle\EventRegistrationBundle\Entity\Slug' !== $this->em->getClassMetadata($configuration->getClass())->getName()) {
