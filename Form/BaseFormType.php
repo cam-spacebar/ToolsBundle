@@ -292,13 +292,21 @@ class BaseFormType extends AbstractType
     }
 
     /**
-     * populates a flashbag with each error in the form
+     * populates a flashbag with each error in the form.
+     * If no error messages exist , throw an exception (optional, via: $throwOnEmpty=true) - this is
+     * used to detect that a message is acctually being sent back to the user.
      */
-    public function populateFlashBagWithErrors (FlashBagInterface $flashBag)
+    public function populateFlashBagWithErrors (FlashBagInterface $flashBag, $throwOnEmpty = true)
     {
         if (!empty($this->processingErrors)) {
             foreach ($this->processingErrors as $curI => $curErrorMsg) {
                 $flashBag->add('error', $curErrorMsg);
+            }
+        } else {
+            if ($throwOnEmpty) {
+                throw new \Exception (
+                    'No error message was set for flashbag, a message must be written for the user or $throwOnEmpty set to false. in class: '. __CLASS__
+                );
             }
         }
 

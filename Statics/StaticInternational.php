@@ -812,7 +812,7 @@ class StaticInternational
         return $text;
     }
 
-    public static function checkCountryExistsByCode ($countryCode, $throwOnError = true)
+    public static function checkCountryExistsByCode ($countryCode, bool $throwOnError = true)
     {
         if (empty(self::$countries[$countryCode])) {
             if ($throwOnError) {
@@ -824,7 +824,7 @@ class StaticInternational
         return true;
     }
 
-    public static function checkLanguageExistsByCode (string $langCode, $throwOnError = true)
+    public static function checkLanguageExistsByCode (string $langCode, bool $throwOnError = true)
     {
         if (empty(self::$languages[$langCode])) {
             if ($throwOnError) {
