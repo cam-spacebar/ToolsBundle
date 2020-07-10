@@ -111,7 +111,7 @@ abstract class FlaggerOptions
     protected static function addFlagOption (int $flagValue, string $flagString) {
         if (!empty(self::$flagOptions[$flagValue])) {
             throw new \Exception (
-                'a flag with the value: '. $flagValue .' ("'. static::getFlagAsString($flagValue) .')'.
+                'a flag with the value: '. $flagValue .' ("'. static::getFlagAsAFormattedString($flagValue) .')'.
                 ' already exists, the new flag cannot be added.'
             );
         }

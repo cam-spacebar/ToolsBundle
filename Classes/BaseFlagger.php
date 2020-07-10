@@ -52,33 +52,35 @@ abstract class BaseFlagger extends FlaggerOptions
      * Check that a text version of the flag is available,
      * if not, throw an exception.
      */
-    private static function getFlagAsAFormattedString (string $flagValue) {
+    private static function getFlagAsString (string $flagValue) {
         self::checkValueIsValid($flagValue);
+        $options = self::getFlagOptions();
 
-        return self::getFlagAsString($flagValue);
+        return $options[$flagValue];
     }
 
     /**
      * enter in the flag value and return it's string equivalent
      * use $format to configure the appearance of the returned string.
      */
-    const RETURN_TEXT_ONLY = 103;                   // just return the flag's text. e.g. "to disassemble"
-    const RETURN_TEXT_AND_VALUE_ONLY_STYLE_1 = 105; // just return the flag's text. e.g. "to disassemble (300)"
-    public static function getFlagAsString ($flagValue, $format = self::RETURN_TEXT_ONLY) {
-        self::checkValueIsValid($flagValue);
+    const RETURN_TEXT_ONLY = 103;                       // just return the flag's text. e.g. "to disassemble"
+    const RETURN_TEXT_AND_VALUE_ONLY_STYLE_1 = 105;     // just return the flag's text. e.g. "to disassemble (300)"
+    public static function getFlagAsAFormattedString ($flagValue, $format = self::RETURN_TEXT_ONLY) {
+        $str = self::getFlagAsString($flagValue);
+
         switch ($format) {
             case self::RETURN_TEXT_ONLY:
-                $string1 = self::getFlagAsAFormattedString($flagValue);
+                return $str;
                 break;
             case self::RETURN_TEXT_AND_VALUE_ONLY_STYLE_1:
-                $string1 = '"'. self::getFlagAsAFormattedString($flagValue) .'" ('. $flagValue .')';
+                $string1 = '"'. $str .'" ('. $flagValue .')';
                 break;
             default:
                 throw new \Exception(
                     'you must set $className in the populate() method of your '. self::getFlaggerName() .' flagger. Flagger classname: '. __CLASS__
                 );
         }
-
+        die ('here123');
         return $string1;
     }
 
@@ -147,7 +149,7 @@ abstract class BaseFlagger extends FlaggerOptions
      * where the flag value is valid, but the flags 'case' hasn't been implemented.
      * It will write out a nice message and save the time of the developer writing
      * error messages in each default: switch condition.
-     * it will even check if the flag is accually valid first.
+     * it will even check if the flag is acctually valid first.
      *
      */
     public static function notHandledPreWrittenException ($flag) {
