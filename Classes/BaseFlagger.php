@@ -80,8 +80,8 @@ abstract class BaseFlagger extends FlaggerOptions
                     'you must set $className in the populate() method of your '. self::getFlaggerName() .' flagger. Flagger classname: '. __CLASS__
                 );
         }
-        die ('here123');
-        return $string1;
+
+        return $str;
     }
 
     /**
