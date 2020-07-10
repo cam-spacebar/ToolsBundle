@@ -6,6 +6,8 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Exceptions;
 
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+
 abstract class AppBaseException extends \Exception
 {
     /**
@@ -22,5 +24,13 @@ abstract class AppBaseException extends \Exception
     public function getPublicMessage()
     {
         return $this->publicMsg;
+    }
+
+    public function populateFlashBag (FlashBagInterface $fb)
+    {
+        $fb->add(
+            'error',
+            $this->publicMsg
+        );
     }
 }

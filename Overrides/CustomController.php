@@ -121,8 +121,6 @@ class CustomController extends Controller
         return $this->container->get('logger');
     }
 
-
-
     // METHODS TO OVERRIDE IN APP'S IMPLEMENTATION
     // todo: should be made abstract?
     /**
