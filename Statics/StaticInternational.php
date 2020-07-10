@@ -39,7 +39,7 @@ class StaticInternational
         return self::$countries;
     }
 
-    const EMPTY_CODE = '_-';
+    const EMPTY_CODE = 'ey';
 
     // countries
     // you must now use getCountryNameByCode() method to access these values
