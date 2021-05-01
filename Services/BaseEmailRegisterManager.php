@@ -3,7 +3,6 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
-use Lexik\Bundle\MailerBundle\Message\MessageFactory;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
 use Doctrine\ORM\EntityManager;
@@ -30,7 +29,7 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
         'basic-email',
         'en',
         true,
-        EmailRegister::LEXIK_ADAPTER
+        EmailRegister::essageFactor_ADAPTER
     );
 
     === SONATA ADMIN SERVICE DEFINITION ===
@@ -93,28 +92,7 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
      */
     protected $mailer;
 
-    /**
-     * @var MessageFactory
-     */
-    protected $lexikMailer;
-
     protected $emulateSending;
-
-    /**
-     * @return mixed
-     */
-    public function getLexikMailer()
-    {
-        return $this->lexikMailer;
-    }
-
-    /**
-     * @param mixed $lexikMailer
-     */
-    public function setLexikMailer($lexikMailer)
-    {
-        $this->lexikMailer = $lexikMailer;
-    }
 
     /**
      * @return mixed
@@ -138,10 +116,9 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
      * @param                           $class
      * @param   $dispatcher
      * @param            $logger
-     * @param             $lexikMailer
      * @param               $mailer
      */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface$dispatcher, LoggerInterface $logger, MessageFactory $lexikMailer, Swift_Mailer $mailer, $emulateSending) {
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface$dispatcher, LoggerInterface $logger, Swift_Mailer $mailer, $emulateSending) {
         parent::__construct($em, $class, $dispatcher, $logger);
 
         $this->emulateSending = $emulateSending;
@@ -150,7 +127,6 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
         }
 
         $this->setMailer($mailer);
-        $this->setLexikMailer($lexikMailer);
     }
 
     // spools an email for sending via a worker or sends it immediately (depending on apps config)
@@ -186,12 +162,12 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
             if ($email->getAdapter() == EmailRegister::LEXIK_ADAPTER) {
                 // create a swift message + send
 
-                $message = $this->lexikMailer->get(
-                    $email->getEmailTemplate(),
-                    $email->getToEmail(),
-                    $email->getParams(),
-                    $email->getLocale()
-                );
+//                $message = $this->lexikMailer->get(
+//                    $email->getEmailTemplate(),
+//                    $email->getToEmail(),
+//                    $email->getParams(),
+//                    $email->getLocale()
+//                );
 
                 $this->logger->info('Attempting to process (send) email. Template: "'. $email->getEmailTemplate() .'" To: "'. $email->getToEmail() .'"');
 

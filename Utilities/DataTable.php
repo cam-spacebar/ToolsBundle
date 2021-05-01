@@ -2,7 +2,6 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Utilities;
 
-use Lexik\Bundle\MailerBundle\Message\MessageFactory;
 use Symfony\Component\HttpFoundation\Response;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
