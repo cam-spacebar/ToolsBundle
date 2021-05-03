@@ -121,10 +121,10 @@ abstract class BaseFlagger extends FlaggerOptions
     }
 
     /**
+     * @param $flagVal
+     *
      * Check the argument against valid flag values
      * if it doesn't exist, return false (or throw exception)
-     *
-     * @param $flagVal
      */
     public static function checkValueIsValid($flagVal, $throwExceptionOnFail = true)
     {
