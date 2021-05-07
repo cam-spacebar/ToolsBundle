@@ -840,12 +840,14 @@ class StaticInternational
     /**
      * Check all $countries have a (valid) default language
      * throw an exception if a country does not have a default language set
+     *
+     * todo: turn this into a test
      */
     public static function checkCountriesHaveADefaultLanguage () {
-        print "Begin checking countries have a (valid) language code: \n";
+        print "Checking countries have a (valid) language code. \n\n";
         foreach (self::$countries as $curCode => $curCountryName) {
             $defaultLangCode = self::getDefaultNativeLanguageCode($curCode);
-            print "- ". $curCountryName .' ('. $curCode ."): ". $defaultLangCode ."\n";
+//            print "- ". $curCountryName .' ('. $curCode ."): ". $defaultLangCode ."\n";
             if (empty($defaultLangCode)) {
                 throw new \Exception(
                     'there is no default language code for country code: '. $curCode .
@@ -857,7 +859,7 @@ class StaticInternational
             self::checkLanguageExistsByCode($defaultLangCode);
         }
 
-        print "[Finished check]\n\n";
+//        print "[Finished check]\n\n";
 
         return true;
     }
