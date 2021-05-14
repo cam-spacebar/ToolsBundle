@@ -4,14 +4,13 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Exceptions;
 
 
-class PersonNotFound extends \Exception
+class PersonNotFound extends PublicException
 {
     public function __construct($email)
     {
-        parent::__construct();
-
-        $this->message =
+        $publicMsg =
             'Person with email address: '. $email .' was not found.'
         ;
+        parent::__construct($publicMsg);
     }
 }

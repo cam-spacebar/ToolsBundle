@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Twencha\Bundle\EventRegistrationBundle\Model\BasePersonInterface;
@@ -592,9 +593,16 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     /**
      * @return string
      */
-    public function checkVerificationToken(string $token): bool
+    public function checkVerificationToken(string $token, $throwExceptionOnError = true): bool
     {
+        if ($this->isVerified && $throwExceptionOnError) {
+            throw new AccountAlreadyVerified();
+        }
+
         if ($this->verificationToken == $token) {
+            // Signal the account has been verified.
+            $this->setIsVerified(true);
+
             return true;
         } else {
             return false;
