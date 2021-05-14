@@ -95,6 +95,15 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     protected $verificationToken;
 
     /**
+     * the random string that is sent to a new user's email address to verify it's real
+     *
+     * @var string
+     *
+     * @ORM\Column(name="isVerified", type="boolean", nullable=false)
+     */
+    protected $isVerified;
+
+    /**
      * @ORM\Column(type="string", length=255)
      * This must be the encoded string (not the raw password string)
      * To encode, use: PasswordManager->validatePasswordAndEncode()
@@ -605,5 +614,19 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         $this->verificationToken = $hash;
 
         return $hash;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+
+        $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getIsVerified(): bool
+    {
+
+        return $this->isVerified;
     }
 }

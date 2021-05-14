@@ -6,7 +6,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
-use App\Traits\LoggerTrait;
+use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\Response;

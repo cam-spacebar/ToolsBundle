@@ -3,6 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
 /**
@@ -13,6 +14,9 @@ use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
  */
 class EmailRegisterRepository  extends ServiceEntityRepository
 {
+    public function __construct (ManagerRegistry $registry) {
+        parent::__construct($registry, EmailRegister::class);
+    }
     public function countSpooled () {
         $qb = $this->createQueryBuilder('er')
             ->select('COUNT(er)')

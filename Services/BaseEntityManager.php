@@ -82,6 +82,7 @@ abstract class BaseEntityManager
     public function __construct(EntityManager$em, $class, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger) {
         $this->em               = $em;
         $this->repo             = $this->em->getRepository($class);
+//        dump($this->repo, $class);
         $this->dispatcher       = $eventDispatcher;     // this should be phased out as a variable
         $this->eventDispatcher  = $eventDispatcher;
         $this->logger           = $logger;
@@ -166,6 +167,7 @@ abstract class BaseEntityManager
         $result = $this->repo->findOneBy(
             array ('id'        => $id)
         );
+
         return $result;
     }
 
