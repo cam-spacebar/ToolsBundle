@@ -3,13 +3,28 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\Entity\Person;
+use Doctrine\Common\Persistence\ObjectManager;
 use VisageFour\Bundle\ToolsBundle\Services\TerminalColors;
+use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
 
 abstract class CustomApiTestCase extends ApiTestCase
 {
+    /** @var PersonManager */
+    private $personMan;
+
+    /** @var ObjectManager */
+    private $manager;
+
     static protected $terminalColors;
 
-    abstract protected function getServices();
+    protected function getServices()
+    {
+        //        $this->faker = Faker::
+
+        $this->manager          = self::$container->get('doctrine.orm.default_entity_manager');
+        $this->personMan        = self::$container->get('twencha.person_man');
+    }
 
     static public function setUpBeforeClass(): void
     {
@@ -31,5 +46,20 @@ abstract class CustomApiTestCase extends ApiTestCase
         $text = self::$terminalColors->getColoredString($msg, 'red', 'black');
         print "\n";
         print $text;
+    }
+
+    protected function createNewPerson($email, $password): Person
+    {
+        $person     = $this->personMan->createNewPerson($email,$password);
+        $this->manager->persist($person);
+        $this->manager->flush();
+
+        return $person;
+    }
+
+    protected function removePerson(Person $person)
+    {
+        $this->manager->remove($person);
+        $this->manager->flush();
     }
 }

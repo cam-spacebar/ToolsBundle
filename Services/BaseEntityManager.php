@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
 use Doctrine\ORM\EntityManager;
@@ -79,7 +80,7 @@ abstract class BaseEntityManager
      * @param EventDispatcherInterface $eventDispatcher
      * @param LoggerInterface $logger
      */
-    public function __construct(EntityManager$em, $class, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger) {
+    public function __construct(EntityManagerInterface $em, $class, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger) {
         $this->em               = $em;
         $this->repo             = $this->em->getRepository($class);
 //        dump($this->repo, $class);
