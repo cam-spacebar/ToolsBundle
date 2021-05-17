@@ -624,6 +624,11 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         return $hash;
     }
 
+    public function getVerificationToken()
+    {
+        return $this->verificationToken;
+    }
+
     public function setIsVerified(bool $isVerified): self
     {
 

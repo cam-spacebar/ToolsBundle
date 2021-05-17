@@ -18,6 +18,22 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     static protected $terminalColors;
 
+    protected function setUp(): void
+    {
+        // this is needed, as tearDown() shuts down the kernel each time.
+        // see (for more info): https://stackoverflow.com/questions/59964480/symfony-phpunit-selfkernel-is-null-in-second-test#
+        $kernel = self::bootKernel();
+
+        $this->em = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+
+        $this->getServices();
+
+//        $this->outputRedTextToTerminal('hi there!');
+//        parent::setUp();
+    }
+
     protected function getServices()
     {
         //        $this->faker = Faker::
@@ -28,11 +44,11 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     static public function setUpBeforeClass(): void
     {
-        //start the symfony kernel
+        // start the symfony kernel
         $kernel = static::createKernel();
         $kernel->boot();
 
-        //get the DI container
+        // get the DI container
         self::$container = $kernel->getContainer();
 
 //        self::$terminalColors = self::$container->get('TerminalColors');
