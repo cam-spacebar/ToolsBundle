@@ -6,7 +6,7 @@ namespace App\VisageFour\Bundle\ToolsBundle\Exceptions;
  * Class PublicException
  * @package App\VisageFour\Bundle\ToolsBundle\Exceptions
  *
- * allows the exception to provide a public message that is sent back to the user.
+ * allows the exception to provide a public message that is sent back to the user/client.
  */
 class PublicException extends \Exception
 {
