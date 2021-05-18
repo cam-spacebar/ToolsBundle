@@ -2,6 +2,9 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
+use App\Classes\FrontendUrl;
+use App\Services\PasswordManager;
+use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -607,6 +610,15 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         } else {
             return false;
         }
+    }
+
+    public function hasPasswordBeenSet()
+    {
+        if ($this->password == PasswordManager::PASSWORD_NOT_INITIALIZED) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

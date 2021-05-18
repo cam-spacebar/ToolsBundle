@@ -21,7 +21,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     private $personMan;
 
     /** @var ObjectManager */
-    private $manager;
+    protected $manager;
 
     // the email address of the most recently created user.
     protected $userEmail;
@@ -36,6 +36,9 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     protected $debugOutputOn;
 
+    // the current test method running. Useful for displaying in debugging messages.
+    private $currentMethod;
+
     /**
      * @var Factory
      */
@@ -48,14 +51,14 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     protected function setUp(): void
     {
-        // this is needed, as tearDown() shuts down the kernel each time.
+            // this is needed, as tearDown() shuts down the kernel each time.
         // see (for more info): https://stackoverflow.com/questions/59964480/symfony-phpunit-selfkernel-is-null-in-second-test#
 //        $kernel = self::bootKernel();
 
         $client = static::createClient();
         $client->enableProfiler();
 
-        $this->em = $client->getKernel()->getContainer()
+        $this->manager = $client->getKernel()->getContainer()
             ->get('doctrine')
             ->getManager();
         $this->client = $client;
@@ -71,7 +74,6 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     protected function getServices()
     {
-        $this->manager          = self::$container->get('doctrine.orm.default_entity_manager');
         $this->personMan        = self::$container->get('twencha.person_man');
     }
 
@@ -105,7 +107,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     }
 
     /**
-     * specifically for debugging outputs. Can be turned on (while developing a single test case) and turned off when doing mass tests.
+     * Specifically for debugging outputs. Can be turned on (while developing a single test case) and turned off when doing mass tests.
      */
     protected function outputDebugToTerminal($msg)
     {
@@ -132,13 +134,14 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function createNewUser(): Person
     {
         $this->userEmail        = $this->faker->email();
-        $this->userPassword     = $this->faker->password;
+//        $this->userPassword     = null;     // this is the correct flow for registration (as password is set after verification!)
 
         $this->outputDebugToTerminal(
             'creating person with email: '. $this->userEmail .' and password: '. $this->userPassword
         );
 
-        $person     = $this->personMan->createNewPerson($this->userEmail, $this->userPassword);
+        $person     = $this->personMan->createNewPerson($this->userEmail);
+
         $this->manager->persist($person);
         $this->manager->flush();
 
@@ -146,7 +149,26 @@ abstract class CustomApiTestCase extends ApiTestCase
     }
 
     protected function removeUser (Person $person) {
-        $this->manager->remove($person);
+//        $this->manager->merge($person);
+//        $this->manager->remove($person);
         $this->manager->flush();
+    }
+
+    protected function setShowDebugging(bool $bool) {
+        $this->debugOutputOn = $bool;       // turn on when working on a single test case. Turn off when mass executing tests.
+        $status = ($bool) ? 'on' : 'off';
+        $this->outputRedTextToTerminal('' );
+        $this->outputRedTextToTerminal('DEBUGGING is turned: '. $status );
+
+    }
+
+    /**
+     * @param string $method
+     *
+     * set this at the start of each test case so that the debugger can output which method is being executed.
+     */
+    protected function setCurrentMethod (string $method) {
+        $this->currentMethod = $method;
+        $this->outputDebugToTerminal('now in test method: '. $method .'()');
     }
 }
