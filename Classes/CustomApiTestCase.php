@@ -47,6 +47,11 @@ abstract class CustomApiTestCase extends ApiTestCase
     static protected $terminalColors;
 
     // setup that is specific to the test case that subclasses this class.
+    /**
+     * @var \App\Classes\FrontendUrl|object|null
+     */
+    protected $frontendUrl;
+
     abstract protected function specificSetUp ();
 
     protected function setUp(): void
