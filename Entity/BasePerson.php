@@ -90,13 +90,25 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     protected $isRegistered;
 
     /**
-     * the random string that is sent to a new user's email address to verify it's real
+     * The account verification token. The random string that is sent to a new user's email address to verify it's real
      *
      * @var string
      *
      * @ORM\Column(name="verification_token", type="string", nullable=false)
      */
     protected $verificationToken;
+
+    /**
+     * this is needed to change the users password (if not logged in - due to using the "forgot my password" method).
+     *
+     * @var string
+     *
+     * @ORM\Column(name="change_password_token", type="string", nullable=true)
+     *
+     * Should be set to null straight after using the token (i.e. saving a new password).
+     * A new one is created only when someone requests the "forgot my password" form.
+     */
+    protected $changePasswordToken;
 
     /**
      * the random string that is sent to a new user's email address to verify it's real
@@ -557,11 +569,11 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     }
 
     /**
-     * Use PasswordManager::validatePasswordAndEncode() to set this!s
+     * Use PasswordManager->validatePasswordAndEncode() to set this!s
      */
-    public function setPassword(string $password): self
+    public function setPassword(string $encodedPassword): self
     {
-        $this->password = $password;
+        $this->password = $encodedPassword;
 
         return $this;
     }
@@ -593,6 +605,28 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         // $this->plainPassword = null;
     }
 
+    public function hasPasswordBeenSet()
+    {
+        if ($this->password == PasswordManager::PASSWORD_NOT_INITIALIZED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getIsVerified(): bool
+    {
+
+        return $this->isVerified;
+    }
+
     /**
      * @return string
      */
@@ -605,20 +639,12 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         if ($this->verificationToken == $token) {
             // Signal the account has been verified.
             $this->setIsVerified(true);
+            // note: don't need to delete the token (to prevent re-use and then reset of password), as this method first checks for isVerified() and wil throw an error).
 
             return true;
         } else {
             return false;
         }
-    }
-
-    public function hasPasswordBeenSet()
-    {
-        if ($this->password == PasswordManager::PASSWORD_NOT_INITIALIZED) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -641,17 +667,37 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         return $this->verificationToken;
     }
 
-    public function setIsVerified(bool $isVerified): self
+    /**
+     * @return string
+     */
+    public function createChangePasswordToken(): string
     {
+        $salt = 'randomsaltsc23irn2#C@wrci243wc';
 
-        $this->isVerified = $isVerified;
+        $hash = md5($salt.$this->getEmailCanonical());
 
-        return $this;
+        $this->changePasswordToken = $hash;
+
+        return $hash;
     }
 
-    public function getIsVerified(): bool
+    /**
+     * @param string $changePasswordToken
+     */
+    public function isChangePasswordTokenCorrect(string $token): bool
     {
+        if ($this->changePasswordToken == $token) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-        return $this->isVerified;
+    /**
+     * @return string
+     */
+    public function getChangePasswordToken(): string
+    {
+        return $this->changePasswordToken;
     }
 }

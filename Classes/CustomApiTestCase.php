@@ -42,7 +42,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     /**
      * @var Factory
      */
-    private $faker;
+    protected $faker;
 
     static protected $terminalColors;
 
@@ -75,6 +75,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function getServices()
     {
         $this->personMan        = self::$container->get('twencha.person_man');
+        $this->frontendUrl        = self::$container->get('App\Classes\FrontendUrl');
     }
 
     static public function setUpBeforeClass(): void
@@ -159,7 +160,6 @@ abstract class CustomApiTestCase extends ApiTestCase
         $status = ($bool) ? 'on' : 'off';
         $this->outputRedTextToTerminal('' );
         $this->outputRedTextToTerminal('DEBUGGING is turned: '. $status );
-
     }
 
     /**
