@@ -6,6 +6,7 @@ use App\Classes\FrontendUrl;
 use App\Services\PasswordManager;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotVerifiedException;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Twencha\Bundle\EventRegistrationBundle\Model\BasePersonInterface;
@@ -621,10 +622,14 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         return $this;
     }
 
-    public function getIsVerified(): bool
+    public function isVerified($throw = false): bool
     {
+        $result = $this->isVerified;
+        if ((!$result) && $throw) {
+            throw new AccountNotVerifiedException();
+        }
 
-        return $this->isVerified;
+        return $result;
     }
 
     /**

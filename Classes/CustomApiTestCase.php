@@ -165,7 +165,8 @@ abstract class CustomApiTestCase extends ApiTestCase
     /**
      * @param string $method
      *
-     * set this at the start of each test case so that the debugger can output which method is being executed.
+     * e.g. the method name!
+     * the debugger uses this to output which method is being executed.
      */
     protected function setCurrentMethod (string $method) {
         $this->currentMethod = $method;
