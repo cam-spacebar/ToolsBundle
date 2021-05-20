@@ -457,6 +457,11 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         return $this->isRegistered;
     }
 
+    public function isRegisteredAsString()
+    {
+        return ($this->isRegistered()) ? 'Yes' : 'No';
+    }
+
     /**
      * @param int $isRegistered
      */
@@ -617,7 +622,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
 
     public function setAccountIsVerified(bool $isVerified): self
     {
-        if ($isVerified == false) {
+        if ($isVerified && !$this->isRegistered()) {
             throw new \Exception ('the user: '. $this->email .' must complete their registration before they can be verified.');
         }
 
@@ -645,7 +650,8 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
             throw new AccountAlreadyVerified();
         }
 
-        if ($this->verificationToken == $token) {
+//        print 'token verification test: '. $this->verificationToken .' == '. $token;
+        if ($this->verificationToken == $token) ication token just cre{
             // Signal the account has been verified.
             $this->setAccountIsVerified(true);
             // note: don't need to delete the token (to prevent re-use and then reset of password), as this method first checks for isVerified() and wil throw an error).
@@ -665,7 +671,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         $salt = '34rvefdnvasADWEIREcvwf2io4nwecsDC';
 
         $hash = md5($salt.$this->getEmailCanonical());
-
+//        print 'verification token just created: '. $hash;
         $this->verificationToken = $hash;
 
         return $hash;
