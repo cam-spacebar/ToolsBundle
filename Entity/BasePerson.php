@@ -91,6 +91,15 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     protected $isRegistered;
 
     /**
+     * Has the user verified that their email address is real?
+     *
+     * @var string
+     *
+     * @ORM\Column(name="isVerified", type="boolean", nullable=false)
+     */
+    protected $isVerified;
+
+    /**
      * The account verification token. The random string that is sent to a new user's email address to verify it's real
      *
      * @var string
@@ -110,15 +119,6 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      * A new one is created only when someone requests the "forgot my password" form.
      */
     protected $changePasswordToken;
-
-    /**
-     * the random string that is sent to a new user's email address to verify it's real
-     *
-     * @var string
-     *
-     * @ORM\Column(name="isVerified", type="boolean", nullable=false)
-     */
-    protected $isVerified;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -615,8 +615,12 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         return false;
     }
 
-    public function setIsVerified(bool $isVerified): self
+    public function setAccountIsVerified(bool $isVerified): self
     {
+        if ($isVerified == false) {
+            throw new \Exception ('the user: '. $this->email .' must complete their registration before they can be verified.');
+        }
+
         $this->isVerified = $isVerified;
 
         return $this;
@@ -643,7 +647,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
 
         if ($this->verificationToken == $token) {
             // Signal the account has been verified.
-            $this->setIsVerified(true);
+            $this->setAccountIsVerified(true);
             // note: don't need to delete the token (to prevent re-use and then reset of password), as this method first checks for isVerified() and wil throw an error).
 
             return true;

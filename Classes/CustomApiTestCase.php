@@ -74,6 +74,7 @@ abstract class CustomApiTestCase extends ApiTestCase
 //        $this->outputRedTextToTerminal('hi there!');
 //        parent::setUp();
 
+//        $this->outputDebugToTerminal('running specificSetUp()');
         $this->specificSetUp();
     }
 

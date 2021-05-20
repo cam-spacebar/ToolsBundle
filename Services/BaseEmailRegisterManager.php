@@ -2,6 +2,8 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use Symfony\Component\Mailer\MailerInterface;
+use Twencha\Bundle\EventRegistrationBundle\Classes\AppSettings;
 use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
@@ -9,12 +11,13 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Swift_Mailer;
+use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
-abstract class BaseEmailRegisterManager extends BaseEntityManager
+abstract class BaseEmailRegisterManager
 {
+    use LoggerTrait;
     /*
                 === USAGE BELOW! ===
-
     /** @var $emailRegisterManager EmailRegisterManager
     $emailRegisterManager = $this->container->get('app_name.email_register_manager');
 
@@ -24,40 +27,14 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
     // spool emails to registrants
     foreach ($registrations as $curI => $curRC) {
         $emailRegister = $emailRegisterManager->createEmailAndProcess (
-        'cameronrobertburns@gmail.com',
-        array ('name' => 'dude'),
-        'basic-email',
-        'en',
-        true,
-        EmailRegister::essageFactor_ADAPTER
-    );
-
-    === SONATA ADMIN SERVICE DEFINITION ===
-    SONATA ADMIN SERVICE:
-        sonata.admin.email_register:
-        class: Companyname\Bundle\Bundlename\Services\EmailRegisterManager -- class that extends BaseEmailRegisterManager
-        tags:
-            - name: sonata.admin
-              manager_type: orm
-              group: "Emails"
-              label: "Registered Email"
-        arguments:
-            - ~
-            - VisageFour\Bundle\ToolsBundle\Entity\EmailRegister
-            - ~
-
-
-    === EMAIL REGISTER MANAGER SERVICE ===
-    app_name.email_register_manager:
-        class: Companyname\Bundle\Bundlename\Services\EmailRegisterManager -- class that extends BaseEmailRegisterManager
-        arguments:
-            - "@doctrine.orm.entity_manager"
-            - "ToolsBundle:EmailRegister" -- Entity should be extended first?? (probably no need / not many cases where extension is needed)
-            - "@event_dispatcher"
-            - "@logger"
-            - "@lexik_mailer.message_factory"
-            - "@mailer"
-            - "%emulate_email_sending%
+            'cameronrobertburns@gmail.com',
+            array ('name' => 'dude'),
+            'basic-email',
+            'en',
+            true,
+            EmailRegister::essageFactor_ADAPTER
+        );
+    }
 
     === SUB-EMAIL REGISTER MANAGER CLASS - EMAIL METHOD IMPLEMENTATION EXAMPLE ===
     // CUSTOM EMAIL METHODS BELOW:
@@ -87,46 +64,30 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
     }
     */
 
-    /**
-     * @var Swift_Mailer
-     */
-    protected $mailer;
-
     protected $emulateSending;
 
     /**
-     * @return mixed
+     * @var MailerInterface
      */
-    public function getMailer()
-    {
-        return $this->mailer;
-    }
+    protected $mailer;
 
     /**
-     * @param mixed $mailer
+     * @var EntityManager
      */
-    public function setMailer($mailer)
-    {
-        $this->mailer = $mailer;
-    }
+    protected $em;
+
+    protected $adminEmail;
 
     /**
-     * BaseEntityManager constructor.
-     * @param              $em
-     * @param                           $class
-     * @param   $dispatcher
-     * @param            $logger
-     * @param               $mailer
+     *
      */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface$dispatcher, LoggerInterface $logger, Swift_Mailer $mailer, $emulateSending) {
-        parent::__construct($em, $class, $dispatcher, $logger);
-
+    public function __construct(EntityManager $em, $emulateSending, MailerInterface $mailer, AppSettings $appSettings) {
         $this->emulateSending = $emulateSending;
-        if ($this->emulateSending) {
-            $this->logger->info('Emulate email sending: ON');
-        }
 
-        $this->setMailer($mailer);
+        $this->em = $em;
+        $this->mailer = $mailer;
+
+        $this->adminEmail = $appSettings->getSetting('adminEmailAddress');
     }
 
     // spools an email for sending via a worker or sends it immediately (depending on apps config)
@@ -218,10 +179,9 @@ abstract class BaseEmailRegisterManager extends BaseEntityManager
         return false;
     }
 
-    // return a spooled email
-
     /**
      * @return null|EmailRegister
+     * return a spooled email
      */
     public function getSpooled () {
         $email = $this->repo->findOneBy(array (

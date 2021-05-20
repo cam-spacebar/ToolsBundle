@@ -225,12 +225,4 @@ abstract class BaseEntityManager
     {
         $this->eventDispatcher = $eventDispatcher;
     }
-
-    /**
-     * @return EntityRepository
-     *
-     * implement this simply to get autocompletion in your inheriting class
-     * as each implementation of BaseEntityManager will have it's (different) own repo obj.
-     */
-    abstract protected function getRepo ();
 }
