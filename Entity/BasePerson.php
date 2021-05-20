@@ -6,6 +6,7 @@ use App\Classes\FrontendUrl;
 use App\Services\PasswordManager;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotRegisteredException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotVerifiedException;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -623,7 +624,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     public function setAccountIsVerified(bool $isVerified): self
     {
         if ($isVerified && !$this->isRegistered()) {
-            throw new \Exception ('the user: '. $this->email .' must complete their registration before they can be verified.');
+            throw new AccountNotRegisteredException($this->email);
         }
 
         $this->isVerified = $isVerified;
@@ -651,7 +652,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         }
 
 //        print 'token verification test: '. $this->verificationToken .' == '. $token;
-        if ($this->verificationToken == $token) ication token just cre{
+        if ($this->verificationToken == $token) {
             // Signal the account has been verified.
             $this->setAccountIsVerified(true);
             // note: don't need to delete the token (to prevent re-use and then reset of password), as this method first checks for isVerified() and wil throw an error).

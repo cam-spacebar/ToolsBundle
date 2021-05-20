@@ -13,7 +13,7 @@ use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
  * Class CustomApiTestCase
  * @package App\VisageFour\Bundle\ToolsBundle\Classes
  *
- * this class reduces boiler plate such as: creating users, sending requents (finctional testing) setup and tear down etc.
+ * this class reduces boiler plate such as: creating users, sending requests (finctional testing) setup and tear down etc.
  */
 abstract class CustomApiTestCase extends ApiTestCase
 {
@@ -102,12 +102,16 @@ abstract class CustomApiTestCase extends ApiTestCase
     /**
      * Sends a "http request" to the $url specified. This just reduces boilerplate in the testcase methods.
      */
-    protected function sendJSONRequest(string $method, $data) {
+    protected function sendJSONRequest(string $method, $data = null) {
         $json = ['json' => $data];
+        if ($method == 'GET') {
+            $json = [];
+        }
 
         if (empty($this->url)) {
             throw new \Exception('$this->url cannot be empty. Please set it via: specificSetUp().');
         }
+
         $crawler = $this->client->request($method, $this->url, $json);
 
         return $crawler;
@@ -147,7 +151,8 @@ abstract class CustomApiTestCase extends ApiTestCase
             'creating person with email: '. $this->userEmail .' and password: '. $this->userPassword
         );
 
-        $person     = $this->personMan->createNewPerson($this->userEmail);
+        $person = $this->personMan->createNewPerson($this->userEmail);
+        $person->setIsRegistered(true);
 
         $this->manager->persist($person);
         $this->manager->flush();
@@ -176,6 +181,6 @@ abstract class CustomApiTestCase extends ApiTestCase
      */
     protected function setCurrentMethod (string $method) {
         $this->currentMethod = $method;
-        $this->outputDebugToTerminal('now in test method: '. $method .'()');
+        $this->outputDebugToTerminal('now in test: '. $method .'()');
     }
 }
