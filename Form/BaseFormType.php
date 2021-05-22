@@ -103,9 +103,9 @@ class BaseFormType extends AbstractType
      */
     public function createForm (Request $request, $options = array ()) {
         // getDefaultData is implemented in the super class
-        $this->logger->info('populating form: "'. $this->className  .'" inputs with prefill/default values');
-        $defaultData = $this->getDefaultData();
-
+//        $this->logger->info('populating form: "'. $this->className  .'" inputs with prefill/default values');
+//        $defaultData = $this->getDefaultData();
+        $defaultData=null;
 
         $this->form = $this->formFactory->create($this->formPath, $defaultData, $options);
 
@@ -241,7 +241,7 @@ class BaseFormType extends AbstractType
 //    }
 
     protected function processInput () {
-        throw new NotImplementedException('processInput() must be overriden by the super class.');
+        throw new NotImplementedException('ERROR: processInput() must be overriden by the super class.');
     }
 
     /**
@@ -264,7 +264,7 @@ class BaseFormType extends AbstractType
         } else {
             $processingResult = self::FORM_NOT_SUBMITTED;
         }
-
+//die('ff');
         return $this->setProcessingResult ($processingResult);
     }
 
