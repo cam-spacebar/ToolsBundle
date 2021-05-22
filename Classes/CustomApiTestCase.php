@@ -3,7 +3,10 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\Services\AppSecurity;
+use App\Services\FrontendUrl;
 use App\Entity\Person;
+use App\Services\Factories\PersonFactory;
 use Doctrine\Common\Persistence\ObjectManager;
 use Faker\Factory;
 use VisageFour\Bundle\ToolsBundle\Services\TerminalColors;
@@ -51,6 +54,14 @@ abstract class CustomApiTestCase extends ApiTestCase
      * @var \App\Classes\FrontendUrl|object|null
      */
     protected $frontendUrl;
+    /**
+     * @var PersonFactory
+     */
+    protected $personFactory;
+    /**
+     * @var AppSecurity
+     */
+    private $appSecurity;
 
     abstract protected function specificSetUp ();
 
@@ -81,7 +92,9 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function getServices()
     {
         $this->personMan        = self::$container->get('twencha.person_man');
-        $this->frontendUrl        = self::$container->get('App\Classes\FrontendUrl');
+        $this->frontendUrl      = self::$container->get('test.'. FrontendUrl::class);
+        $this->personFactory    = self::$container->get('test.'. PersonFactory::class);
+        $this->appSecurity      = self::$container->get('test.'. AppSecurity::class);
     }
 
     static public function setUpBeforeClass(): void
@@ -101,8 +114,9 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     /**
      * Sends a "http request" to the $url specified. This just reduces boilerplate in the testcase methods.
+     * if $urlOverride is set, it will be the target instead of $this->url. (Note: $this->url is just useful to set in setUp() once, instead of per every test. URL override is used on things like: setup that requires login, as otherwise we'd have to re-set the $this->url from within the test method (not ideal).)
      */
-    protected function sendJSONRequest(string $method, $data = null) {
+    protected function sendJSONRequest(string $method, $data = null, $urlOverride = null) {
         $json = ['json' => $data];
         if ($method == 'GET') {
             $json = [];
@@ -112,7 +126,8 @@ abstract class CustomApiTestCase extends ApiTestCase
             throw new \Exception('$this->url cannot be empty. Please set it via: specificSetUp().');
         }
 
-        $crawler = $this->client->request($method, $this->url, $json);
+        $url = (empty($urlOverride)) ? $this->url : $urlOverride;
+        $crawler = $this->client->request($method, $url, $json);
 
         return $crawler;
     }
@@ -158,6 +173,27 @@ abstract class CustomApiTestCase extends ApiTestCase
         $this->manager->flush();
 
         return $person;
+    }
+
+    /**
+     * @throws \Exception
+     *
+     * Create a user, complete their registration, verify the account, set the password and also: log them in.
+     */
+    protected function createUserAndLogin()
+    {
+        $this->userPassword = $this->faker->password(8);
+        $this->person = $this->personFactory->createUserThenRegisterAndVerifyAccount($this->userPassword);
+
+        // login the new user
+        $this->url = $this->frontendUrl->getSymfonyURL(FrontendUrl::LOGIN);
+        $data = [
+            'email'         => $this->person->getEmail(),
+            'password'      => $this->userPassword
+        ];
+        $crawler = $this->sendJSONRequest('POST', $data);
+
+        return true;
     }
 
     protected function removeUser (Person $person) {

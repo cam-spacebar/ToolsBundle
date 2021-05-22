@@ -2,7 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
-use App\Classes\FrontendUrl;
+use App\Services\FrontendUrl;
 use App\Services\PasswordManager;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
