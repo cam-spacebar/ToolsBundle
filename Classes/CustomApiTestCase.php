@@ -51,7 +51,7 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     // setup that is specific to the test case that subclasses this class.
     /**
-     * @var \App\Classes\FrontendUrl|object|null
+     * @var FrontendUrl
      */
     protected $frontendUrl;
     /**
@@ -61,7 +61,12 @@ abstract class CustomApiTestCase extends ApiTestCase
     /**
      * @var AppSecurity
      */
-    private $appSecurity;
+    protected $appSecurity;
+
+    /**
+     * @var Person
+     */
+    protected $person;
 
     abstract protected function specificSetUp ();
 
@@ -193,7 +198,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         ];
         $crawler = $this->sendJSONRequest('POST', $data);
 
-        return true;
+        return $this->person;
     }
 
     protected function removeUser (Person $person) {

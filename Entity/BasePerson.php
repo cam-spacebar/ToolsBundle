@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
+use App\Services\AppSecurity;
 use App\Services\FrontendUrl;
 use App\Services\PasswordManager;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
@@ -715,5 +716,10 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     public function getChangePasswordToken(): string
     {
         return $this->changePasswordToken;
+    }
+
+    public function isLoggedIn()
+    {
+        throw new \Exception('you must use: AppSecurity->getLoggedInUser() to get the loggedIn user. Or use CustomController->getLoggedInPerson(). You may also consider using: getLoggedInUserOrRedirectToLogin() - as you probably want to cause a redirect.');
     }
 }
