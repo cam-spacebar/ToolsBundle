@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Twencha\Bundle\EventRegistrationBundle\Classes\AppSettings;
 use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
@@ -76,19 +77,45 @@ abstract class BaseEmailRegisterManager
      */
     protected $em;
 
+    /**
+     * @var bool
+     * when true, it will prevent a emails from being sent. This does not duplicate the function of env var: MAILER_DSN=null://default - both methods need to exists.
+     * It is used (for example) to prevent sending verification emails when setting up new user fixtures (for test of loadFixtiures).
+     */
+    private $preventMailing;
+
     protected $adminEmail;
 
     /**
      *
      */
-    public function __construct(EntityManager $em, $emulateSending, MailerInterface $mailer, AppSettings $appSettings) {
-        $this->emulateSending = $emulateSending;
+    public function __construct(EntityManager $em, MailerInterface $mailer, AppSettings $appSettings) {
+        $this->preventMailing = false;
 
         $this->em = $em;
         $this->mailer = $mailer;
 
         $this->adminEmail = $appSettings->getSetting('adminEmailAddress');
     }
+
+    public function setPreventMailing(bool $bool)
+    {
+        $this->preventMailing = $bool;
+    }
+
+    public function send (TemplatedEmail $email)
+    {
+        if ($this->preventMailing) {
+            $msg='email prevented from sending as $this->preventMailing = true';
+            $this->logger->info($msg);
+        } else {
+            $this->mailer->send($email);
+        }
+
+        return $this;
+    }
+
+
 
     // spools an email for sending via a worker or sends it immediately (depending on apps config)
     public function createEmailAndProcess ($to, $params, $template, $locale, $spoolEmail, $adapter = EmailRegister::LEXIK_ADAPTER) {
@@ -137,7 +164,7 @@ abstract class BaseEmailRegisterManager
                 if ($toSend) {
                     // todo: create AppSettings emulate_email_sending variable?
                     // then send the email
-                    if ($this->emulateSending) {
+                    if (!$this->zz) {
                         $this->logger->info('Email NOT sent to gateway (emulate_email_sending: true).');
                         $email->setSendStatus(EmailRegister::EMULATED_SEND);
                     } else {

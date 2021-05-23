@@ -1,6 +1,6 @@
 <?php
 
-namespace App\VisageFour\Bundle\ToolsBundle\Interfaces;
+namespace VisageFour\Bundle\ToolsBundle\Interfaces;
 
 /*
  * this interface allows the app to throw (and catch) (less verbose and) custom exception classes, instead of the older (and more verbose):

@@ -4,6 +4,7 @@ namespace App\VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Services\AppSecurity;
+use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
 use App\Entity\Person;
 use App\Services\Factories\PersonFactory;
@@ -67,6 +68,10 @@ abstract class CustomApiTestCase extends ApiTestCase
      * @var Person
      */
     protected $person;
+    /**
+     * @var EmailRegisterManager
+     */
+    private $emailRegisterMan;
 
     abstract protected function specificSetUp ();
 
@@ -96,10 +101,12 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     protected function getServices()
     {
+        // to add a service alias, esarch for marker: #pferfiinw4f
         $this->personMan        = self::$container->get('twencha.person_man');
         $this->frontendUrl      = self::$container->get('test.'. FrontendUrl::class);
         $this->personFactory    = self::$container->get('test.'. PersonFactory::class);
         $this->appSecurity      = self::$container->get('test.'. AppSecurity::class);
+        $this->emailRegisterMan = self::$container->get('test.'. EmailRegisterManager::class);
     }
 
     static public function setUpBeforeClass(): void
@@ -188,7 +195,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function createUserAndLogin()
     {
         $this->userPassword = $this->faker->password(8);
-        $this->person = $this->personFactory->createUserThenRegisterAndVerifyAccount($this->userPassword);
+        $this->person = $this->personFactory->fixturesCreateUserThenRegisterAndVerifyAccount($this->userPassword);
 
         // login the new user
         $this->url = $this->frontendUrl->getSymfonyURL(FrontendUrl::LOGIN);
@@ -197,6 +204,7 @@ abstract class CustomApiTestCase extends ApiTestCase
             'password'      => $this->userPassword
         ];
         $crawler = $this->sendJSONRequest('POST', $data);
+//        dump("User login attempt result (#234fwef): \n". $crawler->getContent());
 
         return $this->person;
     }
