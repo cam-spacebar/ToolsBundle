@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use App\VisageFour\Bundle\ToolsBundle\Services\WorkIsRequiredHere;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Twencha\Bundle\EventRegistrationBundle\Classes\AppSettings;
@@ -65,8 +66,6 @@ abstract class BaseEmailRegisterManager
     }
     */
 
-    protected $emulateSending;
-
     /**
      * @var MailerInterface
      */
@@ -115,10 +114,10 @@ abstract class BaseEmailRegisterManager
         return $this;
     }
 
-
-
     // spools an email for sending via a worker or sends it immediately (depending on apps config)
     public function createEmailAndProcess ($to, $params, $template, $locale, $spoolEmail, $adapter = EmailRegister::LEXIK_ADAPTER) {
+        WorkIsRequiredHere::needsRewriting();
+
         $loggerAction = ($spoolEmail) ? 'spool' : 'send';
         /** @var EmailRegister $email */
         $email = $this->createNew(false, false);
@@ -146,6 +145,8 @@ abstract class BaseEmailRegisterManager
 
     // send email if spooled
     public function sendEmail (EmailRegister $email) {
+        WorkIsRequiredHere::needsRewriting();
+
         if ($email->getSendStatus() == EmailRegister::SPOOLED) {
             if ($email->getAdapter() == EmailRegister::LEXIK_ADAPTER) {
                 // create a swift message + send
@@ -195,6 +196,7 @@ abstract class BaseEmailRegisterManager
      */
     public function sendNextSpooled ()
     {
+        WorkIsRequiredHere::needsRewriting();
         // get a spooled email
         $email = $this->getSpooled();
 
@@ -211,6 +213,7 @@ abstract class BaseEmailRegisterManager
      * return a spooled email
      */
     public function getSpooled () {
+        WorkIsRequiredHere::needsRewriting();
         $email = $this->repo->findOneBy(array (
             'sendStatus'   => EmailRegister::SPOOLED
         ));
@@ -219,28 +222,14 @@ abstract class BaseEmailRegisterManager
     }
 
     public function countSpooled () {
+        WorkIsRequiredHere::needsRewriting();
         return $this->repo->countSpooled();
     }
 
     public function getRemainingEmailstoSendAsCount () {
+        WorkIsRequiredHere::needsRewriting();
         $count      = $this->repo->countSpooled ();
 
         return $count;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getEmulateSending()
-    {
-        return $this->emulateSending;
-    }
-
-    /**
-     * @param mixed $emulateSending
-     */
-    public function setEmulateSending($emulateSending)
-    {
-        $this->emulateSending = $emulateSending;
     }
 }
