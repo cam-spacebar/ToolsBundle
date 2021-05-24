@@ -211,6 +211,8 @@ abstract class CustomApiTestCase extends ApiTestCase
     }
 
     protected function removeUser (Person $person) {
+        // removed, because it generates an erro when there's a second API call - yet to find out why.
+        // error is: Doctrine\ORM\ORMInvalidArgumentException: Detached entity 1113 cannot be removed
 //        $this->manager->merge($person);
 //        $this->manager->remove($person);
         $this->manager->flush();

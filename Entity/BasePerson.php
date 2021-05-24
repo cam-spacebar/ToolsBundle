@@ -720,6 +720,10 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
 
     public function isLoggedIn()
     {
-        throw new \Exception('you must use: AppSecurity->getLoggedInUser() to get the loggedIn user. Or use CustomController->getLoggedInPerson(). You may also consider using: getLoggedInUserOrRedirectToLogin() - as you probably want to cause a redirect.');
+        throw new \Exception(
+            'you must use: AppSecurity->getLoggedInUser() to get the loggedIn user. '.
+            'Or use CustomController->getLoggedInPerson(). '.
+            'You may also consider using: getLoggedInUserOrRedirectToLogin() - as you probably want to cause a redirect.'
+        );
     }
 }
