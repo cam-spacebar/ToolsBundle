@@ -384,8 +384,8 @@ class StaticInternational
         'is' => 'Icelandic',
         'it' => 'Italian',
         'iu' => 'Inuktitut',
-        'ja' => 'Japanese (ja)',
-        'jc' => 'Javanese (jv)',
+        'ja' => 'Japanese',
+        'jc' => 'Javanese',
         'ka' => 'Georgian',
         'kg' => 'Kongo',
         'ki' => 'Kikuyu, Gikuyu',
@@ -792,6 +792,8 @@ class StaticInternational
      *
      * this will determine if it's a country or lang
      * and then return the full name of either
+     *
+     * note: for this to work, languages and country codes must be unique (i.e. a country code and a langauge code with the same value will result in a bug).
      */
     public static function getNameByCountryOrLanguageCode($code)
     {

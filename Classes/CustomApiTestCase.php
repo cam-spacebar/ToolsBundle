@@ -203,6 +203,7 @@ abstract class CustomApiTestCase extends ApiTestCase
             'email'         => $this->person->getEmail(),
             'password'      => $this->userPassword
         ];
+
         $crawler = $this->sendJSONRequest('POST', $data);
 //        dump("User login attempt result (#234fwef): \n". $crawler->getContent());
 
