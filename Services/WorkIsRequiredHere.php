@@ -1,6 +1,6 @@
 <?php
 
-namespace App\VisageFour\Bundle\ToolsBundle\Services;
+namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use Twencha\Bundle\EventRegistrationBundle\Classes\AppSettings;
 

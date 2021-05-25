@@ -43,6 +43,8 @@ abstract class CustomApiTestCase extends ApiTestCase
     // the current test method running. Useful for displaying in debugging messages.
     private $currentMethod;
 
+    protected $HTTPMethod;
+
     /**
      * @var Factory
      */
@@ -68,6 +70,7 @@ abstract class CustomApiTestCase extends ApiTestCase
      * @var Person
      */
     protected $person;
+
     /**
      * @var EmailRegisterManager
      */
@@ -120,6 +123,7 @@ abstract class CustomApiTestCase extends ApiTestCase
 
 //        self::$terminalColors = self::$container->get('TerminalColors');
         self::$terminalColors = new TerminalColors();
+//        $this->outputDebugToTerminal("class startASDF\n\n zzz \n\n");
 
         return;
     }
@@ -147,6 +151,29 @@ abstract class CustomApiTestCase extends ApiTestCase
     /**
      * Specifically for debugging outputs. Can be turned on (while developing a single test case) and turned off when doing mass tests.
      */
+    protected function outputTestingUrl()
+    {
+        if(empty($this->url)) {
+            throw new \Exception('$this->url cannot be empty. (Error is in test: '. $this->currentMethod .')');
+        }
+
+        $this->outputColoredTextToTerminal('testing URL: '. $this->url .' (using HTTP method: '. $this->HTTPMethod .')');
+
+//        $this->outputDebugToTerminal($this->url);
+    }
+
+    /**
+     * Specifically for debugging outputs. Can be turned on (while developing a single test case) and turned off when doing mass tests.
+     */
+    protected function setUrl($url)
+    {
+        $this->url = $url;
+        $this->outputTestingUrl();
+    }
+
+    /**
+     * Specifically for debugging outputs. Can be turned on (while developing a single test case) and turned off when doing mass tests.
+     */
     protected function outputDebugToTerminal($msg)
     {
         if ($this->debugOutputOn) {
@@ -157,6 +184,14 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function outputRedTextToTerminal($msg)
     {
         $text = self::$terminalColors->getColoredString($msg, 'red', 'black');
+        print "\n";
+        print $text;
+    }
+
+    protected function outputColoredTextToTerminal($msg, $fgColor = 'red', $bgColor = 'black')
+    {
+        $msg = 'DEBUG: '.$msg;
+        $text = self::$terminalColors->getColoredString($msg, $fgColor, $bgColor);
         print "\n";
         print $text;
     }
@@ -198,7 +233,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         $this->person = $this->personFactory->fixturesCreateUserThenRegisterAndVerifyAccount($this->userPassword);
 
         // login the new user
-        $this->url = $this->frontendUrl->getSymfonyURL(FrontendUrl::LOGIN);
+        $this->setUrl($this->frontendUrl->getSymfonyURL(FrontendUrl::LOGIN));
         $data = [
             'email'         => $this->person->getEmail(),
             'password'      => $this->userPassword
@@ -233,6 +268,13 @@ abstract class CustomApiTestCase extends ApiTestCase
      */
     protected function setCurrentMethod (string $method) {
         $this->currentMethod = $method;
-        $this->outputDebugToTerminal('now in test: '. $method .'()');
+
+        // remove namespace component of $method
+        $offset = strrpos($method, '\\') +1;
+        $shortened = substr($method, $offset);
+
+        $this->outputColoredTextToTerminal('Currently in test: '. $shortened .'()', 'blue');
+
+//        zself::$terminalColors->getColoredString($msg, 'red', 'black');
     }
 }
