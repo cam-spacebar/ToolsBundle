@@ -3,7 +3,7 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use App\Services\AppSecurity;
+use VisageFour\Bundle\ToolsBundle\Services\Security\AppSecurity;
 use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
 use App\Entity\Person;
