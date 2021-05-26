@@ -6,11 +6,18 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class BaseFrontendUrl
 {
+    /**
+     * @var array
+     * a list of all possible routes - with a route to the front-end and another to the backend.
+     */
+    protected $routeList = [];
+
     // this ensures that a redirection is *specifically* set, so that if a null / false is accidentally returned, that the bug is caught.
     public const NO_REDIRECTION = 'noRedirect';
 
     private $baseUrl;
 
+    // list of routes constants:
     const LOGIN                     = 100;
     const CONFIRM_EMAIL             = 200;
     const MAIN_LOGGED_IN_USER_MENU  = 300;
@@ -20,44 +27,9 @@ class BaseFrontendUrl
     const USER_REGISTRATION         = 700;
     const ACCOUNT_VERIFICATION      = 900;
 
-    // Marker: #CMDKKD00
     const NO_FRONTEND = 'NO_FRONTEND';      // placeholder to indicate that there's no "front-end", maybe because the "front-end" is acctually delivered via the backend (not a react client)
+
     // in this case, use GET on the symfony route_name to get the page.
-    static public $routes = [
-        self::LOGIN => [
-            'route_name'        => 'app_login_post',
-            'front_end'         => 'login'
-        ],
-        self::LOGOUT => [
-            'route_name'        => 'manual_logout',
-            'front_end'         => null
-        ],
-        self::CONFIRM_EMAIL => [
-            'controller'        => 'SecurityController::verifyEmailAccountViaTokenAction',          // controller listed here for debugging (finding the controller quickly).
-            'route_name'        => 'confirm_email_get',
-            'front_end'         => 'confirm_email/{EMAIL}/{VERIFICATION_TOKEN}'
-        ],
-        self::MAIN_LOGGED_IN_USER_MENU => [
-            'route_name'        => 'main_loggedin_user_menu',
-            'front_end'         => 'userMenu'
-        ],
-        self::HOME => [
-            'route_name'        => 'homepage',
-            'front_end'         => ''
-        ],
-        self::CHANGE_PASSWORD => [
-            'route_name'        => 'change_password',
-            'front_end'         => 'change_password'
-        ],
-        self::USER_REGISTRATION => [
-            'route_name'        => 'reg',
-            'front_end'         => self::NO_FRONTEND
-        ],
-//        self::ACCOUNT_VERIFICATION => [
-//            'route_name'        => 'account_verification',
-//            'front_end'         => 'account_verification'
-//        ]
-    ];
 
     /**
      * @var UrlGeneratorInterface
@@ -84,10 +56,11 @@ class BaseFrontendUrl
 
         $this->router               = $router;
         $this->frontend_base_url    = $frontend_base_url;
+        $this->populateRouteList();
     }
 
-    static public function checkIfRouteExists ($constant) { // dont add an type to the parameter
-        // check if Null was sent
+    public function checkIfRouteExists ($constant) { // dont add an type to the parameter
+        // check if null was sent
         if (empty($constant)) {
             throw new \Exception(
                 'A falsey value (likely Null) was provided as the $constant for in the FrontendUrl class.'.
@@ -95,17 +68,22 @@ class BaseFrontendUrl
             );
         }
 
-        if (empty(self::$routes[$constant])) {
-            $extra = (is_string($constant)) ? ' Also, the provided value was a string, it should be a number. This is likely because you have called getFrontendURLPart() twice.' : '';
+        if (!$this->doesRouteConstantExist($constant)) {
             throw new \Exception (
-                "a route with the value: '$constant' has not beeen coigured. (Search for marker: #CMDKKD00 to add new routes)."
-                .$extra
+                "a route with the value: '$constant' has not been configured.'.
+                ' Note, this should also be uppercase, if not, you have probably called getFrontendURLPart() twice. (Search for marker: #CMDKKD00 to add new routes)."
             );
         }
 
 //        if (empty($route)) {
 //            throw new \Exception ('route_name cannot be empty.');
 //        }
+    }
+
+    private function doesRouteConstantExist($constant)
+    {
+//        dd($this->routeList);
+        return !empty($this->routeList[$constant]);
     }
 
     /**
@@ -126,9 +104,9 @@ class BaseFrontendUrl
 
     public function getSymfonyRouteNAME ($constant)
     {
-        self::checkIfRouteExists($constant);
+        $this->checkIfRouteExists($constant);
 
-        return self::$routes[$constant];
+        return $this->routeList[$constant];
     }
 
     public function getFrontendUrl(int $constant, $data = [])
@@ -173,7 +151,7 @@ class BaseFrontendUrl
 
         return $populatedPath;
     }
-
+    
     /**
      * @param $constant
      * @return mixed
@@ -183,15 +161,83 @@ class BaseFrontendUrl
      */
     public function getFrontendURLPart ($constant, $addBaseUrl = false)
     {
-        self::checkIfRouteExists($constant);
+        $this->checkIfRouteExists($constant);
 
-        $route = self::$routes[$constant];
+        $route = $this->routeList[$constant];
 
         if ($addBaseUrl == true) {
             return $this->baseUrl .'/'. $route['front_end'];
         }
 
         return $route['front_end'];
+    }
+
+    /**
+     * @return $this
+     * @throws \Exception
+     *
+     * add a list of routes to the main routeList
+     */
+    private function populateRouteList()
+    {
+        // Add new route marker: #CMDKKD00
+        $routes = [
+            self::LOGIN => [
+                'route_name'        => 'app_login_post',
+                'front_end'         => 'login'
+            ],
+            self::LOGOUT => [
+                'route_name'        => 'manual_logout',
+                'front_end'         => null
+            ],
+            self::CONFIRM_EMAIL => [
+                'controller'        => 'SecurityController::verifyEmailAccountViaTokenAction',          // controller listed here for debugging (finding the controller quickly).
+                'route_name'        => 'confirm_email_get',
+                'front_end'         => 'confirm_email/{EMAIL}/{VERIFICATION_TOKEN}'
+            ],
+            self::MAIN_LOGGED_IN_USER_MENU => [
+                'route_name'        => 'main_loggedin_user_menu',
+                'front_end'         => 'userMenu'
+            ],
+            self::HOME => [
+                'route_name'        => 'homepage',
+                'front_end'         => ''
+            ],
+            self::CHANGE_PASSWORD => [
+                'route_name'        => 'change_password',
+                'front_end'         => 'change_password'
+            ],
+            self::USER_REGISTRATION => [
+                'route_name'        => 'reg',
+                'front_end'         => self::NO_FRONTEND
+            ],
+    //        self::ACCOUNT_VERIFICATION => [
+    //            'route_name'        => 'account_verification',
+    //            'front_end'         => 'account_verification'
+    //        ]
+        ];
+
+        foreach ($routes as $curI => $curRoute) {
+            $this->addToRouteList($curRoute, $curI);
+        }
+//        dd($this->routeList);
+        return $this;
+    }
+
+    /**
+     * @param $item
+     * add the item to the array, but throw an exception if an array element index already exists (this simply ensures that routes don't overwrite each other.)
+     */
+    protected function addToRouteList($item, $arrIndex): self
+    {
+        if ($this->doesRouteConstantExist($arrIndex)) {
+            throw new \Exception('unable to add the item with array index: "'. $arrIndex .'" to the routeList as an item with this array index already exists.');
+        }
+
+        $this->routeList[$arrIndex] = $item;
+
+
+        return $this;
     }
 }
 ?>
