@@ -3,7 +3,6 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Entity\Person;
-use App\Services\FrontendUrl;
 use App\Services\PasswordManager;
 use App\Traits\FlashBagTrait;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
@@ -41,30 +40,35 @@ class AppSecurity
      * @var AuthenticationUtils
      */
     private $authenticationUtils;
+
     /**
      * @var PersonRepository
      */
     private $personRepo;
+
     /**
      * @var PersonManager
      */
     private $personMan;
+
     /**
      * @var EntityManager
      */
     private $em;
-    /**
-     * @var FrontendUrl
-     */
-    private $frontendUrl;
+
     /**
      * @var PasswordManager
      */
     private $passwordManager;
 
+    /**
+     * @var BaseFrontendUrl
+     */
+    private $baseFrontendUrl;
+
     public function __construct(
         TokenStorageInterface $tokenStorageInterface,  ResponseAssembler $ra, AuthenticationUtils $authenticationUtils,
-        PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, FrontendUrl $frontendUrl, PasswordManager $passwordManager
+        PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, BaseFrontendUrl $baseFrontendUrl, PasswordManager $passwordManager
     ) {
         $this->tokenStorageInterface    = $tokenStorageInterface;
         $this->ra                       = $ra;
@@ -72,8 +76,9 @@ class AppSecurity
         $this->personRepo               = $personRepo;
         $this->personMan                = $personMan;
         $this->em                       = $em;
-        $this->frontendUrl              = $frontendUrl;
+
         $this->passwordManager          = $passwordManager;
+        $this->baseFrontendUrl          = $baseFrontendUrl;
     }
 
     /**
@@ -121,7 +126,7 @@ class AppSecurity
         $e = new ApiErrorCode($errorCode);
         // get the last username entered by the user
         $data = ['lastEmail' => $this->authenticationUtils->getLastUsername()];
-        return $this->ra->assembleJsonResponse($data, FrontendUrl::NO_REDIRECTION, $e);
+        return $this->ra->assembleJsonResponse($data, BaseFrontendUrl::NO_REDIRECTION, $e);
     }
 
     public function logoutUser (Request $request)
@@ -131,7 +136,7 @@ class AppSecurity
 
         $request->getSession()->invalidate();
 
-        return $this->ra->assembleJsonResponse(null, FrontendUrl::HOME);
+        return $this->ra->assembleJsonResponse(null, BaseFrontendUrl::HOME);
     }
 
     /**
@@ -173,13 +178,13 @@ class AppSecurity
                 $redirect = null;
                 if (!$person->hasPasswordBeenSet()) {
                     // redirect to reset password page.
-                    $redirect = FrontendUrl::CHANGE_PASSWORD;
+                    $redirect = BaseFrontendUrl::CHANGE_PASSWORD;
                 }
                 throw new ApiErrorCode(ApiErrorCode::ACCOUNT_ALREADY_VERIFIED, null, $redirect);
             }
 
             // token was correct (and account is now verified) - so they must set a password:
-            $redirect = FrontendUrl::CHANGE_PASSWORD;
+            $redirect = BaseFrontendUrl::CHANGE_PASSWORD;
             // send password token for use when the front-end redirects to reset_password page
             // todo: security: is this vulnerable? (sending the token to the client? however, it's straight after verifying the email account.)
             $data = ['changePasswordToken' => $changePasswordToken];
@@ -241,7 +246,7 @@ class AppSecurity
 
         return $this->ra->assembleJsonResponse(
             null,
-            FrontendUrl::MAIN_LOGGED_IN_USER_MENU
+            BaseFrontendUrl::MAIN_LOGGED_IN_USER_MENU
         );
 
     }
@@ -333,12 +338,11 @@ class AppSecurity
 ////            die ('usernot found!');
 //        }
 
-
         if (empty($person)) {
 //            throw new ApiErrorCode(
-//                ApiErrorCode::LOGIN_REQUIRED,
+//                ApiErrorCode::LOGIN_REQU IRED,
 //                null,
-//                FrontendUrl::LOGIN
+//                BaseFrontendUrl::LOGIN
 //            );
 
 //            throw new UserNotLoggedInException();

@@ -30,21 +30,21 @@ class ResponseAssembler
     private $flashbag;
 
     /**
-     * @var FrontendUrl
-     */
-    private $frontendUrl;
-
-    /**
      * @var AuthenticationUtils
      */
     private $authentication_utils;
 
-    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, FrontendUrl $frontendUrl, AuthenticationUtils $authentication_utils)
+    /**
+     * @var BaseFrontendUrl
+     */
+    private $baseFrontendUrl;
+
+    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, BaseFrontendUrl $baseFrontendUrl, AuthenticationUtils $authentication_utils)
     {
         $this->tokenStorageInterface    = $tokenStorageInterface;
         $this->flashbag                 = $flashbag;
-        $this->frontendUrl              = $frontendUrl;
         $this->authentication_utils     = $authentication_utils;
+        $this->baseFrontendUrl = $baseFrontendUrl;
     }
 
     private function getLoggedInUser () {
@@ -78,7 +78,7 @@ class ResponseAssembler
         $rootKeys['data'] = $data;
 
         if ($redirect !== FrontendUrl::NO_REDIRECTION) {
-            $rootKeys['redirect'] = $this->frontendUrl->getFrontendURLPart($redirect);
+            $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendURLPart($redirect);
         }
 
         $rootKeys['success_msgs'] = $this->flashbag->get('success_msgs');        // an array of success messages (is returned)
