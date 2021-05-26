@@ -18,14 +18,14 @@ class BaseFrontendUrl
     private $baseUrl;
 
     // list of routes constants:
-    const LOGIN                     = 100;
-    const CONFIRM_EMAIL             = 200;
-    const MAIN_LOGGED_IN_USER_MENU  = 300;
-    const LOGOUT                    = 400;
-    const HOME                      = 500;
-    const CHANGE_PASSWORD           = 600;
-    const USER_REGISTRATION         = 700;
-    const ACCOUNT_VERIFICATION      = 900;
+    const LOGIN                     = 'LOGIN';
+    const CONFIRM_EMAIL             = 'CONFIRM_EMAIL';
+    const MAIN_LOGGED_IN_USER_MENU  = 'MAIN_LOGGED_IN_USER_MENU';
+    const LOGOUT                    = 'LOGOUT';
+    const HOME                      = 'HOME';
+    const CHANGE_PASSWORD           = 'CHANGE_PASSWORD';
+    const USER_REGISTRATION         = 'USER_REGISTRATION';
+    const ACCOUNT_VERIFICATION      = 'ACCOUNT_VERIFICATION';
 
     const NO_FRONTEND = 'NO_FRONTEND';      // placeholder to indicate that there's no "front-end", maybe because the "front-end" is acctually delivered via the backend (not a react client)
 
@@ -87,13 +87,13 @@ class BaseFrontendUrl
     }
 
     /**
-     * @param int $constant
+     * @param string $constant
      * @return string
      * @throws \Exception
      *
      * Return the URL of the symfony route (for the $constant provided).
      */
-    public function getSymfonyURL (int $constant, array $params = [])
+    public function getSymfonyURL (string $constant, array $params = [])
     {
         $route = $this->getSymfonyRouteNAME($constant);
 
@@ -109,7 +109,7 @@ class BaseFrontendUrl
         return $this->routeList[$constant];
     }
 
-    public function getFrontendUrl(int $constant, $data = [])
+    public function getFrontendUrl(string $constant, $data = [])
     {
         $pathPart = $this->getFrontendURLPart($constant);
 
