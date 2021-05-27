@@ -3,7 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Entity\Person;
-use App\Services\PasswordManager;
+use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Traits\FlashBagTrait;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;

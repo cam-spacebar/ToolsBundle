@@ -4,7 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Entity;
 
 use VisageFour\Bundle\ToolsBundle\Services\Security\AppSecurity;
 use App\Services\FrontendUrl;
-use App\Services\PasswordManager;
+use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotRegisteredException;
