@@ -183,6 +183,7 @@ class BaseFrontendUrl
         // Add new route marker: #CMDKKD00
         $routes = [
             self::LOGIN => [
+                'controller'        => 'SecurityController::loginPOSTAction()',          // controller listed here for debugging (finding the controller quickly).
                 'route_name'        => 'app_login_post',
                 'front_end'         => 'login'
             ],

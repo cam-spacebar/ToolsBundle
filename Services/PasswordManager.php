@@ -21,6 +21,9 @@ use VisageFour\Bundle\ToolsBundle\Exceptions\PasswordValidationException;
  */
 class PasswordManager
 {
+    const MINIMUM_PASSWORD_LENGTH = 8;
+    const MAXIMUM_PASSWORD_LENGTH = 70;
+
     /**
      * @var UserPasswordEncoderInterface
      */
@@ -52,13 +55,11 @@ class PasswordManager
 
         // check password is longer than 8 characters
         $length = strlen($newPassword);
-        $min = 8;
-        if ($length < $min) {
+        if ($length < self::MINIMUM_PASSWORD_LENGTH) {
             throw new PasswordValidationException("You must provide a password longer than $min characters.". $extraText);
         }
 
-        $max = 70;
-        if ($length > 70) {
+        if ($length > self::MAXIMUM_PASSWORD_LENGTH) {
             throw new PasswordValidationException("You must provide a password less than $max characters.". $extraText);
         }
 

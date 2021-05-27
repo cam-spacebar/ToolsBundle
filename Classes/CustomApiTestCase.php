@@ -3,6 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use VisageFour\Bundle\ToolsBundle\Services\Security\AppSecurity;
 use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
@@ -229,7 +230,7 @@ abstract class CustomApiTestCase extends ApiTestCase
      */
     protected function createUserAndLogin()
     {
-        $this->userPassword = $this->faker->password(8);
+        $this->userPassword = $this->faker->password(PasswordManager::MINIMUM_PASSWORD_LENGTH);
         $this->person = $this->personFactory->fixturesCreateUserThenRegisterAndVerifyAccount($this->userPassword);
 
         // login the new user
