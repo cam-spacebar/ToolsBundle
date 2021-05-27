@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\VisageFour\Bundle\ToolsBundle\Exceptions;
+namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 
 class PersonNotFound extends PublicException

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\VisageFour\Bundle\ToolsBundle\Classes;
+namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\Security\AppSecurity;
@@ -15,7 +15,7 @@ use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
 
 /**
  * Class CustomApiTestCase
- * @package App\VisageFour\Bundle\ToolsBundle\Classes
+ * @package VisageFour\Bundle\ToolsBundle\Classes
  *
  * this class reduces boiler plate such as: creating users, sending requests (finctional testing) setup and tear down etc.
  */

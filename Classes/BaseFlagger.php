@@ -7,7 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use App\Classes\Flaggers\BadgeWorkflowFlagger;
-use App\VisageFour\Bundle\ToolsBundle\Classes\FlaggerOptions;
+use VisageFour\Bundle\ToolsBundle\Classes\FlaggerOptions;
 use VisageFour\Bundle\ToolsBundle\Exceptions\FlagOptionDoesNotExistException;
 
 /**

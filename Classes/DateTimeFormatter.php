@@ -4,7 +4,7 @@
 * by: cameronrobertburns
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Classes;
+namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 class DateTimeFormatter
 {

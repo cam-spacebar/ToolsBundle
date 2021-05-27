@@ -6,7 +6,7 @@ use Twencha\Bundle\EventRegistrationBundle\Classes\AppSettings;
 
 /**
  * Class WorkIsRequiredHere
- * @package App\VisageFour\Bundle\ToolsBundle\Services
+ * @package VisageFour\Bundle\ToolsBundle\Services
  *
  * a class that's used to indicate where work needs to be done (remove old legacy code or rewrite legacy code).
  *

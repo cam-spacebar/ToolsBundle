@@ -1,6 +1,6 @@
 <?php
 
-namespace App\VisageFour\Bundle\ToolsBundle\Exceptions;
+namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 class AccountNotVerifiedException extends PublicException
 {

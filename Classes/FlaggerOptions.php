@@ -4,14 +4,14 @@
 * by: cameronrobertburns
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Classes;
+namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 /**
  * this is a seperate class from BaseFlagger, so that it enforces use of
  * getFlaggerOptions which calls ensurePopulated() first
  *
  * Class FlaggerOptions
- * @package App\VisageFour\Bundle\ToolsBundle\Classes
+ * @package VisageFour\Bundle\ToolsBundle\Classes
  *
  */
 abstract class FlaggerOptions

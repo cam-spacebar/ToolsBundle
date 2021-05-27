@@ -1,10 +1,10 @@
 <?php
 
-namespace App\VisageFour\Bundle\ToolsBundle\Exceptions;
+namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 /**
  * Class PublicException
- * @package App\VisageFour\Bundle\ToolsBundle\Exceptions
+ * @package VisageFour\Bundle\ToolsBundle\Exceptions
  *
  * allows the exception to provide a public message that is sent back to the user/client.
  */

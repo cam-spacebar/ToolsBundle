@@ -3,7 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Statics;
 
 
-use App\VisageFour\Bundle\ToolsBundle\Exceptions\CountryCodeDoesNotExist;
+use VisageFour\Bundle\ToolsBundle\Exceptions\CountryCodeDoesNotExist;
 use VisageFour\Bundle\ToolsBundle\Exceptions\LanguageCodeDoesNotExist;
 
 /**

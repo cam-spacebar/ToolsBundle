@@ -2,7 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
-use App\VisageFour\Bundle\ToolsBundle\Services\WorkIsRequiredHere;
+use VisageFour\Bundle\ToolsBundle\Services\WorkIsRequiredHere;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Twencha\Bundle\EventRegistrationBundle\Classes\AppSettings;

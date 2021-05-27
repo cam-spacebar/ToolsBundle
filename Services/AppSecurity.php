@@ -6,9 +6,9 @@ use App\Entity\Person;
 use App\Services\PasswordManager;
 use App\Traits\FlashBagTrait;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
-use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
-use App\VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotVerifiedException;
-use App\VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
+use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
+use VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotVerifiedException;
+use VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -278,7 +278,7 @@ class AppSecurity
      * @param string $email
      * @param string $token
      * @return bool
-     * @throws \App\VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound
+     * @throws \VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound
      *
      * Return true if the verification token is correct (and not already verified)
      */

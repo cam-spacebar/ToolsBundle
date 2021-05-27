@@ -4,7 +4,7 @@
 * by: cameronrobertburns
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Exceptions;
+namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 

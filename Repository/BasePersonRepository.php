@@ -1,7 +1,7 @@
 <?php
 
 namespace VisageFour\Bundle\ToolsBundle\Repository;
-use App\VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
+use VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
