@@ -30,7 +30,7 @@ class AppSecurity
     /**
      * @var TokenStorageInterface
      */
-    private $tokenStorageInterface;
+    private $tokenStorage;
 
     /**
      * @var ResponseAssembler
@@ -71,7 +71,7 @@ class AppSecurity
         TokenStorageInterface $tokenStorageInterface, ResponseAssembler $ra, AuthenticationUtils $authenticationUtils,
         PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, FrontendUrl $frontendUrl, PasswordManager $passwordManager
     ) {
-        $this->tokenStorageInterface    = $tokenStorageInterface;
+        $this->tokenStorage    = $tokenStorageInterface;
         $this->ra                       = $ra;
         $this->authenticationUtils      = $authenticationUtils;
         $this->personRepo               = $personRepo;
@@ -133,9 +133,13 @@ class AppSecurity
     public function logoutUser (Request $request)
     {
         // clear the token, cancel session and redirect
-        $this->tokenStorageInterface->setToken();
+        $this->tokenStorage->setToken(null);
 
-        $request->getSession()->invalidate();
+        $session = $request->getSession();
+
+//        $session->clear();
+        $session->invalidate();
+//        dd($session);
 
         return $this->ra->assembleJsonResponse(null, FrontendUrl::HOME);
     }
@@ -311,7 +315,7 @@ class AppSecurity
     }
 
     public function getLoggedInUser ($throw = false) {
-        $token = $this->tokenStorageInterface->getToken();
+        $token = $this->tokenStorage->getToken();
         if (empty($token)){
             return 'anon.';
         }

@@ -90,8 +90,8 @@ class SecurityController extends CustomController
 //        return $this->assembleJsonResponse($request);
     }
 
-    /*
-     * @Route("/logout", name="app_logout", methods={"GET"})
+    /**
+     * @Route("/logout1", name="app_logout", methods={"GET"})
      *
      * Don't user this for API, it 302 redirects instead of returning JSON. use: manual_logout instead.
      */
