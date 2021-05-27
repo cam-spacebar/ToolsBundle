@@ -3,6 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Entity\Person;
+use App\Services\FrontendUrl;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Traits\FlashBagTrait;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
@@ -67,8 +68,8 @@ class AppSecurity
     private $baseFrontendUrl;
 
     public function __construct(
-        TokenStorageInterface $tokenStorageInterface,  ResponseAssembler $ra, AuthenticationUtils $authenticationUtils,
-        PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, BaseFrontendUrl $baseFrontendUrl, PasswordManager $passwordManager
+        TokenStorageInterface $tokenStorageInterface, ResponseAssembler $ra, AuthenticationUtils $authenticationUtils,
+        PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, FrontendUrl $frontendUrl, PasswordManager $passwordManager
     ) {
         $this->tokenStorageInterface    = $tokenStorageInterface;
         $this->ra                       = $ra;
@@ -78,7 +79,7 @@ class AppSecurity
         $this->em                       = $em;
 
         $this->passwordManager          = $passwordManager;
-        $this->baseFrontendUrl          = $baseFrontendUrl;
+        $this->baseFrontendUrl          = $frontendUrl;
     }
 
     /**
@@ -136,7 +137,7 @@ class AppSecurity
 
         $request->getSession()->invalidate();
 
-        return $this->ra->assembleJsonResponse(null, BaseFrontendUrl::HOME);
+        return $this->ra->assembleJsonResponse(null, FrontendUrl::HOME);
     }
 
     /**

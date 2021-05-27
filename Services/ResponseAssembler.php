@@ -39,12 +39,12 @@ class ResponseAssembler
      */
     private $baseFrontendUrl;
 
-    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, BaseFrontendUrl $baseFrontendUrl, AuthenticationUtils $authentication_utils)
+    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, FrontendUrl $frontendUrl, AuthenticationUtils $authentication_utils)
     {
         $this->tokenStorageInterface    = $tokenStorageInterface;
         $this->flashbag                 = $flashbag;
         $this->authentication_utils     = $authentication_utils;
-        $this->baseFrontendUrl = $baseFrontendUrl;
+        $this->baseFrontendUrl          = $frontendUrl;
     }
 
     private function getLoggedInUser () {

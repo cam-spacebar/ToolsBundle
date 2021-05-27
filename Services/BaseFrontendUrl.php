@@ -10,7 +10,7 @@ class BaseFrontendUrl
      * @var array
      * a list of all possible routes - with a route to the front-end and another to the backend.
      */
-    protected $routeList = [];
+    protected $routePairList = [];
 
     // this ensures that a redirection is *specifically* set, so that if a null / false is accidentally returned, that the bug is caught.
     public const NO_REDIRECTION = 'noRedirect';
@@ -22,7 +22,6 @@ class BaseFrontendUrl
     const CONFIRM_EMAIL             = 'CONFIRM_EMAIL';
     const MAIN_LOGGED_IN_USER_MENU  = 'MAIN_LOGGED_IN_USER_MENU';
     const LOGOUT                    = 'LOGOUT';
-    const HOME                      = 'HOME';
     const CHANGE_PASSWORD           = 'CHANGE_PASSWORD';
     const USER_REGISTRATION         = 'USER_REGISTRATION';
     const ACCOUNT_VERIFICATION      = 'ACCOUNT_VERIFICATION';
@@ -69,9 +68,9 @@ class BaseFrontendUrl
         }
 
         if (!$this->doesRouteConstantExist($constant)) {
+            dd($this->routePairList);
             throw new \Exception (
-                "a route with the value: '$constant' has not been configured.'.
-                ' Note, this should also be uppercase, if not, you have probably called getFrontendURLPart() twice. (Search for marker: #CMDKKD00 to add new routes)."
+                "a route-pair with the value: $constant has not been configured. (Search for marker: #CMDKKD00 to add new routes)"
             );
         }
 
@@ -83,7 +82,7 @@ class BaseFrontendUrl
     private function doesRouteConstantExist($constant)
     {
 //        dd($this->routeList);
-        return !empty($this->routeList[$constant]);
+        return !empty($this->routePairList[$constant]);
     }
 
     /**
@@ -106,7 +105,7 @@ class BaseFrontendUrl
     {
         $this->checkIfRouteExists($constant);
 
-        return $this->routeList[$constant];
+        return $this->routePairList[$constant];
     }
 
     public function getFrontendUrl(string $constant, $data = [])
@@ -163,13 +162,19 @@ class BaseFrontendUrl
     {
         $this->checkIfRouteExists($constant);
 
-        $route = $this->routeList[$constant];
+        $route = $this->routePairList[$constant];
+
+//        dd($route);
+        if (!isset($route['front_end'])) {
+            throw new \Exception('The route-constant: "'. $constant.'"["front-end"] was not set. Please fix this.');
+        }
+        $pathPart = $route['front_end'];
 
         if ($addBaseUrl == true) {
-            return $this->baseUrl .'/'. $route['front_end'];
+            return $this->baseUrl .'/'. $pathPart;
         }
 
-        return $route['front_end'];
+        return '/'. $route['front_end'];
     }
 
     /**
@@ -188,7 +193,8 @@ class BaseFrontendUrl
                 'front_end'         => 'login'
             ],
             self::LOGOUT => [
-                'route_name'        => 'manual_logout',
+                'controller'        => 'SecurityController::manualLogoutAction()',          // controller listed here for debugging (finding the controller quickly).
+                'route_name'        => 'app_manual_logout',
                 'front_end'         => null
             ],
             self::CONFIRM_EMAIL => [
@@ -199,10 +205,6 @@ class BaseFrontendUrl
             self::MAIN_LOGGED_IN_USER_MENU => [
                 'route_name'        => 'main_loggedin_user_menu',
                 'front_end'         => 'userMenu'
-            ],
-            self::HOME => [
-                'route_name'        => 'homepage',
-                'front_end'         => ''
             ],
             self::CHANGE_PASSWORD => [
                 'route_name'        => 'change_password',
@@ -217,11 +219,17 @@ class BaseFrontendUrl
     //            'front_end'         => 'account_verification'
     //        ]
         ];
-
-        foreach ($routes as $curI => $curRoute) {
-            $this->addToRouteList($curRoute, $curI);
-        }
+        $this->addArrayOfNewRoutes($routes);
 //        dd($this->routeList);
+        return $this;
+    }
+
+    protected function addArrayOfNewRoutes($routes)
+    {
+        foreach ($routes as $curI => $curRoute) {
+            $this->addRoutePairToList($curRoute, $curI);
+        }
+
         return $this;
     }
 
@@ -229,14 +237,13 @@ class BaseFrontendUrl
      * @param $item
      * add the item to the array, but throw an exception if an array element index already exists (this simply ensures that routes don't overwrite each other.)
      */
-    protected function addToRouteList($item, $arrIndex): self
+    protected function addRoutePairToList($item, $arrIndex): self
     {
         if ($this->doesRouteConstantExist($arrIndex)) {
             throw new \Exception('unable to add the item with array index: "'. $arrIndex .'" to the routeList as an item with this array index already exists.');
         }
 
-        $this->routeList[$arrIndex] = $item;
-
+        $this->routePairList[$arrIndex] = $item;
 
         return $this;
     }
