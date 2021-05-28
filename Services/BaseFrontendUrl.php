@@ -62,13 +62,12 @@ class BaseFrontendUrl
         // check if null was sent
         if (empty($constant)) {
             throw new \Exception(
-                'A falsey value (likely Null) was provided as the $constant for in the FrontendUrl class.'.
+                'A falsey value (likely Null) was provided as the (route-pair) $constant for in the FrontendUrl class.'.
                 " You must explicitly set the $constant value to: FrontendUrl::NO_REDIRECTION to prevent redirection (i.e. don't use null)."
             );
         }
 
         if (!$this->doesRouteConstantExist($constant)) {
-            dd($this->routePairList);
             throw new \Exception (
                 "a route-pair with the value: $constant has not been configured. (Search for marker: #CMDKKD00 to add new routes)"
             );

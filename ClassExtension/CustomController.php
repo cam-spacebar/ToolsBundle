@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\ClassExtension;
 
+use App\Services\FrontendUrl;
 use VisageFour\Bundle\ToolsBundle\Services\AppSecurity;
 use App\Entity\Person;
 use VisageFour\Bundle\ToolsBundle\Services\ResponseAssembler;
@@ -38,7 +39,7 @@ class CustomController extends AbstractController
      *
      * $redirect: issues a command to the front-end to redirect the user to a different url on the front-end.
      */
-    protected function assembleJsonResponse ($data = null, $redirect = null): JsonResponse {
+    protected function assembleJsonResponse ($data = null, $redirect = FrontendUrl::NO_REDIRECTION): JsonResponse {
         /** @var Person $loggedInPerson */
 
         return $this->ra->assembleJsonResponse($data, $redirect);

@@ -556,6 +556,16 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         return $this;
     }
 
+    public function addRole($role): self
+    {
+        if (in_array($role, $this->roles)) {
+            return $this;
+        }
+        $this->roles[] = $role;
+
+        return $this;
+    }
+
     /**
      * @see UserInterface
      */
