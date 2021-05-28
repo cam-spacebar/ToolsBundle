@@ -2,8 +2,21 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use App\Controller\AdminMenuController;
+use App\Controller\RegistrationController;
+use App\Controller\SecurityController;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+ * This provides a list of front-end urls and an additional mapping to the backend (symfony) route.
+ * This should allow for easy (centralized) changes to route names and urls
+ *
+ * note: front-end "file path" url part and backend URL should match (to keep it simple),
+ * however symfony route_name does not need to match.
+ *
+ * == Implementation code ==:
+ * FrontendUrl::getSymfonyRouteName(FrontendUrl::MAIN_LOGGED_IN_USER_MENU)
+ */
 class BaseFrontendUrl
 {
     /**
@@ -105,8 +118,7 @@ class BaseFrontendUrl
 
     private function doesRouteConstantExist($constant)
     {
-//        dd($this->routeList);
-        return !empty($this->routePairList[$constant]);
+        return (!empty($this->routePairList[$constant]));
     }
 
     /**
@@ -125,12 +137,35 @@ class BaseFrontendUrl
         return $this->baseUrl . $pathPart;
     }
 
-    public function getControllerName($routePairConstant)
+    public function getControllerName(string $routePairConstant)
+    {
+        $this->checkControllerElementExists($routePairConstant);
+        return $this->routePairList[$routePairConstant]['controller'];
+    }
+
+    private function checkControllerElementExists(string $routePairConstant)
     {
         if (empty($this->routePairList[$routePairConstant]['controller'])) {
             throw new \Exception ('you must set a "controller" value for route-pair constant: '. $routePairConstant .' (goto class: FrontendURL to do this).');
         }
-        return $this->routePairList[$routePairConstant]['controller'];
+
+        return true;
+    }
+
+    private function checkControllerActuallyExists($routePairConstant)
+    {
+        $this->checkControllerElementExists($routePairConstant);
+//        dump($routePairConstant);
+
+        // use reflection to test for the class
+//            $methodName = 'OrderNewBadgeAction';
+        $controllerName = $this->getControllerName($routePairConstant);
+        $pieces = explode('::', $controllerName);
+
+        // this will throw an error is ReflectionException if the class or method doesn't exist
+        $i = new \ReflectionClass($pieces[0]);
+        $i->getMethod($pieces[1]);
+
     }
 
     public function getSymfonyRouteNAME ($constant)
@@ -225,32 +260,32 @@ class BaseFrontendUrl
         // Add new route marker: #CMDKKD00
         $routes = [
             self::LOGIN => [
-                'controller'        => 'SecurityController::loginPOSTAction',          // controller listed here for debugging (finding the controller quickly).
+                'controller'        => SecurityController::class .'::loginPOSTAction',          // controller listed here for debugging (finding the controller quickly).
                 'route_name'        => 'app_login_post',
                 'front_end'         => 'login'
             ],
             self::LOGOUT => [
-                'controller'        => 'SecurityController::manualLogoutAction',          // controller listed here for debugging (finding the controller quickly).
+                'controller'        => SecurityController::class .'::manualLogoutAction',          // controller listed here for debugging (finding the controller quickly).
                 'route_name'        => 'app_manual_logout',
-                'front_end'         => null
+                'front_end'         => ''
             ],
             self::CONFIRM_EMAIL => [
-                'controller'        => 'SecurityController::verifyEmailAccountViaTokenAction',          // controller listed here for debugging (finding the controller quickly).
+                'controller'        => SecurityController::class .'::verifyEmailAccountViaTokenAction',          // controller listed here for debugging (finding the controller quickly).
                 'route_name'        => 'confirm_email_get',
                 'front_end'         => 'confirm_email/{EMAIL}/{VERIFICATION_TOKEN}'
             ],
             self::MAIN_LOGGED_IN_USER_MENU => [
-                'controller'        => 'AdminMenuController::MainLoggedInUserMenuAction',
+                'controller'        => AdminMenuController::class .'::MainLoggedInUserMenuAction',
                 'route_name'        => 'main_loggedin_user_menu',
                 'front_end'         => 'userMenu'
             ],
             self::CHANGE_PASSWORD => [
-                'controller'        => 'SecurityController::changePasswordAction',
+                'controller'        => SecurityController::class.'::changePasswordAction',
                 'route_name'        => 'change_password',
                 'front_end'         => 'change_password'
             ],
             self::USER_REGISTRATION => [
-                'controller'        => 'RegistrationController::BeginNewRegistrationAction',
+                'controller'        => RegistrationController::class .'::BeginNewRegistrationAction',
                 'route_name'        => 'beginNewRegistration',
                 'front_end'         => self::NO_FRONTEND
             ],
@@ -287,6 +322,26 @@ class BaseFrontendUrl
         $this->routePairList[$arrIndex] = $item;
 
         return $this;
+    }
+
+    /**
+     * Test that route-pair elements exist in the routePairList array
+     * and that the controller element (of the routePair) actually exists (this will help detect if it's renamed / not provided when creating new routePairs).
+     */
+    public function checkRoutePairListIntegrity() {
+        foreach($this->routePairList as $curConstant => $curRoutePair) {
+//            print 'testing: '. $curRoutePair['route_name'] ."\n";
+            // check route_name exists
+            $this->getSymfonyRouteNAME($curConstant);
+
+            // check front-end roue exists
+            $this->getFrontendURLPart($curConstant);
+
+            // check that controller exists AND that an actual class/method pair exists in this app
+            $this->checkControllerActuallyExists($curConstant);
+        }
+
+        return true;
     }
 }
 ?>
