@@ -58,6 +58,31 @@ class BaseFrontendUrl
         $this->populateRouteList();
     }
 
+    /**
+     * return a string like:
+     * (controller: PaymentsController::OrderNewBadgeAction(), route name: change_password)
+     * many used to provide additional debug information for things like testing.
+     */
+    public function getRoutePairDebugMsg($routePairConstant, $forBackend = true): string
+    {
+        if (empty($routePairConstant)){
+            throw new \Exception('$routePairConstant is empty, it must be set.');
+        }
+        if ($forBackend) {
+            // display symfony route
+            return ('(controller: '.
+                $this->getControllerName($routePairConstant) .
+                ', route_name: '.
+                $this->getSymfonyRouteNAME($routePairConstant)
+                .')'
+            );
+        } else {
+            // display front-end route details
+            throw new \Exception('not implemented yet');
+        }
+
+    }
+
     public function checkIfRouteExists ($constant) { // dont add an type to the parameter
         // check if null was sent
         if (empty($constant)) {
@@ -91,20 +116,33 @@ class BaseFrontendUrl
      *
      * Return the URL of the symfony route (for the $constant provided).
      */
-    public function getSymfonyURL (string $constant, array $params = [])
+    public function getSymfonyURL (string $constant, array $params = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
-        $route = $this->getSymfonyRouteNAME($constant);
+        $routeName = $this->getSymfonyRouteNAME($constant);
 
         // generate URL
-        $pathPart = $this->router->generate($route['route_name'], $params);
+        $pathPart = $this->router->generate($routeName, $params, $referenceType);
         return $this->baseUrl . $pathPart;
+    }
+
+    public function getControllerName($routePairConstant)
+    {
+        if (empty($this->routePairList[$routePairConstant]['controller'])) {
+            throw new \Exception ('you must set a "controller" value for route-pair constant: '. $routePairConstant .' (goto class: FrontendURL to do this).');
+        }
+        return $this->routePairList[$routePairConstant]['controller'];
     }
 
     public function getSymfonyRouteNAME ($constant)
     {
         $this->checkIfRouteExists($constant);
+        $routeName = $this->routePairList[$constant]['route_name'];
 
-        return $this->routePairList[$constant];
+        if (empty($routeName)) {
+            throw new \Exception('the route_name element for route-pair constant: '. $constant .' cannot be empty');
+        }
+
+        return $routeName;
     }
 
     public function getFrontendUrl(string $constant, $data = [])
@@ -114,6 +152,32 @@ class BaseFrontendUrl
         $populatedPath = $this->generateURLPart($pathPart, $data);
 
         return $this->frontend_base_url .'/'. $populatedPath;
+    }
+
+    /**
+     * @param $constant
+     * @return mixed
+     * @throws \Exception
+     *
+     * return the 'file path' url part for the front-end
+     */
+    public function getFrontendURLPart ($constant, $addBaseUrl = false)
+    {
+        $this->checkIfRouteExists($constant);
+
+        $route = $this->routePairList[$constant];
+
+//        dd($route);
+        if (!isset($route['front_end'])) {
+            throw new \Exception('The route-constant: "'. $constant.'"["front-end"] was not set. Please fix this.');
+        }
+        $pathPart = $route['front_end'];
+
+        if ($addBaseUrl == true) {
+            return $this->baseUrl .'/'. $pathPart;
+        }
+
+        return '/'. $route['front_end'];
     }
 
     /**
@@ -149,32 +213,6 @@ class BaseFrontendUrl
 
         return $populatedPath;
     }
-    
-    /**
-     * @param $constant
-     * @return mixed
-     * @throws \Exception
-     *
-     * return the 'file path' url part for the front-end
-     */
-    public function getFrontendURLPart ($constant, $addBaseUrl = false)
-    {
-        $this->checkIfRouteExists($constant);
-
-        $route = $this->routePairList[$constant];
-
-//        dd($route);
-        if (!isset($route['front_end'])) {
-            throw new \Exception('The route-constant: "'. $constant.'"["front-end"] was not set. Please fix this.');
-        }
-        $pathPart = $route['front_end'];
-
-        if ($addBaseUrl == true) {
-            return $this->baseUrl .'/'. $pathPart;
-        }
-
-        return '/'. $route['front_end'];
-    }
 
     /**
      * @return $this
@@ -187,12 +225,12 @@ class BaseFrontendUrl
         // Add new route marker: #CMDKKD00
         $routes = [
             self::LOGIN => [
-                'controller'        => 'SecurityController::loginPOSTAction()',          // controller listed here for debugging (finding the controller quickly).
+                'controller'        => 'SecurityController::loginPOSTAction',          // controller listed here for debugging (finding the controller quickly).
                 'route_name'        => 'app_login_post',
                 'front_end'         => 'login'
             ],
             self::LOGOUT => [
-                'controller'        => 'SecurityController::manualLogoutAction()',          // controller listed here for debugging (finding the controller quickly).
+                'controller'        => 'SecurityController::manualLogoutAction',          // controller listed here for debugging (finding the controller quickly).
                 'route_name'        => 'app_manual_logout',
                 'front_end'         => null
             ],
@@ -202,18 +240,22 @@ class BaseFrontendUrl
                 'front_end'         => 'confirm_email/{EMAIL}/{VERIFICATION_TOKEN}'
             ],
             self::MAIN_LOGGED_IN_USER_MENU => [
+                'controller'        => 'AdminMenuController::MainLoggedInUserMenuAction',
                 'route_name'        => 'main_loggedin_user_menu',
                 'front_end'         => 'userMenu'
             ],
             self::CHANGE_PASSWORD => [
+                'controller'        => 'SecurityController::changePasswordAction',
                 'route_name'        => 'change_password',
                 'front_end'         => 'change_password'
             ],
             self::USER_REGISTRATION => [
-                'route_name'        => 'reg',
+                'controller'        => 'RegistrationController::BeginNewRegistrationAction',
+                'route_name'        => 'beginNewRegistration',
                 'front_end'         => self::NO_FRONTEND
             ],
     //        self::ACCOUNT_VERIFICATION => [
+//                'controller'        => 'xxx',
     //            'route_name'        => 'account_verification',
     //            'front_end'         => 'account_verification'
     //        ]

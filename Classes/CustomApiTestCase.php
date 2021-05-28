@@ -3,8 +3,9 @@
 namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
-use VisageFour\Bundle\ToolsBundle\Services\Security\AppSecurity;
+use App\Services\AppSecurity;
 use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
 use App\Entity\Person;
@@ -76,8 +77,32 @@ abstract class CustomApiTestCase extends ApiTestCase
      * @var EmailRegisterManager
      */
     private $emailRegisterMan;
+    
+    /**
+     * @var string
+     */
+    private $routePairConstant;
+    private $urlParams;
 
     abstract protected function specificSetUp ();
+
+    /**
+     * @param string $routePair
+     * @param $data
+     * @throws \Exception
+     *
+     * generate the URL, and set the route pair (so it can display a debug msg of what controller was used - later on).
+     */
+    protected function setTargetRoutePairConstant (string $routePairConstant, $urlParams = []) {
+//        $this->outputDebugToTerminal($this->frontendUrl->getControllerName($routePairConstant));
+//        die($routePairConstant .'zzz');
+        $this->routePairConstant = $routePairConstant;
+        $this->urlParams = $urlParams;
+//            $this->frontendUrl->getControllerName($routePairConstant);
+        $this->setUrl($this->frontendUrl->getSymfonyURL($routePairConstant, $urlParams));
+//        $this->setTargetRoutePairConstant(FrontendUrl::CHANGE_PASSWORD);
+//        $this->controllerName
+    }
 
     protected function setUp(): void
     {
@@ -133,8 +158,12 @@ abstract class CustomApiTestCase extends ApiTestCase
      * Sends a "http request" to the $url specified. This just reduces boilerplate in the testcase methods.
      * if $urlOverride is set, it will be the target instead of $this->url. (Note: $this->url is just useful to set in setUp() once, instead of per every test. URL override is used on things like: setup that requires login, as otherwise we'd have to re-set the $this->url from within the test method (not ideal).)
      */
-    protected function sendJSONRequest(string $method, $data = null, $urlOverride = null) {
-        $json = ['json' => $data];
+    protected function sendJSONRequest(string $method, $body = null, $urlOverride = null) {
+        $json = null;
+        if (!empty($body)) {
+            $json = ['json' => $body];
+        }
+
         if ($method == 'GET') {
             $json = [];
         }
@@ -144,9 +173,33 @@ abstract class CustomApiTestCase extends ApiTestCase
         }
 
         $url = (empty($urlOverride)) ? $this->url : $urlOverride;
+        $urlPart = $this->frontendUrl->getSymfonyURL($this->routePairConstant, $this->urlParams, UrlGeneratorInterface::RELATIVE_PATH);
+        $msg = 'requesting url: '. $this->url;
+        $this->outputColoredTextToTerminal($msg, 'yellow');
+
+        $displayPayload = false;
+        $this->outputPayload($displayPayload, $url, $json);
+
         $crawler = $this->client->request($method, $url, $json);
 
         return $crawler;
+    }
+
+    /**
+     * display the payload sent to the url (and the url address)
+     */
+    private function outputPayload($displayPayload, $url, $json)
+    {
+        if ($displayPayload) {
+            if (!empty($json)) {
+                $payload = (!empty($json['json'])) ? $json['json'] : 'empty';
+
+                dump('url called: '. $url .' -- with payload:', $payload);
+            } else {
+                dump('no payload sent (with request)');
+            }
+
+        }
     }
 
     /**
@@ -157,8 +210,12 @@ abstract class CustomApiTestCase extends ApiTestCase
         if(empty($this->url)) {
             throw new \Exception('$this->url cannot be empty. (Error is in test: '. $this->currentMethod .')');
         }
-
-        $this->outputColoredTextToTerminal('testing URL: '. $this->url .' (using HTTP method: '. $this->HTTPMethod .')');
+        $msg = 'target URL set to: '. $this->url
+            .' '. $this->frontendUrl->getRoutePairDebugMsg($this->routePairConstant)
+            .' (using HTTP method: '. $this->HTTPMethod .')'
+        ;
+        
+        $this->outputColoredTextToTerminal($msg);
 
 //        $this->outputDebugToTerminal($this->url);
     }
@@ -169,6 +226,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function setUrl($url)
     {
         $this->url = $url;
+
         $this->outputTestingUrl();
     }
 
@@ -234,11 +292,13 @@ abstract class CustomApiTestCase extends ApiTestCase
         $this->person = $this->personFactory->fixturesCreateUserThenRegisterAndVerifyAccount($this->userPassword);
 
         // login the new user
-        $this->setUrl($this->frontendUrl->getSymfonyURL(FrontendUrl::LOGIN));
+//        $this->setUrl($this->frontendUrl->getSymfonyURL(FrontendUrl::LOGIN));
+
         $data = [
             'email'         => $this->person->getEmail(),
             'password'      => $this->userPassword
         ];
+        $this->setTargetRoutePairConstant(FrontendUrl::LOGIN);
 
         $crawler = $this->sendJSONRequest('POST', $data);
 //        dump("User login attempt result (#234fwef): \n". $crawler->getContent());

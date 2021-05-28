@@ -226,6 +226,7 @@ class AppSecurity
     {
         try {
             // attempt token/account verification
+            $this->logger->info('looking for user with email: '. $email);
             $person = $this->personRepo->findOneByEmailCanonical($email);
         } catch (PersonNotFound $e) {
             // transcribe the error:
@@ -243,6 +244,7 @@ class AppSecurity
             $newPassword    = $this->getPOSTParam($request,'newPassword');
 
             $person = $this->getPersonByEmailAddress($email);
+
             $this->attemptChangePassword($person, $newPassword, $providedToken);
             $this->checkIsAccountVerified($person);
         } catch (ApiErrorCodeInterface $e) {
@@ -258,8 +260,9 @@ class AppSecurity
 
     public function attemptChangePassword(Person $person, string $newPassword, string $changePasswordToken)
     {
+        $this->logger->info('change password token comparison: '. $person->getChangePasswordToken() .' =? '. $changePasswordToken);
         if (!$person->isChangePasswordTokenCorrect($changePasswordToken)) {
-            throw new ApiErrorCode(ApiErrorCode::INVALID_EMAIL_ADDRESS);
+            throw new ApiErrorCode(ApiErrorCode::CHANGE_PASSWORD_TOKEN_INVALID);
         }
 
         // update the password

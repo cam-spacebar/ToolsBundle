@@ -129,7 +129,7 @@ class SecurityController extends CustomController
     }
 
     /**
-     * @Route(" /change_password", name="change_password", methods={"POST"})
+     * @Route("/change_password", name="change_password", methods={"POST"})
      *
      * This controller iw tested via method: ChangePasswordTest()
      */

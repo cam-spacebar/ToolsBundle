@@ -56,11 +56,11 @@ class PasswordManager
         // check password is longer than 8 characters
         $length = strlen($newPassword);
         if ($length < self::MINIMUM_PASSWORD_LENGTH) {
-            throw new PasswordValidationException("You must provide a password longer than $min characters.". $extraText);
+            throw new PasswordValidationException("You must provide a password longer than ". self::MINIMUM_PASSWORD_LENGTH ." characters.". $extraText);
         }
 
         if ($length > self::MAXIMUM_PASSWORD_LENGTH) {
-            throw new PasswordValidationException("You must provide a password less than $max characters.". $extraText);
+            throw new PasswordValidationException("You must provide a password less than ". self::MAXIMUM_PASSWORD_LENGTH ." characters.". $extraText);
         }
 
         return true;
