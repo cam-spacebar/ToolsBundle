@@ -166,6 +166,8 @@ class BaseFrontendUrl
         $i = new \ReflectionClass($pieces[0]);
         $i->getMethod($pieces[1]);
 
+        return true;
+
     }
 
     public function getSymfonyRouteNAME ($constant)
@@ -180,13 +182,24 @@ class BaseFrontendUrl
         return $routeName;
     }
 
-    public function getFrontendUrl(string $constant, $data = [])
+    const FORMAT_RELATIVE  = 'RELATIVE';
+    const FORMAT_ABSOLUTE  = 'ABSOLUTE';
+    public function getFrontendUrl(string $constant, $data = [], $format = self::FORMAT_RELATIVE)
     {
         $pathPart = $this->getFrontendURLPart($constant);
 
         $populatedPath = $this->generateURLPart($pathPart, $data);
 
-        return $this->frontend_base_url .'/'. $populatedPath;
+        switch ($format) {
+            case self::FORMAT_RELATIVE:
+                return $populatedPath;
+                break;
+            case self::FORMAT_ABSOLUTE:
+                return $this->frontend_base_url . $populatedPath;
+                break;
+            default:
+                throw new \Exception('this $format is not recognised.');
+        }
     }
 
     /**
@@ -196,7 +209,7 @@ class BaseFrontendUrl
      *
      * return the 'file path' url part for the front-end
      */
-    public function getFrontendURLPart ($constant, $addBaseUrl = false)
+    private function getFrontendURLPart ($constant, $addBaseUrl = false)
     {
         $this->checkIfRouteExists($constant);
 
@@ -220,11 +233,17 @@ class BaseFrontendUrl
      * @param array $data
      *
      * Replace the placeholders with real values from $data.
+     *
+     * take something like this:
+     *   confirm_email/{EMAIL}/{VERIFICATION_TOKEN}
+     * and converts it to:
+     *   /confirm_email/willie.dickens%40gmail.com/0fb26653e290c67ed7687efa9fa3ea7e
      */
     private function generateURLPart($pathPart, $data = [])
     {
         // replace the placeholders with their $data values
         $populatedPath = $pathPart;
+
         foreach($data as $key => $replacementValue) {
             $replacementValue = urlencode($replacementValue);
             $needle = '{'.strtoupper($key).'}';
@@ -335,7 +354,7 @@ class BaseFrontendUrl
             $this->getSymfonyRouteNAME($curConstant);
 
             // check front-end roue exists
-            $this->getFrontendURLPart($curConstant);
+            $this->getFrontendUrl($curConstant);
 
             // check that controller exists AND that an actual class/method pair exists in this app
             $this->checkControllerActuallyExists($curConstant);

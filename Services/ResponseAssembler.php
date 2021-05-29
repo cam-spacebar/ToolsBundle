@@ -78,7 +78,7 @@ class ResponseAssembler
         $rootKeys['data'] = $data;
 
         if ($redirect !== FrontendUrl::NO_REDIRECTION) {
-            $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendURLPart($redirect);
+            $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendUrl($redirect);
         }
 
         $rootKeys['success_msgs'] = $this->flashbag->get('success_msgs');        // an array of success messages (is returned)
