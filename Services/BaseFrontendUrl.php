@@ -209,7 +209,7 @@ class BaseFrontendUrl
      *
      * return the 'file path' url part for the front-end
      */
-    private function getFrontendURLPart ($constant, $addBaseUrl = false)
+    public function getFrontendURLPart ($constant, $addBaseUrl = false)
     {
         $this->checkIfRouteExists($constant);
 
@@ -261,7 +261,8 @@ class BaseFrontendUrl
             $rightbracket  = (strpos($populatedPath, '}'));
             if (!empty($rightbracket)) {
                 $missingPlaceholderName = substr($populatedPath, $leftBracket+1, ($rightbracket - $leftBracket -1));
-                throw new \Exception('You must provide a value for the placeholder: "'. $missingPlaceholderName .'"');
+                dump($data);
+                throw new \Exception('You must provide a value for the placeholder: "'. $missingPlaceholderName .'" for path-part: '. $pathPart);
             }
         }
 
@@ -353,8 +354,8 @@ class BaseFrontendUrl
             // check route_name exists
             $this->getSymfonyRouteNAME($curConstant);
 
-            // check front-end roue exists
-            $this->getFrontendUrl($curConstant);
+            // check front-end roue exists (note: don't try to generate the urls as we don't have the $data field to add and it will rderNewBadgeTestgenerate an error)
+            $this->getFrontendURLPart($curConstant);
 
             // check that controller exists AND that an actual class/method pair exists in this app
             $this->checkControllerActuallyExists($curConstant);

@@ -3,6 +3,10 @@
 namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\Exceptions\BadgeAlreadyInPipelineException;
+use Symfony\Component\HttpClient\Exception\ClientException;
+use Symfony\Component\HttpClient\Exception\RedirectionException;
+use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Services\AppSecurity;
@@ -159,7 +163,7 @@ abstract class CustomApiTestCase extends ApiTestCase
      * if $urlOverride is set, it will be the target instead of $this->url. (Note: $this->url is just useful to set in setUp() once, instead of per every test. URL override is used on things like: setup that requires login, as otherwise we'd have to re-set the $this->url from within the test method (not ideal).)
      */
     protected function sendJSONRequest(string $method, $body = null, $urlOverride = null) {
-        $json = null;
+        $json = [];
         if (!empty($body)) {
             $json = ['json' => $body];
         }
@@ -180,7 +184,34 @@ abstract class CustomApiTestCase extends ApiTestCase
         $displayPayload = false;
         $this->outputPayload($displayPayload, $url, $json);
 
-        $crawler = $this->client->request($method, $url, $json);
+        // run request
+        try {
+            $crawler = $this->client->request($method, $url, $json);
+            $crawler->getcontent();
+        } catch (ClientException|ServerException|RedirectionException $e) {
+            $response = $e->getResponse();
+            $data = $response->toArray(false);
+
+            if (isset($data['trace'])) {
+                // display stack trace (if it's available)
+                $trace = $data['trace'];
+                print "\n== Error == \n";
+                print $data['hydra:description'] ."\n\n";
+                print "== Stack trace ==\n";
+                foreach ($trace as $i => $curCall) {
+                    print "$i: ". $curCall['file'] .' line: '. $curCall['line'] ."\n";
+
+                }
+            } else {
+                print 'no stack trace available.';
+            }
+
+//            dump($data);
+//            die('ff');
+//            dump('Error pulled from the above response array:', $data['hydra:description']);
+
+//            die("\ndie(): after completion of error report\n");
+        }
 
         return $crawler;
     }
@@ -284,16 +315,20 @@ abstract class CustomApiTestCase extends ApiTestCase
     /**
      * @throws \Exception
      *
-     * Create a user, complete their registration, verify the account, set the password and also: log them in.
+     * Create a (verfied & registered) user, set the password and then: log them in.
+     * (note: this is just to prepare for a test case that requires a logged in user).
      */
     protected function createUserAndLogin()
     {
         $this->userPassword = $this->faker->password(PasswordManager::MINIMUM_PASSWORD_LENGTH);
-        $this->person = $this->personFactory->fixturesCreateUserThenRegisterAndVerifyAccount($this->userPassword);
+        $this->person = $this->personFactory->fixturesCreateRegisteredUser(true, $this->userPassword);
+
+        // remove the success messages created from successful verification and password change.
+        $this->appSecurity->clearFlashes();
+
 
         // login the new user
 //        $this->setUrl($this->frontendUrl->getSymfonyURL(FrontendUrl::LOGIN));
-
         $data = [
             'email'         => $this->person->getEmail(),
             'password'      => $this->userPassword
@@ -301,7 +336,19 @@ abstract class CustomApiTestCase extends ApiTestCase
         $this->setTargetRoutePairConstant(FrontendUrl::LOGIN);
 
         $crawler = $this->sendJSONRequest('POST', $data);
-//        dump("User login attempt result (#234fwef): \n". $crawler->getContent());
+        try {
+//            print 'HTTP status code provided: '. $crawler->getStatusCode() ."\n";
+            $crawler->getContent(true);
+        } catch (ClientException|ServerException|RedirectionException $e) {
+            print "\nERROR: error occured while attempting to login a test user. Error msg (generated when calling \$crawler->getContent()): ". $e->getMessage();
+            $responseObj = $e->getResponse()->toArray(false);
+            dump($responseObj);
+
+            die("\n\ndie() - please fix this problem.\n");
+//            dump($e);
+        } catch (\Exception $e) {
+            die ('an error occured during login attempt. Please investigate.');
+        }
 
         return $this->person;
     }

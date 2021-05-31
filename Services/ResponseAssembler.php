@@ -81,7 +81,7 @@ class ResponseAssembler
             $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendUrl($redirect);
         }
 
-        $rootKeys['success_msgs'] = $this->flashbag->get('success_msgs');        // an array of success messages (is returned)
+        $rootKeys['success_msgs'] = $this->flashbag->get('success_msgs');    // an array of success messages (is returned)
         $rootKeys['error_msgs'] = $this->flashbag->get('error_msgs');        // an array of success messages (is returned)
         if (!empty($rootKeys['error_msgs'])) {
             throw new \Exception(
@@ -90,8 +90,12 @@ class ResponseAssembler
             );
         }
 
+        $HTTPStatusCode = 200;
         if (!empty($error)) {
-            $rootKeys['error_msgs'] = $error->getPublicMsg();
+            $respMsg = $error->getStandardResponseMsg();
+            $HTTPStatusCode = $error->getHTTPStatusCode();
+
+            $rootKeys['error_msgs'] = $respMsg; //$error->getPublicMsg();
             $rootKeys['status'] = $error->getStatusCode();
         } else {
             $rootKeys['status'] = ApiErrorCode::OK;
@@ -106,13 +110,14 @@ class ResponseAssembler
             $payload[$curKey] = $curValue;
         }
 
-        return new JsonResponse($payload);
+
+        return new JsonResponse($payload, $HTTPStatusCode);
     }
 
     public function addErrorMessage($msg)
     {
         throw new \Exception('this should no longer be used. use the ApiErrorCode class instead.');
-        $this->flashbag->add('error_msgs', $msg);
+//        $this->flashbag->add('error_msgs', $msg);
     }
 
     public function addSuccessMessage($msg)
