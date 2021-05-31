@@ -96,7 +96,7 @@ class ResponseAssembler
             $HTTPStatusCode = $error->getHTTPStatusCode();
 
             $rootKeys['error_msgs'] = $respMsg; //$error->getPublicMsg();
-            $rootKeys['status'] = $error->getStatusCode();
+            $rootKeys['status'] = $error->getBodyCode();
         } else {
             $rootKeys['status'] = ApiErrorCode::OK;
         }

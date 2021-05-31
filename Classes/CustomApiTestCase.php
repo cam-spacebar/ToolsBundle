@@ -4,10 +4,13 @@ namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Exceptions\BadgeAlreadyInPipelineException;
+use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
+use PHPUnit\Framework\ExpectationFailedException;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\Exception\RedirectionException;
 use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Services\AppSecurity;
 use App\Services\EmailRegisterManager;
@@ -24,6 +27,9 @@ use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
  * @package VisageFour\Bundle\ToolsBundle\Classes
  *
  * this class reduces boiler plate such as: creating users, sending requests (finctional testing) setup and tear down etc.
+ *
+ * Testing framework documentation:
+ * https://docs.google.com/presentation/d/1tAEVY-Ypdv1ClBrCzfk3EqI2QK_wBxd80isKieJDRyw/edit
  */
 abstract class CustomApiTestCase extends ApiTestCase
 {
@@ -88,18 +94,34 @@ abstract class CustomApiTestCase extends ApiTestCase
     private $routePairConstant;
     private $urlParams;
 
+    /**
+     * @var ApiErrorCode
+     * The response from calling $this->client->request() must contain the correct 'body-code'. It also provides the expected HTTP status code which is used for an assert
+     * Note; this is *not* HTTP status code, it is the 'body-code' that corresponds to a 'ApiErrorCode' constant.s
+     */
+    protected $expectedResponse;
+
     abstract protected function specificSetUp ();
+
+    /**
+     * @param $bodyCode
+     * for more info no what a body-code is, see the ApiErrorCode class
+     */
+    protected function setExpectedResponse($bodyCode)
+    {
+        $this->expectedResponse = new ApiErrorCode($bodyCode);
+    }
 
     /**
      * @param string $routePair
      * @param $data
      * @throws \Exception
      *
-     * generate the URL, and set the route pair (so it can display a debug msg of what controller was used - later on).
+     * Generate the target testing URL, and set the route pair (so the test can display a debug msg of what controller and what RoutePair was used - later on).
      */
     protected function setTargetRoutePairConstant (string $routePairConstant, $urlParams = []) {
 //        $this->outputDebugToTerminal($this->frontendUrl->getControllerName($routePairConstant));
-//        die($routePairConstant .'zzz');
+//        die($routePairConstant .'12eqwds');
         $this->routePairConstant = $routePairConstant;
         $this->urlParams = $urlParams;
 //            $this->frontendUrl->getControllerName($routePairConstant);
@@ -153,9 +175,89 @@ abstract class CustomApiTestCase extends ApiTestCase
 
 //        self::$terminalColors = self::$container->get('TerminalColors');
         self::$terminalColors = new TerminalColors();
-//        $this->outputDebugToTerminal("class startASDF\n\n zzz \n\n");
 
         return;
+    }
+
+    protected function getExpectedBodyCode()
+    {
+        $this->checkExpectedResponseIsSet();
+
+        return $this->expectedResponse->getBodyCode();
+    }
+
+    protected function getExpectedHTTPStatusCode()
+    {
+        $this->checkExpectedResponseIsSet();
+
+        return $this->expectedResponse->getHTTPStatusCode();
+    }
+
+    private function checkExpectedResponseIsSet()
+    {
+        if (empty($this->expectedResponse)) {
+            throw new \Exception ('expectedResponse was not set! Please ensure this is set prior to calling sendJSONRequest(). use setExpectedResponse() with the bodyCode (from class: ApiErrorCode) that is expected. ');
+        }
+    }
+
+    protected function assetBodyCodesIsAsExpected(ResponseInterface $crawler)
+    {
+        try {
+            $this->assertJsonContains([
+                'status' => $this->getExpectedBodyCode()
+            ]);
+        } catch (ExpectationFailedException $e) {
+//        } catch (ClientException|ServerException|RedirectionException $e) {
+//            dump($e);
+//            $e
+            $this->displayResponse($crawler);
+        }
+
+    }
+
+    /**
+     * Display the http status code and response body.
+     */
+    protected function displayResponse(ResponseInterface $crawler)
+    {
+        $data = $crawler->toArray(false);
+        dump(
+            'there was a problem. The response body is provided below: ',
+            $data,
+            'expected body-code: '. $this->getExpectedBodyCode(),
+            'expected HTTP status code: '. $this->getExpectedHTTPStatusCode() .', actual code: '. $crawler->getStatusCode()
+        );
+
+        // Display stack trace (if one was provided).
+        if (isset($data['trace'])) {
+            // display stack trace (if it's available)
+            $trace = $data['trace'];
+            print "\n== Error == \n";
+            print $data['hydra:description'] ."\n\n";
+            print "== Stack trace ==\n";
+            foreach ($trace as $i => $curCall) {
+                print "$i: ". $curCall['file'] .' line: '. $curCall['line'] ."\n";
+            }
+        } else {
+            dump('Note: no stack trace provided.');
+        }
+    }
+
+    /**
+     * compare the HTTP status code from the $this->>expectedResponse (ApiErrorCode) with the crawlers HTTP Status code.
+     */
+    protected function assertHTTPStatusCodeIsAsExpected(ResponseInterface $crawler)
+    {
+        $expectedHTTPStatusCode = $this->getExpectedHTTPStatusCode();
+
+        $this->assertEquals($expectedHTTPStatusCode, $crawler->getStatusCode());
+
+        // todo: if they dont match, then output the stack trace / error!
+
+        if ($expectedHTTPStatusCode != $crawler->getStatusCode()) {
+            print "Status Codes match: Expected: ". $expectedHTTPStatusCode .' == $crawler: '. $crawler->getStatusCode();
+        }
+
     }
 
     /**
@@ -187,37 +289,19 @@ abstract class CustomApiTestCase extends ApiTestCase
         // run request
         try {
             $crawler = $this->client->request($method, $url, $json);
-            $crawler->getcontent();
-        } catch (ClientException|ServerException|RedirectionException $e) {
-            $response = $e->getResponse();
-            $data = $response->toArray(false);
 
-            if (isset($data['trace'])) {
-                // display stack trace (if it's available)
-                $trace = $data['trace'];
-                print "\n== Error == \n";
-                print $data['hydra:description'] ."\n\n";
-                print "== Stack trace ==\n";
-                foreach ($trace as $i => $curCall) {
-                    print "$i: ". $curCall['file'] .' line: '. $curCall['line'] ."\n";
-
-                }
-            } else {
-                print 'no stack trace available.';
-            }
-
-//            dump($data);
-//            die('ff');
-//            dump('Error pulled from the above response array:', $data['hydra:description']);
-
-//            die("\ndie(): after completion of error report\n");
+            $this->assetBodyCodesIsAsExpected($crawler);
+            $this->assertHTTPStatusCodeIsAsExpected($crawler);
+        } catch (\Exception $e) {
+            dump($e);
+            die ('an error occured during login attempt. Please investigate.');
         }
 
         return $crawler;
     }
 
     /**
-     * display the payload sent to the url (and the url address)
+     * Display the payload sent to the url (and the url address)
      */
     private function outputPayload($displayPayload, $url, $json)
     {
@@ -334,7 +418,7 @@ abstract class CustomApiTestCase extends ApiTestCase
             'password'      => $this->userPassword
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::LOGIN);
-
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $crawler = $this->sendJSONRequest('POST', $data);
         try {
 //            print 'HTTP status code provided: '. $crawler->getStatusCode() ."\n";

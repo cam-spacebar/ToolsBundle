@@ -200,26 +200,6 @@ class AppSecurity
         }
     }
 
-    /**
-     * @param Person $person
-     * @return bool
-     * @throws ApiErrorCode
-     *
-     * check if the $person is verified, if not, provide a standard ApiErrorCode exception object.
-     */
-    private function checkIsAccountVerified(Person $person): bool
-    {
-        try {
-            $person->isVerified(true);
-        } catch (AccountNotVerifiedException $e) {
-            // transcribe exception to ApiErrorCode object.
-
-            throw new ApiErrorCode(ApiErrorCode::ACCOUNT_NOT_VERIFIED, $e->getPublicMsg());
-        }
-
-        return true;
-    }
-
     private function getPersonByEmailAddress(string $email): Person
     {
         try {
@@ -244,7 +224,7 @@ class AppSecurity
             $person = $this->getPersonByEmailAddress($email);
 
             $this->attemptChangePassword($person, $newPassword, $providedToken);
-            $this->checkIsAccountVerified($person);
+            $person->isVerified(true);
         } catch (ApiErrorCodeInterface $e) {
             return $this->ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
         }
@@ -267,7 +247,7 @@ class AppSecurity
         try {
             $this->passwordManager->validatePasswordAndEncode($person, $newPassword);
         } catch (PasswordValidationException $e) {
-            throw new ApiErrorCode(ApiErrorCode::INVALID_PASSWORD, $e->getPublicMsg() );
+            throw new ApiErrorCode(ApiErrorCode::INVALID_NEW_PASSWORD, $e->getPublicMsg() );
         }
 
         $this->em->persist($person);
