@@ -64,7 +64,7 @@ class ResponseAssembler
      * @throws \Exception
      *
      */
-    public function assembleJsonResponse ($data = null, $redirect = FrontendUrl::NO_REDIRECTION, ApiErrorCodeInterface $error = null): JsonResponse {
+    public function assembleJsonResponse ($data = null, $redirect = FrontendUrl::NO_REDIRECTION, ApiErrorCodeInterface $error = null, $redirectData = []): JsonResponse {
         $rootKeys = [];
 
         $loggedInUser = $this->getLoggedInUser();
@@ -76,9 +76,10 @@ class ResponseAssembler
         }
 
         $rootKeys['data'] = $data;
+//        dump($data);
 
         if ($redirect !== FrontendUrl::NO_REDIRECTION) {
-            $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendUrl($redirect);
+            $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendUrl($redirect, $redirectData);
         }
 
         $rootKeys['success_msgs'] = $this->flashbag->get('success_msgs');    // an array of success messages (is returned)

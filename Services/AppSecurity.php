@@ -151,14 +151,14 @@ class AppSecurity
     /**
      * Returns a POST parameter or returns an error to the client (if the parameter value doesn't exist)
      */
-    private function getPOSTParam (Request $request, string $paramName) {
+    public function getPOSTParam (Request $request, string $paramName) {
         // this uses: symfony-bundles/json-request-bundle (for the nice shorthand ->get() command)
         $value = $request->get($paramName);
 
         if (empty($value)) {
             throw new ApiErrorCode(
                 ApiErrorCode::INPUT_MISSING,
-                'You must provide a "'. $paramName .'" field'
+                'You must provide a "'. $paramName .'" field as an GET/POST'
             );
         }
 
@@ -187,20 +187,25 @@ class AppSecurity
                 $redirect = null;
                 if (!$person->hasPasswordBeenSet()) {
                     // redirect to reset password page.
-                    $redirect = BaseFrontendUrl::CHANGE_PASSWORD;
+                    $redirect = BaseFrontendUrl::RESET_PASSWORD;
                 }
                 throw new ApiErrorCode(ApiErrorCode::ACCOUNT_ALREADY_VERIFIED, null, $redirect);
             }
 
             // token was correct (and account is now verified) - so they must set a password:
-            $redirect = BaseFrontendUrl::CHANGE_PASSWORD;
+            $redirect = BaseFrontendUrl::RESET_PASSWORD;
             // send password token for use when the front-end redirects to reset_password page
             // todo: security: is this vulnerable? (sending the token to the client? however, it's straight after verifying the email account.)
-            $data = ['changePasswordToken' => $changePasswordToken];
+            $redirectData = [
+                'email'                 => $person->getEmail(),
+                'reset_password_token'  => $changePasswordToken
+            ];
+//            dump('9fvuh', $redirect); // zzz
 
             $this->em->flush();
+            $data = null;
 
-            return $this->ra->assembleJsonResponse($data, $redirect);
+            return $this->ra->assembleJsonResponse($data, $redirect, null, $redirectData);
         } catch (ApiErrorCodeInterface $e) {
             return $this->ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
         }
@@ -248,7 +253,6 @@ class AppSecurity
             null,
             BaseFrontendUrl::MAIN_LOGGED_IN_USER_MENU
         );
-
     }
 
     /**
@@ -258,20 +262,14 @@ class AppSecurity
      *
      * Send a password reset token to the users email address.
      */
-    public function processForgotMyPasswordRequest(Request $request)
+    public function processForgotMyPasswordRequest(string $email)
     {
-        try {
-            $email          = $this->getPOSTParam($request,'email');
+        $person = $this->getPersonByEmailAddress($email);
+        $token = $person->createChangePasswordToken();
 
-            $person = $this->getPersonByEmailAddress($email);
-            $token = $person->createChangePasswordToken();
+        $this->emailRegisterMan->sendResetPasswordTokenEmail($person, $token);
 
-            $this->emailRegisterMan->sendResetPasswordTokenEmail($person, $token);
-
-            $this->ra->addSuccessMessage('We have sent you a password reset email to your email address. (please also check your spam folder).');
-        } catch (ApiErrorCodeInterface $e) {
-            return $this->ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
-        }
+        $this->ra->addSuccessMessage('We have sent you a password reset email to your email address. (please also check your spam folder).');
 
         return $this->ra->assembleJsonResponse(
             null,

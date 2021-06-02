@@ -221,12 +221,17 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function displayResponse(ResponseInterface $crawler)
     {
         $data = $crawler->toArray(false);
+
         dump(
+            '',
             'there was a problem. The response body is provided below: ',
-            $data,
+
             'expected body-code: '. $this->getExpectedBodyCode(),
-            'expected HTTP status code: '. $this->getExpectedHTTPStatusCode() .', actual code: '. $crawler->getStatusCode()
+            'expected HTTP status code: '. $this->getExpectedHTTPStatusCode() .', actual code: '. $crawler->getStatusCode(),
+            "error occured in test: ". $this->currentMethod .' (with target URL: '. $this->url .')',
+            ' '
         );
+//        dump($data);
 
         // Display stack trace (if one was provided).
         if (isset($data['trace'])) {
@@ -293,8 +298,8 @@ abstract class CustomApiTestCase extends ApiTestCase
             $this->assetBodyCodesIsAsExpected($crawler);
             $this->assertHTTPStatusCodeIsAsExpected($crawler);
         } catch (\Exception $e) {
-            dump($e);
-            die ('an error occured during login attempt. Please investigate.');
+//            dump('Exception during login attempt: (#23fwesd): ', $e);
+            die ("\nan error occured during test: ". $this->currentMethod .". Please investigate.\n");
         }
 
         return $crawler;

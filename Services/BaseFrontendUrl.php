@@ -6,6 +6,7 @@ use App\Controller\AdminMenuController;
 use App\Controller\RegistrationController;
 use App\Controller\SecurityController;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
 
 /**
  * This provides a list of front-end urls and an additional mapping to the backend (symfony) route.
@@ -17,7 +18,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * == Implementation code ==:
  * FrontendUrl::getSymfonyRouteName(FrontendUrl::MAIN_LOGGED_IN_USER_MENU)
  */
-class BaseFrontendUrl
+class BaseFrontendUrl implements FrontendUrlInterface
 {
     /**
      * @var array
@@ -35,8 +36,8 @@ class BaseFrontendUrl
     const CONFIRM_EMAIL             = 'CONFIRM_EMAIL';
     const MAIN_LOGGED_IN_USER_MENU  = 'MAIN_LOGGED_IN_USER_MENU';
     const LOGOUT                    = 'LOGOUT';
-    const CHANGE_PASSWORD           = 'CHANGE_PASSWORD';
     const FORGOT_MY_PASSWORD        = 'FORGOT_MY_PASSWORD';
+    const RESET_PASSWORD            = 'RESET_PASSWORD';
     const USER_REGISTRATION         = 'USER_REGISTRATION';
     const ACCOUNT_VERIFICATION      = 'ACCOUNT_VERIFICATION';
 
@@ -185,11 +186,9 @@ class BaseFrontendUrl
 
     const FORMAT_RELATIVE  = 'RELATIVE';
     const FORMAT_ABSOLUTE  = 'ABSOLUTE';
-    public function getFrontendUrl(string $constant, $data = [], $format = self::FORMAT_RELATIVE)
+    public function getFrontendUrl(string $constant, $urlData = [], $format = self::FORMAT_RELATIVE)
     {
-        $pathPart = $this->getFrontendURLPart($constant);
-
-        $populatedPath = $this->generateURLPart($pathPart, $data);
+        $populatedPath = $this->generateURLPart($constant, $urlData); // yyy
 
         switch ($format) {
             case self::FORMAT_RELATIVE:
@@ -240,9 +239,11 @@ class BaseFrontendUrl
      * and converts it to:
      *   /confirm_email/willie.dickens%40gmail.com/0fb26653e290c67ed7687efa9fa3ea7e
      */
-    private function generateURLPart($pathPart, $data = [])
+    private function generateURLPart($constant, $data = [])
     {
+//        dump($constant);
         // replace the placeholders with their $data values
+        $pathPart = $this->getFrontendURLPart($constant);
         $populatedPath = $pathPart;
 
         foreach($data as $key => $replacementValue) {
@@ -250,7 +251,10 @@ class BaseFrontendUrl
             $needle = '{'.strtoupper($key).'}';
 
             if(strpos($populatedPath, $needle) == false) {
-                throw new \Exception('Cannot use placeholder named: "'. $needle .'" in URL construction, as it doesn\'t exist in the pathPart: "/'. $pathPart .'"');
+                throw new \Exception('Cannot use placeholder named: "'. $needle
+                    .'" in URL construction, as it doesn\'t exist in the pathPart: "/'. $pathPart .'"'
+                    .' (using route-pair constant: '. $constant .' in the FrontendUrl class)'
+                );
             }
 
             $populatedPath = str_replace($needle, $replacementValue, $populatedPath);
@@ -262,8 +266,11 @@ class BaseFrontendUrl
             $rightbracket  = (strpos($populatedPath, '}'));
             if (!empty($rightbracket)) {
                 $missingPlaceholderName = substr($populatedPath, $leftBracket+1, ($rightbracket - $leftBracket -1));
-                dump($data);
-                throw new \Exception('You must provide a value for the placeholder: "'. $missingPlaceholderName .'" for path-part: '. $pathPart);
+                dump('placeholder data dump below (#sdcs3): ', $data);
+                throw new \Exception(
+                    'You must provide a value for the placeholder: "'. $missingPlaceholderName .'" for path-part: '. $pathPart
+                    .' (using route-pair constant: '. $constant .' in the FrontendUrl class)'
+                );
             }
         }
 
@@ -300,15 +307,15 @@ class BaseFrontendUrl
                 'route_name'        => 'main_loggedin_user_menu',
                 'front_end'         => 'userMenu'
             ],
-            self::CHANGE_PASSWORD => [
-                'controller'        => SecurityController::class.'::resetPasswordAction',
-                'route_name'        => 'reset_password',
-                'front_end'         => 'reset_password'
-            ],
             self::FORGOT_MY_PASSWORD => [
                 'controller'        => SecurityController::class.'::forgotMyPasswordAction',
                 'route_name'        => 'forgot_my_password',
                 'front_end'         => 'forgot_my_password'
+            ],
+            self::RESET_PASSWORD => [
+                'controller'        => SecurityController::class.'::handleResetPasswordRequestAction',
+                'route_name'        => 'reset_password',
+                'front_end'         => 'reset_password/{EMAIL}/{RESET_PASSWORD_TOKEN}'
             ],
             self::USER_REGISTRATION => [
                 'controller'        => RegistrationController::class .'::BeginNewRegistrationAction',
@@ -321,12 +328,12 @@ class BaseFrontendUrl
     //            'front_end'         => 'account_verification'
     //        ]
         ];
-        $this->addArrayOfNewRoutes($routes);
+        $this->addArrayOfNewRoutePairs($routes);
 //        dd($this->routeList);
         return $this;
     }
 
-    protected function addArrayOfNewRoutes($routes)
+    protected function addArrayOfNewRoutePairs($routes)
     {
         foreach ($routes as $curI => $curRoute) {
             $this->addRoutePairToList($curRoute, $curI);

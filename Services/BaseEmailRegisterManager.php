@@ -5,9 +5,11 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use VisageFour\Bundle\ToolsBundle\Entity\BasePerson;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
 use Doctrine\ORM\EntityManager;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 abstract class BaseEmailRegisterManager
@@ -47,17 +49,25 @@ abstract class BaseEmailRegisterManager
     protected $automailerReplyAddress;
 
     /**
+     * @var BaseFrontendUrl
+     */
+    protected $frontendUrl;
+
+    /**
      *
      */
-    public function __construct(EntityManager $em, MailerInterface $mailer, string $adminEmail, string $businessName, string $automailerReplyAddress) {
+    public function __construct(
+        EntityManager $em, MailerInterface $mailer, FrontendUrlInterface $frontendUrl, string $adminEmail, string $businessName, string $automailerReplyAddress
+    ) {
         $this->preventMailing = false;
 
         $this->em = $em;
         $this->mailer = $mailer;
 
-        $this->adminEmail = $adminEmail;
+        $this->adminEmail   = $adminEmail;
         $this->businessName             = $businessName;
         $this->automailerReplyAddress   = $automailerReplyAddress;
+        $this->frontendUrl = $frontendUrl;
     }
 
     protected function getSiteAdminAddress () {
@@ -79,6 +89,79 @@ abstract class BaseEmailRegisterManager
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $email
+     *
+     */
+    public function sendResetPasswordTokenEmail(BasePerson $person, string $token): bool
+    {
+        // must persist $person, as it's verification token has just changed.
+        $this->em->persist($person);
+
+        $passwordResetUrl = $this->frontendUrl->getFrontendUrl(
+            BaseFrontendUrl::RESET_PASSWORD,
+            [
+                'email'                     => $person->getEmail(),
+                'reset_password_token'      => $token,
+            ],
+            BaseFrontendUrl::FORMAT_ABSOLUTE
+        );
+
+        $email = (new TemplatedEmail())
+            ->from(new Address($this->automailerReplyAddress, $this->businessName))
+            ->to(new Address($person->getEmail(), $person->getFirstName()))
+            ->subject('Password reset')
+            ->htmlTemplate('@ToolsBundleEmails/resetPassword.html.twig')
+            ->context([
+                'person'                => $person,
+                'passwordResetUrl'      => $passwordResetUrl
+            ])
+        ;
+
+        $this->send($email);
+
+        return true;
+    }
+
+    /**
+     * @param string $email
+     *
+     * Send the user their account verification token (with registration complete notice).
+     */
+    public function sendRegistrationCompleteEmail(BasePerson $person): bool
+    {
+        // create a new verification token (even if one already exists)
+        $verificationToken = $person->createVerificationHash();
+
+        // must persist $person, as it's verification token has just changed.
+        $this->em->persist($person);
+
+        $account_verification_url = $this->frontendUrl->getFrontendUrl(
+            BaseFrontendUrl::CONFIRM_EMAIL,
+            [
+                'email'                     => $person->getEmail(),
+                'verification_token'        => $verificationToken,
+            ],
+            BaseFrontendUrl::FORMAT_ABSOLUTE
+        );
+
+        $email = (new TemplatedEmail())
+            ->from(new Address($this->automailerReplyAddress, $this->businessName))
+            ->to(new Address($person->getEmail(), $person->getFirstName()))
+            ->subject('Please verify your account')
+//            ->htmlTemplate('accountVerificationLink.html.twig')
+            ->htmlTemplate('@ToolsBundleEmails/accountVerificationLink.html.twig')
+            ->context([
+                'person'                        => $person,
+                'account_verification_url'      => $account_verification_url
+            ])
+        ;
+
+        $this->send($email);
+
+        return true;
     }
 
     // spools an email for sending via a worker or sends it immediately (depending on apps config)
@@ -198,5 +281,31 @@ abstract class BaseEmailRegisterManager
         $count      = $this->repo->countSpooled ();
 
         return $count;
+    }
+
+    /*
+     * IMPLEMENTATION:
+        // create email + send email
+        $url = $this->router->generate('displayPhotoGroup', array(
+            'registeredCodeId' => $registeredCode->getId()),
+            true);
+        $params = array (
+            'parameter1'   => $url
+        );
+        $template = EmailRegisterManager::adminBookingConfirm;
+        $emailRegister = $this->sendThis($person, $params, $template);
+    // */
+    // the central method for sending emails to emailRegisterManager - checks person->email
+    public function sendThis ($targetEmail, $params, $template, $spoolEmail = false, $locale = 'en') {
+        $emailRegister = $this->createEmailAndProcess (
+            $targetEmail,
+            $params,
+            $template,
+            $locale,
+            $spoolEmail,
+            EmailRegister::LEXIK_ADAPTER
+        );
+
+        return $emailRegister;
     }
 }
