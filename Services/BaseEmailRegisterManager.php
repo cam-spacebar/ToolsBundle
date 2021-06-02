@@ -2,69 +2,17 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
-use VisageFour\Bundle\ToolsBundle\Services\WorkIsRequiredHere;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
-use Twencha\Bundle\EventRegistrationBundle\Classes\AppSettings;
-use VisageFour\Bundle\ToolsBundle\Interfaces\BaseEntityInterface;
+use Symfony\Component\Mime\Address;
 use VisageFour\Bundle\ToolsBundle\Entity\EmailRegister;
 
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Psr\Log\LoggerInterface;
-use Swift_Mailer;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 abstract class BaseEmailRegisterManager
 {
     use LoggerTrait;
-    /*
-                === USAGE BELOW! ===
-    /** @var $emailRegisterManager EmailRegisterManager
-    $emailRegisterManager = $this->container->get('app_name.email_register_manager');
-
-    // $emailRegisterManager->sendNextSpooled();
-    // $remaininedEmails = $emailRegisterManager->countSpooled();
-
-    // spool emails to registrants
-    foreach ($registrations as $curI => $curRC) {
-        $emailRegister = $emailRegisterManager->createEmailAndProcess (
-            'cameronrobertburns@gmail.com',
-            array ('name' => 'dude'),
-            'basic-email',
-            'en',
-            true,
-            EmailRegister::essageFactor_ADAPTER
-        );
-    }
-
-    === SUB-EMAIL REGISTER MANAGER CLASS - EMAIL METHOD IMPLEMENTATION EXAMPLE ===
-    // CUSTOM EMAIL METHODS BELOW:
-    // New Booking - admin notification
-    public function sendNewBookingEmail (Booking $booking, Slug $slug, Event $event) {
-        $person = $booking->getRelatedBookedPerson();
-        $slug   = $booking->getRelatedSlug();
-
-        $params = array (
-            'bookingCreatedAt'      => $booking->getCreatedAt()->format('Y-m-j H:i'),
-            'eventSeriesName'       => $slug->getRelatedEventSeries()->getName(),
-            'eventStartDateTime'    => $event->getStartDateTime()->format('Y-m-j H:i'),
-
-            'bookedPersonEmail'     => $person->getEmail(),
-            'bookingId'              => $booking->getId(),
-
-            'code'                  => $slug->getRelatedCode()->getCode(),
-            'source'                => $slug->getRelatedSource()->getName()
-        );
-
-        $params = $this->duplicateCheck ($booking, $params);
-
-        $template       = EmailRegisterManager::$AdminNewBookingEmail['reference'];
-        $emailRegister  = $this->sendThis($slug->getRelatedPromoterPerson(), $params, $template);
-
-        return $emailRegister;
-    }
-    */
 
     /**
      * @var MailerInterface
@@ -83,18 +31,37 @@ abstract class BaseEmailRegisterManager
      */
     private $preventMailing;
 
+    /**
+     * @var string
+     */
     protected $adminEmail;
+
+    /**
+     * @var string
+     */
+    protected $businessName;
+
+    /**
+     * @var string
+     */
+    protected $automailerReplyAddress;
 
     /**
      *
      */
-    public function __construct(EntityManager $em, MailerInterface $mailer, AppSettings $appSettings) {
+    public function __construct(EntityManager $em, MailerInterface $mailer, string $adminEmail, string $businessName, string $automailerReplyAddress) {
         $this->preventMailing = false;
 
         $this->em = $em;
         $this->mailer = $mailer;
 
-        $this->adminEmail = $appSettings->getSetting('adminEmailAddress');
+        $this->adminEmail = $adminEmail;
+        $this->businessName             = $businessName;
+        $this->automailerReplyAddress   = $automailerReplyAddress;
+    }
+
+    protected function getSiteAdminAddress () {
+        return new Address($this->adminEmail, 'Cameron');
     }
 
     public function setPreventMailing(bool $bool)

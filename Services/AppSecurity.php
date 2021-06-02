@@ -3,11 +3,11 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Entity\Person;
+use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
 use App\Traits\FlashBagTrait;
 use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
-use VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotVerifiedException;
 use VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -66,9 +66,14 @@ class AppSecurity
      */
     private $baseFrontendUrl;
 
+    /**
+     * @var EmailRegisterManager
+     */
+    private $emailRegisterMan;
+
     public function __construct(
         TokenStorageInterface $tokenStorageInterface, ResponseAssembler $ra, AuthenticationUtils $authenticationUtils,
-        PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, FrontendUrl $frontendUrl, PasswordManager $passwordManager
+        PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, FrontendUrl $frontendUrl, PasswordManager $passwordManager, EmailRegisterManager $emailRegisterManager
     ) {
         $this->tokenStorage    = $tokenStorageInterface;
         $this->ra                       = $ra;
@@ -79,6 +84,7 @@ class AppSecurity
 
         $this->passwordManager          = $passwordManager;
         $this->baseFrontendUrl          = $frontendUrl;
+        $this->emailRegisterMan     = $emailRegisterManager;
     }
 
     /**
@@ -202,6 +208,7 @@ class AppSecurity
 
     private function getPersonByEmailAddress(string $email): Person
     {
+        // tood: move this to personmanager?
         try {
             // attempt token/account verification
             $this->logger->info('looking for user with email: '. $email);
@@ -214,7 +221,15 @@ class AppSecurity
         return $person;
     }
 
-    public function handleChangePasswordRequest(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     *
+     * 'reset password' is different from 'change password' in that it requires a token.
+     * This is used for both: initial set of password (straight after account verification) and "forgot my password" resetting.
+     */
+    public function handleResetPasswordRequest(Request $request)
     {
         try {
             $providedToken  = $this->getPOSTParam($request,'changePasswordToken');
@@ -234,6 +249,34 @@ class AppSecurity
             BaseFrontendUrl::MAIN_LOGGED_IN_USER_MENU
         );
 
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     *
+     * Send a password reset token to the users email address.
+     */
+    public function processForgotMyPasswordRequest(Request $request)
+    {
+        try {
+            $email          = $this->getPOSTParam($request,'email');
+
+            $person = $this->getPersonByEmailAddress($email);
+            $token = $person->createChangePasswordToken();
+
+            $this->emailRegisterMan->sendResetPasswordTokenEmail($person, $token);
+
+            $this->ra->addSuccessMessage('We have sent you a password reset email to your email address. (please also check your spam folder).');
+        } catch (ApiErrorCodeInterface $e) {
+            return $this->ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
+        }
+
+        return $this->ra->assembleJsonResponse(
+            null,
+            BaseFrontendUrl::LOGIN
+        );
     }
 
     public function attemptChangePassword(Person $person, string $newPassword, string $changePasswordToken)
@@ -340,6 +383,7 @@ class AppSecurity
 
     /**
      * Remove any flashes that were added.
+     * Used in testing as flash messages from verification and registration will stack up and be collected all together.
      */
     public function clearFlashes()
     {

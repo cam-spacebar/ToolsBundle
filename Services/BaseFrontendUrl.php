@@ -36,6 +36,7 @@ class BaseFrontendUrl
     const MAIN_LOGGED_IN_USER_MENU  = 'MAIN_LOGGED_IN_USER_MENU';
     const LOGOUT                    = 'LOGOUT';
     const CHANGE_PASSWORD           = 'CHANGE_PASSWORD';
+    const FORGOT_MY_PASSWORD        = 'FORGOT_MY_PASSWORD';
     const USER_REGISTRATION         = 'USER_REGISTRATION';
     const ACCOUNT_VERIFICATION      = 'ACCOUNT_VERIFICATION';
 
@@ -300,9 +301,14 @@ class BaseFrontendUrl
                 'front_end'         => 'userMenu'
             ],
             self::CHANGE_PASSWORD => [
-                'controller'        => SecurityController::class.'::changePasswordAction',
-                'route_name'        => 'change_password',
-                'front_end'         => 'change_password'
+                'controller'        => SecurityController::class.'::resetPasswordAction',
+                'route_name'        => 'reset_password',
+                'front_end'         => 'reset_password'
+            ],
+            self::FORGOT_MY_PASSWORD => [
+                'controller'        => SecurityController::class.'::forgotMyPasswordAction',
+                'route_name'        => 'forgot_my_password',
+                'front_end'         => 'forgot_my_password'
             ],
             self::USER_REGISTRATION => [
                 'controller'        => RegistrationController::class .'::BeginNewRegistrationAction',

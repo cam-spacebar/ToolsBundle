@@ -129,12 +129,22 @@ class SecurityController extends CustomController
     }
 
     /**
-     * @Route("/change_password", name="change_password", methods={"POST"})
+     * @Route("/reset_password", name="reset_password", methods={"POST"})
      *
-     * This controller iw tested via method: ChangePasswordTest()
+     * This controller is tested via method: resetPasswordTest()
      */
-    public function changePasswordAction(Request $request): JsonResponse
+    public function resetPasswordAction(Request $request): JsonResponse
     {
-        return $this->appSecurity->handleChangePasswordRequest($request);
+        return $this->appSecurity->handleResetPasswordRequest($request);
+    }
+
+    /**
+     * @Route("/forgot_my_password", name="forgot_possword_request", methods={"POST"})
+     *
+     * This controller is tested via method: ??()
+     */
+    public function forgotMyPasswordAction(Request $request): JsonResponse
+    {
+        return $this->appSecurity->processForgotMyPasswordRequest($request);
     }
 }
