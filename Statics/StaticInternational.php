@@ -3,8 +3,8 @@
 namespace VisageFour\Bundle\ToolsBundle\Statics;
 
 
-use VisageFour\Bundle\ToolsBundle\Exceptions\CountryCodeDoesNotExist;
-use VisageFour\Bundle\ToolsBundle\Exceptions\LanguageCodeDoesNotExist;
+use App\Exceptions\CountryCodeDoesNotExist;
+use App\Exceptions\LanguageCodeDoesNotExist;
 
 /**
  * Created by PhpStorm.

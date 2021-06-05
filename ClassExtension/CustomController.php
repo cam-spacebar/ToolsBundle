@@ -67,7 +67,7 @@ class CustomController extends AbstractController
 
     /**
      * @return Person
-     * @throws \App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode
+     * @throws \Twencha\Bundle\EventRegistrationBundle\Exceptions\BaseApiErrorCode
      * get the logged in user, or throw an ApiErroCode that redirects them to the login form (on the front-end)
      */
     protected function getLoggedInUserOrRedirectToLogin(): ?Person

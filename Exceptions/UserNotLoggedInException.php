@@ -3,7 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 use App\Services\FrontendUrl;
-use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
+use App\Exceptions\ApiErrorCode;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 
 class UserNotLoggedInException extends ApiErrorCode implements ApiErrorCodeInterface

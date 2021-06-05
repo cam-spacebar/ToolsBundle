@@ -3,7 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Services\FrontendUrl;
-use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
+use App\Exceptions\ApiErrorCode;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;

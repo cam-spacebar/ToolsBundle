@@ -1,0 +1,172 @@
+<?php
+
+namespace VisageFour\Bundle\ToolsBundle\Exceptions;
+
+use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
+use VisageFour\Bundle\ToolsBundle\Services\BaseFrontendUrl;
+
+class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface
+{
+    // security error codes:
+    const OK                                    = 10;       // the default of a response, which indicates there were not problems.
+    const INPUT_MISSING                         = 20;       // a GET or POST parameter is missing.
+    const INVALID_EMAIL_ADDRESS                 = 30;       // the email address provided is invalid.
+    const ALREADY_LOGGED_IN                     = 40;       // when a user is attempting to login
+    const ERROR_BUT_ALREADY_LOGGED_IN           = 43;       // originally it used the already logged in error (if logged in but failed authentication) - but
+                                                            // this could cause confusion so this error code was created
+    const INVALID_ACCOUNT_VERIFICATION_TOKEN    = 50;
+    const ACCOUNT_ALREADY_VERIFIED              = 60;
+    const CHANGE_PASSWORD_TOKEN_INVALID         = 70;
+    const INVALID_CREDENTIALS                   = 80;       // incorrect password
+    const INVALID_NEW_PASSWORD                  = 90;       // when a user provides a new passwords that's too short or too long (for instance).
+    const ACCOUNT_NOT_VERIFIED                  = 100;
+    const LOGIN_REQUIRED                        = 110;
+
+    /**
+     * @return $this
+     * @throws \Exception
+     */
+    private function populateStandardResponses()
+    {
+        // Add new route marker: #CMDKKD00
+        $responses = [
+            // security errors:
+            self::OK                                    => ['msg'               => 'Request fine.',
+                                                            'HTTPStatusCode'    => 200],
+            self::INPUT_MISSING                         => ['msg'               => 'You are missing an input parameter',
+                                                            'HTTPStatusCode'    => 401],
+            self::INVALID_EMAIL_ADDRESS                 => ['msg'               => 'Email could not be found.',
+                                                            'HTTPStatusCode'    => 401],
+            self::ALREADY_LOGGED_IN                     => ['msg'               => 'You are already logged in!',
+                                                            'HTTPStatusCode'    => 200],
+            self::ERROR_BUT_ALREADY_LOGGED_IN           => ['msg'               => 'There was an error in your login attempt, however you are already logged in.',
+                                                            'HTTPStatusCode'    => 400],
+            self::INVALID_ACCOUNT_VERIFICATION_TOKEN    => ['msg'               => 'The token provided is invalid. This account cannot be verified.',
+                                                            'HTTPStatusCode'    => 400],
+            self::ACCOUNT_ALREADY_VERIFIED              => ['msg'               => 'Your account has already been verified.',
+                                                            'HTTPStatusCode'    => 400],
+            self::CHANGE_PASSWORD_TOKEN_INVALID         => ['msg'               => 'The token provided is invalid. The password cannot be changed. Please re-try the "forgot your password" form to get a new link/token.',
+                                                            'HTTPStatusCode'    => 401],
+            self::INVALID_CREDENTIALS                   => ['msg'               => 'Invalid credentials.',
+                                                            'HTTPStatusCode'    => 401],
+            self::INVALID_NEW_PASSWORD                  => ['msg'               => 'The password provided is incorrect.',
+                                                            'HTTPStatusCode'    => 401],
+            self::ACCOUNT_NOT_VERIFIED                  => ['msg'               => 'Cannot complete this request as this account is not verified. Please check your email (and spam folder) for an email containing a verification link.',
+                                                            'HTTPStatusCode'    => 401],        // message inherited from the exception class: AccountNotVerifiedException
+            self::LOGIN_REQUIRED                        => ['msg'               => 'You must login first to view this page.',
+                                                            'HTTPStatusCode'    => 401]
+        ];
+
+        $this->addArrayOfStdResponses($responses);
+    }
+
+    private $stdResponses;
+
+    protected function addArrayOfStdResponses(array $newResponses)
+    {
+        foreach ($newResponses as $curI => $curResponse) {
+            $this->stdResponses[$curI] = $curResponse;
+        }
+
+    }
+    
+
+    /**
+     * @var int|null
+     * the FrontendUrl (class) redirection constant - this is often/most likely set when a new ApiErrorCode obj (i.e. this class) is instantiated.
+     * The ResponseAssembler will then take this and get the front-end URL from it and return this url to the client.
+     */
+    private $redirectCode;
+
+    /**
+     * @var int
+     * bodyCode isn't the HTTP status code, it's the code in the 'body' of the response and corresponds to an
+     * internal set of (app specific) status codes - see $stdResponses for a list of available options.
+     */
+    private $bodyCode;
+
+    public function __construct(int $statusCode, string $clientMsg = null, string $redirectCode = null)
+    {
+        $this->populateStandardResponses();
+
+        $this->checkCodeIsValid($statusCode);
+        $this->bodyCode   = $statusCode;
+
+        if (!empty($redirect)) {
+            $this->redirectCode = $redirectCode;
+        }
+
+        // $clientMsg can only be empty if it has a "stdMessage". If not, throw an error.
+        if (empty($clientMsg)) {
+            $clientMsg = $this->getStandardResponseMsg();
+        }
+
+        parent::__construct($clientMsg);
+    }
+
+    /**
+     * @return int
+     */
+    public function getBodyCode(): int
+    {
+        return $this->bodyCode;
+    }
+
+    /**
+     * return a FrontendUrl constant representing the url that the client-side app should redirect to.
+     */
+    public function getRedirectionCode ()
+    {
+        if (empty($this->redirectCode)) {
+            return BaseFrontendUrl::NO_REDIRECTION;
+        } else {
+            return $this->redirectCode;
+        }
+    }
+
+    public function getHTTPStatusCode()
+    {
+        $stdResponse = $this->getStandardResponse();
+
+        if (!isset($stdResponse['HTTPStatusCode'])) {
+            throw new \Exception ('ApiErrorCode->statusCode: '. $this->bodyCode .' does not have a corresponding HTTPStatusCode. Please configure one at marker: #oollgg55');
+        }
+        return $stdResponse ['HTTPStatusCode'];
+    }
+
+    public function getStandardResponseMsg(): string
+    {
+        $stdResponse = $this->getStandardResponse();
+        if (!isset($stdResponse['msg'])) {
+//            throw new \Exception('');
+            throw new \Exception ('ApiErrorCode->statusCode: '. $this->bodyCode .' does not have a corresponding "msg". Please configure one at marker: #oollgg55');
+        }
+
+        return $stdResponse ['msg'];
+    }
+
+    private function getStandardResponse()
+    {
+        if (empty($this->stdResponses[$this->bodyCode])) {
+            throw new \Exception(
+                'There is no "stdResponse" for code: "'. $this->bodyCode .'". This is often means that you are required to make a custom message. (note: to fix this, goto marker: #oollgg55).'
+            );
+        }
+        $response = $this->stdResponses[$this->bodyCode];
+
+        return $response;
+    }
+
+    public function checkCodeIsValid ($code)
+    {
+        // check the provided errorCode matches one that we have.
+        if (array_key_exists($code, $this->stdResponses)) {
+            return true;
+        }
+//        die($code.'zzz');
+
+        throw new \Exception('code with value: "'. $code .'" does not exist in $stdResponses. Please review the code submitted or add the new code.');
+
+        return true;
+    }
+}

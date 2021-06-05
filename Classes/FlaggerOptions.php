@@ -66,7 +66,6 @@ abstract class FlaggerOptions
         }
     }
 
-
     public static function getFlaggerName () : string
     {
         self::ensureIsPopulated();

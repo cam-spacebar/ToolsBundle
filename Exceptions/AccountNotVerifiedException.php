@@ -2,14 +2,12 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
-use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
-
-class AccountNotVerifiedException extends ApiErrorCode
+class AccountNotVerifiedException extends BaseApiErrorCode
 {
     public function __construct()
     {
         parent::__construct(
-            ApiErrorCode::ACCOUNT_NOT_VERIFIED
+            BaseApiErrorCode::ACCOUNT_NOT_VERIFIED
         );
     }
 }

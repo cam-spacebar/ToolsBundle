@@ -4,7 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Classes;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Exceptions\BadgeAlreadyInPipelineException;
-use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
+use App\Exceptions\ApiErrorCode;
 use PHPUnit\Framework\ExpectationFailedException;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\Exception\RedirectionException;

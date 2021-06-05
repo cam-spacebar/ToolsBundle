@@ -6,9 +6,9 @@ use App\Entity\Person;
 use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
 use App\Traits\FlashBagTrait;
-use App\Twencha\Bundle\EventRegistrationBundle\Exceptions\ApiErrorCode;
+use App\Exceptions\ApiErrorCode;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
-use VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
+use App\Exceptions\PersonNotFound;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Twencha\Bundle\EventRegistrationBundle\Repository\PersonRepository;
 use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
 use VisageFour\Bundle\ToolsBundle\Exceptions\PasswordValidationException;
-use VisageFour\Bundle\ToolsBundle\Exceptions\UserNotLoggedInException;
+use App\Exceptions\UserNotLoggedInException;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
@@ -84,7 +84,8 @@ class AppSecurity
 
         $this->passwordManager          = $passwordManager;
         $this->baseFrontendUrl          = $frontendUrl;
-        $this->emailRegisterMan     = $emailRegisterManager;
+        $this->emailRegisterMan         = $emailRegisterManager;
+        $this->apiErrorCode             = new ApiErrorCode(ApiErrorCode::OK);
     }
 
     /**
@@ -116,7 +117,7 @@ class AppSecurity
 //                break;
         }
 
-        if (!ApiErrorCode::checkCodeIsValid($errorCode)) {
+        if (!$this->apiErrorCode->checkCodeIsValid($errorCode)) {
             throw new \Exception('errorMsg: "'. $errorMsg .'" is not recognised and cannot be converted into an valid ApiErrorCode::constant');
         }
 
@@ -305,7 +306,7 @@ class AppSecurity
      * @param string $email
      * @param string $token
      * @return bool
-     * @throws \VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound
+     * @throws \App\Exceptions\PersonNotFound
      *
      * Return true if the verification token is correct (and not already verified)
      */
