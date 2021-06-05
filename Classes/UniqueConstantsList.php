@@ -20,7 +20,7 @@ namespace App\VisageFour\Bundle\ToolsBundle\Classes;
  * - apply this design to: BaseFlagger
  * - apply this design to: BaseFrontendUrl
  */
-abstract class UniqueConstantsList
+class UniqueConstantsList
 {
     /**
      * @var string

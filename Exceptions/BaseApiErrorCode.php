@@ -4,9 +4,12 @@ namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Services\BaseFrontendUrl;
+use VisageFour\Bundle\ToolsBundle\Traits\HasAUniqueConstantsListTrait;
 
 class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface
 {
+    use HasAUniqueConstantsListTrait;
+
     // security error codes:
     const OK                                    = 10;       // the default of a response, which indicates there were not problems.
     const INPUT_MISSING                         = 20;       // a GET or POST parameter is missing.
@@ -57,17 +60,7 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface
                                                             'HTTPStatusCode'    => 401]
         ];
 
-        $this->addArrayOfStdResponses($responses);
-    }
-
-    private $stdResponses;
-
-    protected function addArrayOfStdResponses(array $newResponses)
-    {
-        foreach ($newResponses as $curI => $curResponse) {
-            $this->stdResponses[$curI] = $curResponse;
-        }
-
+        $this->addArrayOfItemsToUCL($responses);
     }
     
 
