@@ -183,7 +183,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     {
         $this->checkExpectedResponseIsSet();
 
-        return $this->expectedResponse->getBodyCode();
+        return $this->expectedResponse->getValue();
     }
 
     protected function getExpectedHTTPStatusCode()

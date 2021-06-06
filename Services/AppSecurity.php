@@ -71,6 +71,11 @@ class AppSecurity
      */
     private $emailRegisterMan;
 
+    /**
+     * @var ApiErrorCode
+     */
+    private $apiErrorCode;
+
     public function __construct(
         TokenStorageInterface $tokenStorageInterface, ResponseAssembler $ra, AuthenticationUtils $authenticationUtils,
         PersonManager $personMan, PersonRepository $personRepo, EntityManager $em, FrontendUrl $frontendUrl, PasswordManager $passwordManager, EmailRegisterManager $emailRegisterManager
@@ -117,7 +122,7 @@ class AppSecurity
 //                break;
         }
 
-        if (!$this->apiErrorCode->checkCodeIsValid($errorCode)) {
+        if (!$this->apiErrorCode->checkConstantIsValid($errorCode)) {
             throw new \Exception('errorMsg: "'. $errorMsg .'" is not recognised and cannot be converted into an valid ApiErrorCode::constant');
         }
 

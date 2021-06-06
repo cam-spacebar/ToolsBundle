@@ -3,6 +3,12 @@
 namespace VisageFour\Bundle\ToolsBundle\Interfaces;
 
 interface UniqueConstantsListInterface {
-    function addListItem($item, $arrIndex);
+    function setValue($value);
+    function getValue();
+    function getPayload();
+
+    function checkConstantIsValid($constantValue);
+    function getListItemByIndex($arrIndex);
+
 }
 ?>
