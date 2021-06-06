@@ -36,14 +36,14 @@ class BaseFrontendUrl implements FrontendUrlInterface
     const CONFIRM_EMAIL             = 'CONFIRM_EMAIL';
     const MAIN_LOGGED_IN_USER_MENU  = 'MAIN_LOGGED_IN_USER_MENU';
     const LOGOUT                    = 'LOGOUT';
-    const FORGOT_MY_PASSWORD        = 'FORGOT_MY_PASSWORD';
+    const FORGOT_YOUR_PASSWORD      = 'FORGOT_YOUR_PASSWORD';
     const RESET_PASSWORD            = 'RESET_PASSWORD';
     const USER_REGISTRATION         = 'USER_REGISTRATION';
     const ACCOUNT_VERIFICATION      = 'ACCOUNT_VERIFICATION';
 
     const NO_FRONTEND = 'NO_FRONTEND';      // placeholder to indicate that there's no "front-end", maybe because the "front-end" is acctually delivered via the backend (not a react client)
 
-    // in this case, use GET on the symfony route_name to get the page.
+    // in this case, use GET ow new MissingInputException();n the symfony route_name to get the page.
 
     /**
      * @var UrlGeneratorInterface
@@ -253,7 +253,7 @@ class BaseFrontendUrl implements FrontendUrlInterface
             if(strpos($populatedPath, $needle) == false) {
                 throw new \Exception('Cannot use placeholder named: "'. $needle
                     .'" in URL construction, as it doesn\'t exist in the pathPart: "/'. $pathPart .'"'
-                    .' (using route-pair constant: '. $constant .' in the FrontendUrl class)'
+                    .' (using route-pair constant: Base/FrontendUrl::'. $constant .')'
                 );
             }
 
@@ -269,7 +269,7 @@ class BaseFrontendUrl implements FrontendUrlInterface
                 dump('placeholder data dump below (#sdcs3): ', $data);
                 throw new \Exception(
                     'You must provide a value for the placeholder: "'. $missingPlaceholderName .'" for path-part: '. $pathPart
-                    .' (using route-pair constant: '. $constant .' in the FrontendUrl class)'
+                    .' (using route-pair constant: Base/FrontendUrl::'. $constant .')'
                 );
             }
         }
@@ -300,22 +300,22 @@ class BaseFrontendUrl implements FrontendUrlInterface
             self::CONFIRM_EMAIL => [
                 'controller'        => SecurityController::class .'::verifyEmailAccountViaTokenAction',          // controller listed here for debugging (finding the controller quickly).
                 'route_name'        => 'confirm_email_get',
-                'front_end'         => 'confirm_email/{EMAIL}/{VERIFICATION_TOKEN}'
+                'front_end'         => 'confirm_email?email={EMAIL}&verification_token=reset_password{VERIFICATION_TOKEN}'
             ],
             self::MAIN_LOGGED_IN_USER_MENU => [
                 'controller'        => AdminMenuController::class .'::MainLoggedInUserMenuAction',
                 'route_name'        => 'main_loggedin_user_menu',
                 'front_end'         => 'userMenu'
             ],
-            self::FORGOT_MY_PASSWORD => [
+            self::FORGOT_YOUR_PASSWORD => [
                 'controller'        => SecurityController::class.'::forgotMyPasswordAction',
-                'route_name'        => 'forgot_my_password',
-                'front_end'         => 'forgot_my_password'
+                'route_name'        => 'forgot_your_password',
+                'front_end'         => 'forgot_your_password'
             ],
             self::RESET_PASSWORD => [
                 'controller'        => SecurityController::class.'::handleResetPasswordRequestAction',
                 'route_name'        => 'reset_password',
-                'front_end'         => 'reset_password/{EMAIL}/{RESET_PASSWORD_TOKEN}'
+                'front_end'         => 'reset_password?email={EMAIL}&changePasswordToken={CHANGEPASSWORDTOKEN}'
             ],
             self::USER_REGISTRATION => [
                 'controller'        => RegistrationController::class .'::BeginNewRegistrationAction',

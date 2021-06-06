@@ -7,6 +7,7 @@ use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
 use App\Traits\FlashBagTrait;
 use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\MissingInputException;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
 use VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
 use Doctrine\ORM\EntityManager;
@@ -162,10 +163,7 @@ class BaseAppSecurity
         $value = $request->get($paramName);
 
         if (empty($value)) {
-            throw new ApiErrorCode(
-                ApiErrorCode::INPUT_MISSING,
-                'You must provide a "'. $paramName .'" field as an GET/POST'
-            );
+            throw new MissingInputException($paramName);
         }
 
         return $value;
@@ -204,7 +202,7 @@ class BaseAppSecurity
             // todo: security: is this vulnerable? (sending the token to the client? however, it's straight after verifying the email account.)
             $redirectData = [
                 'email'                 => $person->getEmail(),
-                'reset_password_token'  => $changePasswordToken
+                'changePasswordToken'   => $changePasswordToken
             ];
 //            dump('9fvuh', $redirect); // zzz
 
@@ -243,6 +241,7 @@ class BaseAppSecurity
     public function handleResetPasswordRequest(Request $request)
     {
         try {
+//            dd('z12',$request);
             $providedToken  = $this->getPOSTParam($request,'changePasswordToken');
             $email          = $this->getPOSTParam($request,'email');
             $newPassword    = $this->getPOSTParam($request,'newPassword');

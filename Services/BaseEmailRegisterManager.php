@@ -104,7 +104,7 @@ abstract class BaseEmailRegisterManager
             BaseFrontendUrl::RESET_PASSWORD,
             [
                 'email'                     => $person->getEmail(),
-                'reset_password_token'      => $token,
+                'changePasswordToken'       => $token,
             ],
             BaseFrontendUrl::FORMAT_ABSOLUTE
         );

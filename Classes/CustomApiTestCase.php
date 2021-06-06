@@ -101,6 +101,14 @@ abstract class CustomApiTestCase extends ApiTestCase
      */
     protected $expectedResponse;
 
+    /**
+     * @return string
+     */
+    public function getRoutePairConstant(): string
+    {
+        return $this->routePairConstant;
+    }
+
     abstract protected function specificSetUp ();
 
     /**
@@ -125,9 +133,13 @@ abstract class CustomApiTestCase extends ApiTestCase
         $this->routePairConstant = $routePairConstant;
         $this->urlParams = $urlParams;
 //            $this->frontendUrl->getControllerName($routePairConstant);
-        $this->setUrl($this->frontendUrl->getSymfonyURL($routePairConstant, $urlParams));
+        $this->buildUrlWithParams($urlParams);
 //        $this->setTargetRoutePairConstant(FrontendUrl::CHANGE_PASSWORD);
 //        $this->controllerName
+    }
+
+    protected function buildUrlWithParams ($urlParams) {
+        $this->setUrl($this->frontendUrl->getSymfonyURL($this->routePairConstant, $urlParams));
     }
 
     protected function setUp(): void
@@ -221,12 +233,17 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function displayResponse(ResponseInterface $crawler)
     {
         $data = $crawler->toArray(false);
-
+        $content = json_decode($crawler->getContent(false));
+//        dd('asdfas', $content);
+work from here:
+        resovle this issue with unable to find email address.
         dump(
             '',
             'there was a problem. The response body is provided below: ',
 
             'expected body-code: '. $this->getExpectedBodyCode(),
+            'actual body-code: '. $content->status .', error msgs: '. $content->error_msgs .' ',
+            '',
             'expected HTTP status code: '. $this->getExpectedHTTPStatusCode() .', actual code: '. $crawler->getStatusCode(),
             "error occured in test: ". $this->currentMethod .' (with target URL: '. $this->url .')',
             ' '
@@ -269,7 +286,7 @@ abstract class CustomApiTestCase extends ApiTestCase
      * Sends a "http request" to the $url specified. This just reduces boilerplate in the testcase methods.
      * if $urlOverride is set, it will be the target instead of $this->url. (Note: $this->url is just useful to set in setUp() once, instead of per every test. URL override is used on things like: setup that requires login, as otherwise we'd have to re-set the $this->url from within the test method (not ideal).)
      */
-    protected function sendJSONRequest(string $method, $body = null, $urlOverride = null) {
+    protected function sendJSONRequest(string $method, $body = null, $urlOverride = null, $displayDebugging = false) {
         $json = [];
         if (!empty($body)) {
             $json = ['json' => $body];
@@ -281,6 +298,20 @@ abstract class CustomApiTestCase extends ApiTestCase
 
         if (empty($this->url)) {
             throw new \Exception('$this->url cannot be empty. Please set it via: specificSetUp().');
+        }
+
+        // display useful debugging info about a request (optional)
+        if ($displayDebugging) {
+            dump('payload / body data: ', $body);
+        }
+
+        if (!empty($body) && $method == "GET") {
+            dump('request body dump: ', $body);
+            throw new \Exception(
+                'You have a body set (for your request), but you are using a GET HTTP method for the request. '.
+                'You may want to use $this->buildUrlWithParams($params), as this will build the url with the params (instead of trying to send with the request body).'
+            );
+
         }
 
         $url = (empty($urlOverride)) ? $this->url : $urlOverride;

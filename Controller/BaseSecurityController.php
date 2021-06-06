@@ -22,7 +22,7 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 // use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 // note: no longer used by Anchorcards, so can be modified as needed.
-class SecurityController extends CustomController
+class BaseSecurityController extends CustomController
 {
     /**
      * @var TokenStorageInterface
@@ -130,9 +130,10 @@ class SecurityController extends CustomController
     }
 
     /**
-     * @Route("/reset_password", name="reset_password", methods={"POST"})
+     * @Route("/reset_password", name="reset_password", methods={"GET"})
      *
      * This controller is tested via method: resetPasswordTest()
+     * (note: must be GET, as link is sent via email)
      */
     public function handleResetPasswordRequestAction(Request $request): JsonResponse
     {
@@ -140,7 +141,7 @@ class SecurityController extends CustomController
     }
 
     /**
-     * @Route("/forgot_my_password", name="forgot_my_password", methods={"POST"})
+     * @Route("/forgot_your_password", name="forgot_your_password", methods={"POST"})
      *
      * This controller is tested via method: ??()
      */
