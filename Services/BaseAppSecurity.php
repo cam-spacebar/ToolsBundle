@@ -8,7 +8,7 @@ use App\Services\FrontendUrl;
 use App\Traits\FlashBagTrait;
 use App\Exceptions\ApiErrorCode;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
-use App\Exceptions\PersonNotFound;
+use VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,11 +17,11 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Twencha\Bundle\EventRegistrationBundle\Repository\PersonRepository;
 use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
 use VisageFour\Bundle\ToolsBundle\Exceptions\PasswordValidationException;
-use App\Exceptions\UserNotLoggedInException;
+use VisageFour\Bundle\ToolsBundle\Exceptions\UserNotLoggedInException;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
-class AppSecurity
+class BaseAppSecurity
 {
     use LoggerTrait;
     use FlashBagTrait;
@@ -364,7 +364,7 @@ class AppSecurity
 //        try {
             $person = $this->getLoggedInUser(true);
 
-        
+
 //        }
 //        } catch (ApiErrorCode $e) {
 ////            work from here.

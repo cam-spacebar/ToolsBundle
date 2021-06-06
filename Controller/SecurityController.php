@@ -7,7 +7,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Controller;
 
-use VisageFour\Bundle\ToolsBundle\Services\AppSecurity;
+use App\Services\AppSecurity;
 use App\Services\FrontendUrl;
 use VisageFour\Bundle\ToolsBundle\Services\ResponseAssembler;
 use Symfony\Component\HttpFoundation\JsonResponse;

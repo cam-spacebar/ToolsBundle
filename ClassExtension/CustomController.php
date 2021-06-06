@@ -3,7 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\ClassExtension;
 
 use App\Services\FrontendUrl;
-use VisageFour\Bundle\ToolsBundle\Services\AppSecurity;
+use App\Services\AppSecurity;
 use App\Entity\Person;
 use VisageFour\Bundle\ToolsBundle\Services\ResponseAssembler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
