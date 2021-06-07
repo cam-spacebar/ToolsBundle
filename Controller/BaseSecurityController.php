@@ -66,7 +66,7 @@ class BaseSecurityController extends CustomController
      */
     public function loginPOSTAction(Request $request): JsonResponse
     {
-        throw new \Exception('this is hijacked by the authenticator: LoginFormAuthenticator. see: onAuthenticationSuccess() or onAuthenticationFailure().');
+        throw new \Exception('this is hijacked by the authenticator class named: LoginFormAuthenticator. see: onAuthenticationSuccess() or onAuthenticationFailure().');
 //        return $this->appSecurity->loginUserViaPOST($request);
 
 //        $logger->info('request', $request);
@@ -114,7 +114,7 @@ class BaseSecurityController extends CustomController
     /**
      * @Route("/confirm_email/{email}/{verificationToken}", name="confirm_email_get", methods={"GET"})
      *
-     * Verify the email registration link provided.
+     * Verify the email registration link provided (ussually sent to the user via email upon registration.)
      *
      * test case class: VerifyTokenTest
      */

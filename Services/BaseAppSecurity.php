@@ -246,7 +246,10 @@ class BaseAppSecurity
             $email          = $this->getPOSTParam($request,'email');
             $newPassword    = $this->getPOSTParam($request,'newPassword');
 
+//            dd('asd', $email);
+
             $person = $this->getPersonByEmailAddress($email);
+//            dd('123', $person);
 
             $this->attemptChangePassword($person, $newPassword, $providedToken);
             $person->isVerified(true);

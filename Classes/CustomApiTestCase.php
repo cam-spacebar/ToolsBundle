@@ -235,8 +235,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         $data = $crawler->toArray(false);
         $content = json_decode($crawler->getContent(false));
 //        dd('asdfas', $content);
-work from here:
-        resovle this issue with unable to find email address.
+
         dump(
             '',
             'there was a problem. The response body is provided below: ',
@@ -306,12 +305,11 @@ work from here:
         }
 
         if (!empty($body) && $method == "GET") {
-            dump('request body dump: ', $body);
             throw new \Exception(
-                'You have a body set (for your request), but you are using a GET HTTP method for the request. '.
-                'You may want to use $this->buildUrlWithParams($params), as this will build the url with the params (instead of trying to send with the request body).'
+                'You have a $body set (for your request), but you are using a GET HTTP method for the request. '.
+                "(Used when sending a request to controller with the route-pair: ". $this->routePairConstant .")"
+//                'You may want to use $this->buildUrlWithParams($params), as this will build the url with the params (instead of trying to send with the request body).'
             );
-
         }
 
         $url = (empty($urlOverride)) ? $this->url : $urlOverride;
@@ -361,12 +359,15 @@ work from here:
         if(empty($this->url)) {
             throw new \Exception('$this->url cannot be empty. (Error is in test: '. $this->currentMethod .')');
         }
-        $msg = 'target URL set to: '. $this->url
-            .' '. $this->frontendUrl->getRoutePairDebugMsg($this->routePairConstant)
+        $this->outputColoredTextToTerminal(
+            'target URL set to: '. $this->url
+        );
+        $this->outputColoredTextToTerminal(
+            $this->frontendUrl->getRoutePairDebugMsg($this->routePairConstant)
             .' (using HTTP method: '. $this->HTTPMethod .')'
-        ;
+        );
         
-        $this->outputColoredTextToTerminal($msg);
+
 
 //        $this->outputDebugToTerminal($this->url);
     }

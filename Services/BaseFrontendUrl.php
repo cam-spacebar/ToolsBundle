@@ -87,7 +87,7 @@ class BaseFrontendUrl implements FrontendUrlInterface
             // display symfony route
             return ('(controller: '.
                 $this->getControllerName($routePairConstant) .
-                ', route_name: '.
+                ", route_name: ".
                 $this->getSymfonyRouteNAME($routePairConstant)
                 .')'
             );
