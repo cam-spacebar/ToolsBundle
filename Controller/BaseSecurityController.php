@@ -147,11 +147,13 @@ class BaseSecurityController extends CustomController
      */
     public function forgotMyPasswordAction(Request $request, ResponseAssembler $ra, AppSecurity $appSecurity): JsonResponse
     {
+
         try {
             $email = $appSecurity->getPOSTParam($request,'email');
             return $appSecurity->processForgotMyPasswordRequest($email);
 
         } catch (ApiErrorCodeInterface $e) {
+
             return $ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
         }
     }
