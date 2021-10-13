@@ -26,7 +26,7 @@ use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
  * Class CustomApiTestCase
  * @package VisageFour\Bundle\ToolsBundle\Classes
  *
- * this class reduces boiler plate such as: creating users, sending requests (finctional testing) setup and tear down etc.
+ * this class reduces boiler-plate code such as: creating users, sending requests (functional testing) setup and tear down etc.
  *
  * Testing framework documentation:
  * https://docs.google.com/presentation/d/1tAEVY-Ypdv1ClBrCzfk3EqI2QK_wBxd80isKieJDRyw/edit
@@ -233,8 +233,13 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function displayResponse(ResponseInterface $crawler)
     {
         $data = $crawler->toArray(false);
-        $content = json_decode($crawler->getContent(false));
-//        dd('asdfas', $content);
+        $content = json_decode($crawler->getContent(false), true);          // returns assoc array when second param "true"
+//        dd('zzz12', $content);
+        if (empty($content->status)) {
+            // I'm not sure why it doesn't have a "status" in it, but when no ->status, the response needs to be handled differently
+            $this->displayError($content);
+            die("--- die() ---\n");
+        }
 
         dump(
             '',
@@ -249,23 +254,29 @@ abstract class CustomApiTestCase extends ApiTestCase
         );
 //        dump($data);
 
+//        $this->displayError($data['trace']);
+    }
+
+    private function displayError($data)
+    {
+        $trace = $data['trace'];
         // Display stack trace (if one was provided).
-        if (isset($data['trace'])) {
-            // display stack trace (if it's available)
-            $trace = $data['trace'];
+        if (isset($trace)) {
             print "\n== Error == \n";
             print $data['hydra:description'] ."\n\n";
+
+
             print "== Stack trace ==\n";
             foreach ($trace as $i => $curCall) {
                 print "$i: ". $curCall['file'] .' line: '. $curCall['line'] ."\n";
             }
         } else {
-            dump('Note: no stack trace provided.');
+            print ("\nNote: no stack trace provided.]\n");
         }
     }
 
     /**
-     * compare the HTTP status code from the $this->>expectedResponse (ApiErrorCode) with the crawlers HTTP Status code.
+     * compare the HTTP status code from the $this->expectedResponse (ApiErrorCode) with the crawlers HTTP Status code.
      */
     protected function assertHTTPStatusCodeIsAsExpected(ResponseInterface $crawler)
     {
@@ -276,7 +287,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         // todo: if they dont match, then output the stack trace / error!
 
         if ($expectedHTTPStatusCode != $crawler->getStatusCode()) {
-            print "Status Codes match: Expected: ". $expectedHTTPStatusCode .' == $crawler: '. $crawler->getStatusCode();
+            print "Status codes don't match: Expected: ". $expectedHTTPStatusCode .' == $crawler: '. $crawler->getStatusCode();
         }
 
     }
@@ -328,10 +339,24 @@ abstract class CustomApiTestCase extends ApiTestCase
             $this->assertHTTPStatusCodeIsAsExpected($crawler);
         } catch (\Exception $e) {
 //            dump('Exception during login attempt: (#23fwesd): ', $e);
+            $this->displayException($e);
+//            dump($e);
             die ("\nan error occured during test: ". $this->currentMethod .". Please investigate.\n");
         }
 
         return $crawler;
+    }
+
+    private function displayException (\Exception $e)
+    {
+        print "\n=== An exception occured ===";
+        print "\nException class:" . get_class($e);
+        print "\nmessage: ". $e->getMessage();
+
+        print "\n\nStack trace:\n";
+        foreach ($e->getTrace() as $curI => $curItem) {
+            print "- ". $curItem['file'] .', [line: '. $curItem['line'] ."]\n";
+        }
     }
 
     /**

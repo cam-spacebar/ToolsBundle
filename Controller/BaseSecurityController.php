@@ -42,12 +42,21 @@ class BaseSecurityController extends CustomController
     }
 
     /**
-     * @Route("/registerNew", name="app_registration", methods={"POST"})
+     * @Route("/newAccount", name="newAccount", methods={"POST"})
      * @param Request $request
      */
-    public function registerNewUserAction(Request $request, RegistrationManager $regMan)
+    public function createNewUserAction(Request $request, RegistrationManager $regMan)
     {
-        $this->appSecurity->registerNewUser();
+        // get POST email variable
+
+//        $email = $this->getParameter('email');
+//        dd($email);
+
+        $outcome = $this->appSecurity->createNewUser($request);
+//        $data = ['a' => $email];
+//        $data = 'cat';
+
+        return $this->assembleJsonResponse($outcome);
     }
 
     /**

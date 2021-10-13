@@ -141,6 +141,18 @@ class BaseAppSecurity
         return $this->ra->assembleJsonResponse($data, BaseFrontendUrl::NO_REDIRECTION, $e);
     }
 
+    public function createNewUser (Request $request)
+    {
+        $email = $this->getPOSTParam($request, 'email');
+
+        // todo: check the account doesn't already exist
+
+
+        // create the account
+
+        return 'todo: this controller (and its test) needs to be completed. Registrations (for twenchaLE) are done via the registration manager. Email param: '. $email;
+    }
+
     public function logoutUser (Request $request)
     {
         // clear the token, cancel session and redirect
@@ -235,8 +247,8 @@ class BaseAppSecurity
      * @return JsonResponse
      * @throws \Exception
      *
-     * 'reset password' is different from 'change password' in that it requires a token.
      * This is used for both: initial set of password (straight after account verification) and "forgot my password" resetting.
+     * (note: 'reset password' is different from 'change password')
      */
     public function handleResetPasswordRequest(Request $request)
     {

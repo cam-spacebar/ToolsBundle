@@ -33,7 +33,7 @@ class CustomController extends AbstractController
      * @param Person $person
      * @return JsonResponse
      *
-     * Adds the "person" field to *every* response.
+     * Note: the "person" field is add to *every* response.
      * This ensures that when logged out, additional windows / instances of the front-end code will be notified
      * the user is logged out (person: null)
      *
@@ -74,4 +74,5 @@ class CustomController extends AbstractController
     {
             return $this->appSecurity->getLoggedInUserOrRedirectToLogin();
     }
+
 }

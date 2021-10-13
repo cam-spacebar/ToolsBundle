@@ -3,7 +3,6 @@
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Controller\AdminMenuController;
-use App\Controller\RegistrationController;
 use App\Controller\SecurityController;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
@@ -40,8 +39,9 @@ class BaseFrontendUrl implements FrontendUrlInterface
     const RESET_PASSWORD            = 'RESET_PASSWORD';
     const USER_REGISTRATION         = 'USER_REGISTRATION';
     const ACCOUNT_VERIFICATION      = 'ACCOUNT_VERIFICATION';
+    const NEW_ACCOUNT               = 'NEW_ACCOUNT';
 
-    const NO_FRONTEND = 'NO_FRONTEND';      // placeholder to indicate that there's no "front-end", maybe because the "front-end" is acctually delivered via the backend (not a react client)
+    const NO_FRONTEND = 'NO_FRONTEND';      // placeholder to indicate that there's no "front-end", maybe because the "front-end" is acctually delivered via the backend as HTML (not a react client)
 
     // in this case, use GET ow new MissingInputException();n the symfony route_name to get the page.
 
@@ -317,10 +317,10 @@ class BaseFrontendUrl implements FrontendUrlInterface
                 'route_name'        => 'reset_password',
                 'front_end'         => 'reset_password?email={EMAIL}&changePasswordToken={CHANGEPASSWORDTOKEN}'
             ],
-            self::USER_REGISTRATION => [
-                'controller'        => RegistrationController::class .'::BeginNewRegistrationAction',
-                'route_name'        => 'beginNewRegistration',
-                'front_end'         => self::NO_FRONTEND
+            self::NEW_ACCOUNT => [
+                'controller'        => SecurityController::class .'::registerNewUserAction',
+                'route_name'        => 'newAccount',
+                'front_end'         => '/newAccount'
             ],
     //        self::ACCOUNT_VERIFICATION => [
 //                'controller'        => 'xxx',
