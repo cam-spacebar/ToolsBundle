@@ -22,7 +22,7 @@ class Checkout extends BaseEntity
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Person", inversedBy="relatedCheckouts")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Person", inversedBy="relatedCheckouts")
      * @ORM\JoinColumn(name="related_person_id", referencedColumnName="id", nullable=false)
      *
      */
@@ -31,7 +31,7 @@ class Checkout extends BaseEntity
     /**
      * @var int
      *
-     * @ORM\Column(name="status", type="integet", nullable=false)
+     * @ORM\Column(name="status", type="integer", nullable=false)
      *
      * the status of the checkout
      */

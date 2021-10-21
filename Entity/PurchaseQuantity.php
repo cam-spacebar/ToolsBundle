@@ -30,13 +30,13 @@ class PurchaseQuantity extends BaseEntity
     protected $quantity;
 
     /**
-     * @ORM\OneToMany(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Product", mappedBy="relatedPurchaseQuantities")
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="relatedPurchaseQuantities")
      * todo: review this relationship. - dones't seem correct.
      */
     private $relatedProduct;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Checkout", inversedBy="relatedQuantities")
+     * @ORM\ManyToOne(targetEntity="Checkout", inversedBy="relatedQuantities")
      * @ORM\JoinColumn(name="related_checkout_id", referencedColumnName="id", nullable=false)
      *
      * If it has a parent, this product is a variant
