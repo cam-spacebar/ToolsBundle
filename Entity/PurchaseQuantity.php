@@ -30,18 +30,18 @@ class PurchaseQuantity extends BaseEntity
     protected $quantity;
 
     /**
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="relatedPurchaseQuantities")
-     *
+     * @ORM\OneToMany(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Product", mappedBy="relatedPurchaseQuantities")
+     * todo: review this relationship. - dones't seem correct.
      */
     private $relatedProduct;
 
     /**
-     * zz @ORM\ManyToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Round", inversedBy="variantProducts")
-     * zz @ORM\JoinColumn(name="related_product_parent_id", referencedColumnName="id", nullable=true)
+     * @ORM\ManyToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Checkout", inversedBy="relatedQuantities")
+     * @ORM\JoinColumn(name="related_checkout_id", referencedColumnName="id", nullable=false)
      *
-     * if it has a parent, this product is a variant
+     * If it has a parent, this product is a variant
      */
-//    private $product;
+    private $relatedCheckout;
 
     /**
      * PurchaseQuantity constructor.
@@ -94,5 +94,21 @@ class PurchaseQuantity extends BaseEntity
     public function setRelatedProduct(Product $relatedProduct): void
     {
         $this->relatedProduct = $relatedProduct;
+    }
+
+    /**
+     * @return Checkout
+     */
+    public function getRelatedCheckout(): Checkout
+    {
+        return $this->relatedCheckout;
+    }
+
+    /**
+     * @param Checkout $relatedCheckout
+     */
+    public function setRelatedCheckout(Checkout $relatedCheckout): void
+    {
+        $this->relatedCheckout = $relatedCheckout;
     }
 }
