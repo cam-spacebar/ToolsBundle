@@ -33,6 +33,33 @@ class Product extends BaseEntity
     protected $title;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="string", length=256, unique=false, nullable=false)
+     *
+     * a short Description of the product
+     */
+    protected $description;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="price", type="integer", nullable=false)
+     *
+     * price - in cents.
+     */
+    protected $price;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="reference", type="string", length=50, unique=true, nullable=false)
+     *
+     * a unique reference to the product (used instead of id)
+     */
+    protected $reference;
+
+    /**
      * @ORM\OneToMany(targetEntity="App\Entity\Purchase\PurchaseQuantity", mappedBy="relatedProduct")
      *
      * A link to all previous completed checkouts of this product
@@ -48,9 +75,20 @@ class Product extends BaseEntity
      */
 //    private $parentProduct;
 
-    public function __construct()
+    /**
+     * Product constructor.
+     * @param $title
+     * @param $description
+     * @param $price
+     */
+    public function __construct($title, $reference, $description, $price)
     {
         $this->relatedPurchaseQuantities      = new ArrayCollection();
+
+        $this->title        = $title;
+        $this->reference    = $reference;
+        $this->description  = $description;
+        $this->price        = $price;
     }
 
     /**
@@ -80,5 +118,67 @@ class Product extends BaseEntity
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getPrice(): integer
+    {
+        return $this->price;
+    }
+
+    /**
+     * @param string $price
+     */
+    public function setPrice(integer $price): void
+    {
+        $this->price = $price;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReference(): string
+    {
+        return $this->reference;
+    }
+
+    /**
+     * @param string $reference
+     */
+    public function setReference(string $reference): void
+    {
+        $this->reference = $reference;
+    }
+
+    /**
+     * Outputs info on the entity (to the console) when it is created in fixtures.
+     * (for more info see: VisageFour > BaseFixture Marker: #sn1la)
+     */
+    public function fixtureDetails ()
+    {
+        return ([
+            'title'         => $this->title,
+            'reference'     => $this->reference,
+            'price'         => $this->price,
+            'description'   => $this->description
+        ]);
     }
 }

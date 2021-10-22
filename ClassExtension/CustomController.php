@@ -2,13 +2,16 @@
 
 namespace VisageFour\Bundle\ToolsBundle\ClassExtension;
 
-use App\Services\FrontendUrl;
 use App\Services\AppSecurity;
 use App\Entity\Person;
+use Symfony\Component\HttpFoundation\Request;
+use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\MissingInputException;
+use VisageFour\Bundle\ToolsBundle\Services\BaseFrontendUrl;
 use VisageFour\Bundle\ToolsBundle\Services\ResponseAssembler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 
 class CustomController extends AbstractController
 {
@@ -39,7 +42,7 @@ class CustomController extends AbstractController
      *
      * $redirect: issues a command to the front-end to redirect the user to a different url on the front-end.
      */
-    protected function assembleJsonResponse ($data = null, $redirect = FrontendUrl::NO_REDIRECTION): JsonResponse {
+    protected function assembleJsonResponse ($data = null, $redirect = BaseFrontendUrl::NO_REDIRECTION): JsonResponse {
         /** @var Person $loggedInPerson */
 
         return $this->ra->assembleJsonResponse($data, $redirect);
@@ -66,13 +69,28 @@ class CustomController extends AbstractController
     }
 
     /**
-     * @return Person
-     * @throws \Twencha\Bundle\EventRegistrationBundle\Exceptions\BaseApiErrorCode
      * get the logged in user, or throw an ApiErroCode that redirects them to the login form (on the front-end)
      */
     protected function getLoggedInUserOrRedirectToLogin(): ?Person
     {
             return $this->appSecurity->getLoggedInUserOrRedirectToLogin();
+    }
+
+    protected function getPOSTParam(Request $request, string $paramName, ResponseAssembler $ra)
+    {
+        try {
+            // this uses: symfony-bundles/json-request-bundle (for the nice shorthand ->get() command)
+            $value = $request->get($paramName);
+
+            if (empty($value)) {
+                throw new MissingInputException($paramName);
+            }
+
+            return $value;
+        } catch (ApiErrorCodeInterface $e) {
+            return $ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
+        }
+
     }
 
 }

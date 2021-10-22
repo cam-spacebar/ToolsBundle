@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
+use Symfony\Component\HttpFoundation\Request;
 use VisageFour\Bundle\ToolsBundle\Classes\UniqueConstantsList;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\UniqueConstantsListInterface;
