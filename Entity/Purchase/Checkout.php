@@ -1,14 +1,15 @@
 <?php
 
-namespace VisageFour\Bundle\ToolsBundle\Entity;
+namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
 use App\Entity\Person;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
+use Doctrine\ORM\Mapping\MappedSuperclass;
 
 /**
- * @ORM\Table(name="purchase_checkout")
- * @ORM\Entity(repositoryClass="Twencha\Bundle\EventRegistrationBundle\Repository\CheckoutRepository")
+ * @MappedSuperClass
  */
 class Checkout extends BaseEntity
 {
@@ -51,10 +52,10 @@ class Checkout extends BaseEntity
     protected $total;
 
     /**
-     * @ORM\OneToMany(targetEntity="VisageFour\Bundle\ToolsBundle\Entity\PurchaseQuantity", mappedBy="relatedCheckout")
+     * @ORM\OneToMany(targetEntity="App\Entity\Purchase\PurchaseQuantity", mappedBy="relatedCheckout")
      *
      */
-    private $relatedQuantities;
+    protected $relatedQuantities;
 
     /**
      */
@@ -115,11 +116,11 @@ class Checkout extends BaseEntity
     }
 
     /**
-     * @param PurchaseQuantity $purQuan
+     * @param \App\Entity\PurchaseQuantity $purQuan
      * @param bool $addToOppositeSide
      * @return bool
      */
-    public function addQuantity(PurchaseQuantity $purQuan, $addToOppositeSide = true): bool
+    public function addQuantity(\App\Entity\PurchaseQuantity $purQuan, $addToOppositeSide = true): bool
     {
         if ($this->relatedQuantities->contains($purQuan)) {
             return true;

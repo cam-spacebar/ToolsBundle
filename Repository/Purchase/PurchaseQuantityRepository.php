@@ -1,18 +1,17 @@
 <?php
 
-namespace VisageFour\Bundle\ToolsBundle\Repository;
+namespace VisageFour\Bundle\ToolsBundle\Repository\Purchase;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
-use VisageFour\Bundle\ToolsBundle\Entity\Product;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
 
  */
-class ProductRepository extends ServiceEntityRepository
+class PurchaseQuantityRepository extends ServiceEntityRepository
 {
-    public function __construct (ManagerRegistry $registry) {
-        parent::__construct($registry, Product::class);
+    public function __construct (ManagerRegistry $registry, $class) {
+        parent::__construct($registry, $class);
     }
 //    public function countSpooled () {
 //        $qb = $this->createQueryBuilder('er')

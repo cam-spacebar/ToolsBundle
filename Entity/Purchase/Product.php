@@ -1,14 +1,16 @@
 <?php
 
-namespace VisageFour\Bundle\ToolsBundle\Entity;
+namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use App\Entity\Purchase\PurchaseQuantity;
+use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
+use Doctrine\ORM\Mapping\MappedSuperclass;
 
 /**
- * @ORM\Table(name="purchase_product")
- * @ORM\Entity(repositoryClass="Twencha\Bundle\EventRegistrationBundle\Repository\PurchaseQuantityRepository")
+ * @MappedSuperClass
  */
 class Product extends BaseEntity
 {
@@ -31,11 +33,11 @@ class Product extends BaseEntity
     protected $title;
 
     /**
-     * @ORM\OneToMany(targetEntity="PurchaseQuantity", mappedBy="relatedProduct")
+     * @ORM\OneToMany(targetEntity="App\Entity\Purchase\PurchaseQuantity", mappedBy="relatedProduct")
      *
      * A link to all previous completed checkouts of this product
      */
-    private $relatedPurchaseQuantities;
+    protected $relatedPurchaseQuantities;
 
     /**
      * zzz  @ORM\ManyToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Round", inversedBy="variantProducts")

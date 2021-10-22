@@ -1,13 +1,14 @@
 <?php
 
-namespace VisageFour\Bundle\ToolsBundle\Entity;
+namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\MappedSuperclass;
+use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 
 /**
- * @ORM\Table(name="purchase_quantity")
- * @ORM\Entity(repositoryClass="Twencha\Bundle\EventRegistrationBundle\Repository\PurchaseQuantityRepository")
+ * @MappedSuperClass
  */
 class PurchaseQuantity extends BaseEntity
 {
@@ -30,18 +31,18 @@ class PurchaseQuantity extends BaseEntity
     protected $quantity;
 
     /**
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="relatedPurchaseQuantities")
+     * @ORM\OneToMany(targetEntity="App\Entity\Purchase\Product", mappedBy="relatedPurchaseQuantities")
      * todo: review this relationship. - dones't seem correct.
      */
-    private $relatedProduct;
+    protected $relatedProduct;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Checkout", inversedBy="relatedQuantities")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Purchase\Checkout", inversedBy="relatedQuantities")
      * @ORM\JoinColumn(name="related_checkout_id", referencedColumnName="id", nullable=false)
      *
      * If it has a parent, this product is a variant
      */
-    private $relatedCheckout;
+    protected $relatedCheckout;
 
     /**
      * PurchaseQuantity constructor.
