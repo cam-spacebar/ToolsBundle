@@ -19,7 +19,7 @@ class ProductQuantityInvalidException extends BaseApiErrorCode
     {
         parent::__construct(
             BaseApiErrorCode::PRODUCT_QUANTITY_INVALID,
-            'The quantity: "'. $quantity .'" is an invalid quantity for product (with reference: "'. $productReference .'")';
+            'The quantity: "'. $quantity .'" is an invalid quantity for product (with reference: "'. $productReference .'")'
         );
     }
 }

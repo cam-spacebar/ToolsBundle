@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
+use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 /**
  * Class ResponseAssembler
@@ -39,6 +40,8 @@ class ResponseAssembler
      */
     private $baseFrontendUrl;
 
+    use LoggerTrait;
+
     public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, FrontendUrl $frontendUrl, AuthenticationUtils $authentication_utils)
     {
         $this->tokenStorageInterface    = $tokenStorageInterface;
@@ -66,6 +69,8 @@ class ResponseAssembler
      */
     public function handleException (ApiErrorCodeInterface $e)
     {
+        $this->logger->info("Exception caught, class name: ". get_class($e));
+        $this->logger->info("Exception message: ". $e->getMessage());
         return $this->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
     }
 

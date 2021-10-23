@@ -162,8 +162,7 @@ class BaseSecurityController extends CustomController
             return $appSecurity->processForgotMyPasswordRequest($email);
 
         } catch (ApiErrorCodeInterface $e) {
-
-            return $ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
+            return $ra->handleException($e);
         }
     }
 }

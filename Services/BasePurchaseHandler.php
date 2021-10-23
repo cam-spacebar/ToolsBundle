@@ -84,6 +84,11 @@ class BasePurchaseHandler
         return $items;
     }
 
+    private function createCheckout(array $items)
+    {
+        $this->logger->info('in: '. __METHOD__ .'(). items: ', $items );
+    }
+
     /**
      * @param string $stripeToken
      * @param int $amount
@@ -96,7 +101,7 @@ class BasePurchaseHandler
         $this->verifyPurchaseTotal($amount, $jsonItems);
         $items = $this->parseJsonItems($jsonItems);
 
-//        $this->createCheckout($items);
+        $this->createCheckout($items);
 
         // 2. get payment working
         // 2.2: populate the payment entities (And persist)
@@ -128,6 +133,8 @@ class BasePurchaseHandler
      */
     private function verifyPurchaseTotal($providedTotal, $items)
     {
+        $this->logger->info('in: '. __METHOD__ .'(). $items: ', $items);
+
         $calculatedTotal = 0;
         foreach($items as $productRef => $curItem) {
             // get product
