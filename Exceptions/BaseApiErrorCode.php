@@ -33,6 +33,8 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
 
     // purchase codes:
     const PRODUCT_REF_INVALID                   = 1110;
+    const INVALID_CART_TOTAL                    = 1120;
+    const PRODUCT_QUANTITY_INVALID              = 1130;
 
     // Add new route marker: #CMDKKD00-generic
     private static $initialStatusCodes = [
@@ -65,6 +67,12 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         // purchase codes:
         self::PRODUCT_REF_INVALID                   => ['msg'               => 'A product with the reference provided does not exist.',
                                                         'HTTPStatusCode'    => 401],
+        self::INVALID_CART_TOTAL                    => ['msg'               => 'The total provided does not match the one calculated on the backend',
+                                                        'HTTPStatusCode'    => 401],
+        self::PRODUCT_QUANTITY_INVALID              => ['msg'               => 'Product quantity cannot be 0 or negative.',
+                                                        'HTTPStatusCode'    => 401]
+
+
     ];
 
     /**

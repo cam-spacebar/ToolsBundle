@@ -139,7 +139,7 @@ class Product extends BaseEntity
     /**
      * @return integer
      */
-    public function getPrice(): integer
+    public function getPrice(): int
     {
         return $this->price;
     }
