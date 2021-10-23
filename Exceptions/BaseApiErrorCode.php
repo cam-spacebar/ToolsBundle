@@ -31,6 +31,9 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     const ACCOUNT_NOT_VERIFIED                  = 100;
     const LOGIN_REQUIRED                        = 110;
 
+    // purchase codes:
+    const PRODUCT_REF_INVALID                   = 1110;
+
     // Add new route marker: #CMDKKD00-generic
     private static $initialStatusCodes = [
         // security errors:
@@ -57,7 +60,11 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         self::ACCOUNT_NOT_VERIFIED                  => ['msg'               => 'Cannot complete this request as this account is not verified. Please check your email (and spam folder) for an email containing a verification link.',
                                                         'HTTPStatusCode'    => 401],        // message inherited from the exception class: AccountNotVerifiedException
         self::LOGIN_REQUIRED                        => ['msg'               => 'You must login first to view this page.',
-                                                        'HTTPStatusCode'    => 401]
+                                                        'HTTPStatusCode'    => 401],
+
+        // purchase codes:
+        self::PRODUCT_REF_INVALID                   => ['msg'               => 'A product with the reference provided does not exist.',
+                                                        'HTTPStatusCode'    => 401],
     ];
 
     /**

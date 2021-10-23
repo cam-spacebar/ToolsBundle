@@ -58,11 +58,24 @@ class ResponseAssembler
     }
 
     /**
-     * @param null $data
-     * @param null $redirect
+     * @param ApiErrorCodeInterface $e
      * @return JsonResponse
      * @throws \Exception
      *
+     * return a JsonResponse object, based on the APIErrorCode on file (for the exception).
+     */
+    public function handleException (ApiErrorCodeInterface $e)
+    {
+        return $this->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
+    }
+
+    /**
+     * @param null $data
+     * @param string $redirect
+     * @param ApiErrorCodeInterface|null $error
+     * @param array $redirectData
+     * @return JsonResponse
+     * @throws \Exception
      */
     public function assembleJsonResponse ($data = null, $redirect = FrontendUrl::NO_REDIRECTION, ApiErrorCodeInterface $error = null, $redirectData = []): JsonResponse {
         $rootKeys = [];

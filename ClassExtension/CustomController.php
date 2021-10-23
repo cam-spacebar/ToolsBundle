@@ -76,21 +76,15 @@ class CustomController extends AbstractController
             return $this->appSecurity->getLoggedInUserOrRedirectToLogin();
     }
 
-    protected function getPOSTParam(Request $request, string $paramName, ResponseAssembler $ra)
+    protected function getPOSTParam(Request $request, string $paramName)
     {
-        try {
-            // this uses: symfony-bundles/json-request-bundle (for the nice shorthand ->get() command)
-            $value = $request->get($paramName);
+        // this uses: symfony-bundles/json-request-bundle (for the nice shorthand ->get() command)
+        $value = $request->get($paramName);
 
-            if (empty($value)) {
-                throw new MissingInputException($paramName);
-            }
-
-            return $value;
-        } catch (ApiErrorCodeInterface $e) {
-            return $ra->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
+        if (empty($value)) {
+            throw new MissingInputException($paramName);
         }
 
+        return $value;
     }
-
 }
