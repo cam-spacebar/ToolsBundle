@@ -7,9 +7,9 @@ use App\Services\EmailRegisterManager;
 use App\Services\FrontendUrl;
 use App\Traits\FlashBagTrait;
 use App\Exceptions\ApiErrorCode;
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PersonNotFoundException;
 use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\MissingInputException;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
-use VisageFour\Bundle\ToolsBundle\Exceptions\PersonNotFound;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -230,14 +230,13 @@ class BaseAppSecurity
     private function getPersonByEmailAddress(string $email): Person
     {
         // tood: move this to personmanager?
-        try {
+//        try {
             // attempt token/account verification
-            $this->logger->info('looking for user with email: '. $email);
             $person = $this->personRepo->findOneByEmailCanonical($email);
-        } catch (PersonNotFound $e) {
-            // transcribe the error:
-            throw new ApiErrorCode(ApiErrorCode::INVALID_EMAIL_ADDRESS, $e->getPublicMsg());
-        }
+//        } catch (ApiErrorCodeInterface $e) {
+//            // transcribe the error:
+//            throw new ApiErrorCode(ApiErrorCode::INVALID_EMAIL_ADDRESS, $e->getPublicMsg());
+//        }
 
         return $person;
     }
@@ -322,10 +321,11 @@ class BaseAppSecurity
     }
 
     /**
-     * @param string $email
+     * @param Person $person
      * @param string $token
      * @return bool
-     * @throws \App\Exceptions\PersonNotFound
+     * @throws AccountAlreadyVerified
+     * @throws \Doctrine\ORM\ORMException
      *
      * Return true if the verification token is correct (and not already verified)
      */

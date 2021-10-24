@@ -31,8 +31,8 @@ class PurchaseQuantity extends BaseEntity
     protected $quantity;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Purchase\Product", mappedBy="relatedPurchaseQuantities")
-     * todo: review this relationship. - dones't seem correct.
+     * @ORM\ManyToOne(targetEntity="App\Entity\Purchase\Product", inversedBy="relatedPurchaseQuantities")
+     * @ORM\JoinColumn(name="related_product_id", referencedColumnName="id", nullable=false)
      */
     protected $relatedProduct;
 

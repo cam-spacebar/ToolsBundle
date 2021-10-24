@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
  */
 class Checkout extends BaseEntity
 {
+
     /**
      * @var int
      *
@@ -59,9 +60,14 @@ class Checkout extends BaseEntity
 
     /**
      */
-    public function __construct()
+    public function __construct(Person $person, string $status = self::AWAITING_PAYMENT)
     {
+//        set person
+//        check all quantities have the same person (when added).
+//        calculate totas when quantity have changes.
 
+        $this->setRelatedPerson($person);
+        $this->status = $status;
         $this->relatedQuantities = new ArrayCollection();
     }
 
@@ -116,11 +122,11 @@ class Checkout extends BaseEntity
     }
 
     /**
-     * @param \App\Entity\PurchaseQuantity $purQuan
+     * @param \App\Entity\Purchase\PurchaseQuantity $purQuan
      * @param bool $addToOppositeSide
      * @return bool
      */
-    public function addQuantity(\App\Entity\PurchaseQuantity $purQuan, $addToOppositeSide = true): bool
+    public function addQuantity(\App\Entity\Purchase\PurchaseQuantity $purQuan, $addToOppositeSide = true): bool
     {
         if ($this->relatedQuantities->contains($purQuan)) {
             return true;
@@ -131,6 +137,44 @@ class Checkout extends BaseEntity
             $purQuan->setRelatedCheckout($this);
         }
 
+        // recalculate the total - as it will have changed.
+        $this->calculateTotal();
+
         return true;
+    }
+
+    /**
+     * @param \App\Entity\Purchase\PurchaseQuantity $purQuan
+     * @param bool $removeFromOppositeSide
+     * @return bool
+     */
+    public function removeQuantity(\App\Entity\Purchase\PurchaseQuantity $purQuan, $removeFromOppositeSide = true): bool
+    {
+        if ($this->relatedQuantities->contains($purQuan)) {
+            return true;
+        }
+
+        $this->relatedQuantities->remove($purQuan);
+        if ($removeFromOppositeSide) {
+            $purQuan->setRelatedCheckout(null);
+        }
+
+        // recalculate the total - as it will have changed.
+        $this->calculateTotal();
+
+        return true;
+    }
+
+    public function calculateTotal()
+    {
+        /**
+         * @var $curQuantity \App\Entity\Purchase\PurchaseQuantity
+         */
+        foreach($this->relatedQuantities as $key => $curQuantity) {
+            $curProduct = $curQuantity->getRelatedProduct();
+            $this->total = $curProduct->getPrice() * $curQuantity->getQuantity();
+        }
+
+        return $this;
     }
 }

@@ -123,6 +123,7 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     public function getStandardResponseMsg(): string
     {
         $stdResponse = $this->getPayload();
+//        dd($stdResponse);
         if (!isset($stdResponse['msg'])) {
 //            throw new \Exception('');
             throw new \Exception ('ApiErrorCode->statusCode: '. $this->getValue() .' does not have a corresponding "msg". Please configure one at marker: #oollgg55');

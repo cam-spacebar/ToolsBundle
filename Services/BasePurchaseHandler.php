@@ -2,11 +2,15 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
+use App\Entity\Person;
+use App\Entity\Purchase\Checkout;
+use App\Entity\Purchase\PurchaseQuantity;
 use App\Repository\Purchase\ProductRepository;
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidCartTotalException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\ProductQuantityInvalidException;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
@@ -33,6 +37,11 @@ class BasePurchaseHandler
     private $prodRepo;
 
     /**
+     * @var EntityManager
+     */
+    private $em;
+
+    /**
      * zz @var TokenStorageInterface
      */
 
@@ -42,11 +51,13 @@ class BasePurchaseHandler
      * BasePurchaseHandler constructor.
      * @param string $stripe_key
      * @param ProductRepository $prodRepo
+     * @param EntityManager $em
      */
-    public function __construct(string $stripe_key, ProductRepository $prodRepo)
+    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em)
     {
         $this->stripe_api_key   = $stripe_key;
         $this->prodRepo         = $prodRepo;
+        $this->em               = $em;
     }
 
     public function getProductByReference($ref): ?Product
@@ -77,16 +88,53 @@ class BasePurchaseHandler
             if ($curQuan <= 0) {
                 throw new ProductQuantityInvalidException($productRef, $curQuan);
             }
+
             $items[$productRef]['quantity'] = $curQuan;
         }
-//        dd($items);
 
         return $items;
     }
 
-    private function createCheckout(array $items)
+    /**
+     * @param array $items
+     * @return Checkout
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * items array accepts elements with properties of:
+     * - ['product'] => Product obj
+     * - ['quantity'] => int
+     */
+    private function createCheckout(array $items, Person $person): Checkout
     {
         $this->logger->info('in: '. __METHOD__ .'(). items: ', $items );
+        $checkout = new Checkout($person);
+
+        foreach($items as $productRef => $curItem) {
+            $curProduct = $curItem['product'];
+            $curQuantity = new PurchaseQuantity($curItem['quantity'], $curProduct);
+            $checkout->addQuantity($curQuantity);
+
+            $this->em->persist($curQuantity);
+            $this->em->persist($checkout);
+        }
+
+        $this->em->flush();
+        return $checkout;
+    }
+
+    /**
+     * @param $jsonItems
+     * @return Checkout
+     * @throws InvalidProductReferenceException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * Convert a json parsed array of products and quantities into quantity and product objects (and a checkout object) - all linked together.
+     */
+    private function createFullCheckoutFromJsonItems(array $jsonItems, Person $person)
+    {
+        $items = $this->parseJsonItems($jsonItems);
+        return $this->createCheckout($items);
     }
 
     /**
@@ -96,12 +144,11 @@ class BasePurchaseHandler
      * @return string
      * @throws InvalidProductReferenceException
      */
-    public function processPaymentRequest(string $stripeToken, int $amount, array $jsonItems)
+    public function processPaymentRequest(string $stripeToken, int $amount, array $jsonItems, Person $person)
     {
-        $this->verifyPurchaseTotal($amount, $jsonItems);
-        $items = $this->parseJsonItems($jsonItems);
+        $checkout = $this->createFullCheckoutFromJsonItems($jsonItems, $person);
 
-        $this->createCheckout($items);
+        $this->verifyPurchaseTotal($amount, $checkout);
 
         // 2. get payment working
         // 2.2: populate the payment entities (And persist)
@@ -131,18 +178,11 @@ class BasePurchaseHandler
      *
      * Check that the $total provided actually equals the of quantity * product price (in the cart items.)
      */
-    private function verifyPurchaseTotal($providedTotal, $items)
+    private function verifyPurchaseTotal($providedTotal, Checkout $checkout)
     {
-        $this->logger->info('in: '. __METHOD__ .'(). $items: ', $items);
+        $this->logger->info('in: '. __METHOD__ .'(). $checkout: ', [$checkout]);
 
-        $calculatedTotal = 0;
-        foreach($items as $productRef => $curItem) {
-            // get product
-            $curProduct = $this->getProductByReference($productRef);
-            $curPrice = $curProduct->getPrice();
-            $subTotal = $curPrice * $curItem['quantity'];
-            $calculatedTotal = $calculatedTotal + $subTotal;
-        }
+        $calculatedTotal = $checkout->getTotal();
 
         $this->logger->info('verifying total provided -- $providedTotal: '. $providedTotal .', $calculatedTotal: '. $calculatedTotal );
 

@@ -1,11 +1,11 @@
 <?php
 
 namespace VisageFour\Bundle\ToolsBundle\Repository;
-use App\Exceptions\PersonNotFound;
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PersonNotFoundException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Entity\BasePerson;
+use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 /**
  * BasePersonRepository
@@ -13,6 +13,8 @@ use VisageFour\Bundle\ToolsBundle\Entity\BasePerson;
  */
 class BasePersonRepository extends ServiceEntityRepository
 {
+    use LoggerTrait;
+
     public function __construct(ManagerRegistry $registry, $entityClassName)
     {
         // note: you must create a class that overrides this and passes in the correct $entityClassName parameter.
@@ -21,6 +23,7 @@ class BasePersonRepository extends ServiceEntityRepository
 
         parent::__construct($registry, $entityClassName);
     }
+
     public function doesPersonExist($email)
     {
         $person = $this->findOneByEmailCanonical($email, false);
@@ -33,9 +36,10 @@ class BasePersonRepository extends ServiceEntityRepository
     }
 
     /**
-     * Canonicalize email
+     *
      */
     public function findOneByEmailCanonical ($email, $throwExceptionIfNotFound = true) {
+        $this->logger->info('looking for person with email: '. $email);
         $emailCanon = BasePerson::canonicalizeEmail($email);
 
         $result = $this->findOneBy(array(
@@ -43,8 +47,10 @@ class BasePersonRepository extends ServiceEntityRepository
         ));
 
         if (empty($result) && $throwExceptionIfNotFound){
-            throw new PersonNotFound($email);
+            throw new PersonNotFoundException($email);
         }
+
+        $this->logger->info('found person with email: '. $email .': ', [$result]);
         return $result;
     }
 }
