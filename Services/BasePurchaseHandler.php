@@ -5,7 +5,9 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 use App\Entity\Person;
 use App\Entity\Purchase\Checkout;
 use App\Entity\Purchase\PurchaseQuantity;
+use App\Repository\Purchase\CheckoutRepository;
 use App\Repository\Purchase\ProductRepository;
+use App\Repository\Purchase\PurchaseQuantityRepository;
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidCartTotalException;
@@ -40,6 +42,14 @@ class BasePurchaseHandler
      * @var EntityManager
      */
     private $em;
+    /**
+     * @var CheckoutRepository
+     */
+    private $checkoutRepository;
+    /**
+     * @var PurchaseQuantityRepository
+     */
+    private $quantityRepo;
 
     /**
      * zz @var TokenStorageInterface
@@ -53,11 +63,13 @@ class BasePurchaseHandler
      * @param ProductRepository $prodRepo
      * @param EntityManager $em
      */
-    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em)
+    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em, CheckoutRepository $checkoutRepository, PurchaseQuantityRepository $quantityRepo)
     {
-        $this->stripe_api_key   = $stripe_key;
-        $this->prodRepo         = $prodRepo;
-        $this->em               = $em;
+        $this->stripe_api_key       = $stripe_key;
+        $this->prodRepo             = $prodRepo;
+        $this->em                   = $em;
+        $this->checkoutRepository   = $checkoutRepository;
+        $this->quantityRepo         = $quantityRepo;
     }
 
     public function getProductByReference($ref): ?Product
@@ -107,15 +119,16 @@ class BasePurchaseHandler
     private function createCheckout(array $items, Person $person): Checkout
     {
         $this->logger->info('in: '. __METHOD__ .'(). items: ', $items );
-        $checkout = new Checkout($person);
+        $checkout = $this->checkoutRepository->createNew($person);
 
         foreach($items as $productRef => $curItem) {
             $curProduct = $curItem['product'];
-            $curQuantity = new PurchaseQuantity($curItem['quantity'], $curProduct);
+            $curQuantity = $this->quantityRepo->createNew($curItem['quantity'], $curProduct);
+
             $checkout->addQuantity($curQuantity);
 
-            $this->em->persist($curQuantity);
-            $this->em->persist($checkout);
+//            $this->em->persist($curQuantity);
+//            $this->em->persist($checkout);
         }
 
         $this->em->flush();
@@ -134,7 +147,7 @@ class BasePurchaseHandler
     private function createFullCheckoutFromJsonItems(array $jsonItems, Person $person)
     {
         $items = $this->parseJsonItems($jsonItems);
-        return $this->createCheckout($items);
+        return $this->createCheckout($items, $person);
     }
 
     /**
