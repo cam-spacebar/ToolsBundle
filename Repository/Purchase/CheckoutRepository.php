@@ -13,8 +13,14 @@ use App\Entity\Purchase\Checkout;
  */
 class CheckoutRepository extends BaseRepository
 {
-    public function __construct (ManagerRegistry $registry, $class) {
+    /**
+     * @var \App\Repository\Purchase\PurchaseQuantityRepository
+     */
+    private $quantityRepo;
+
+    public function __construct (ManagerRegistry $registry, $class, \App\Repository\Purchase\PurchaseQuantityRepository $quanRepo) {
         parent::__construct($registry, $class);
+        $this->quantityRepo = $quanRepo;
     }
 
     public function createNew(Person $person)
@@ -24,6 +30,30 @@ class CheckoutRepository extends BaseRepository
 
         return $checkout;
     }
+
+    /**
+     * * $items array accepts elements with properties of:
+     * - ['product'] => Product obj
+     * - ['quantity'] => int
+     */
+    public function createCheckoutByItems(array $items, Person $person): Checkout
+    {
+        $this->logger->info('in: '. __METHOD__ .'(). items: ', $items );
+        $checkout = $this->createNew($person);
+
+        foreach($items as $productRef => $curItem) {
+            $curProduct = $curItem['product'];
+            $curQuantity = $this->quantityRepo->createNew($curItem['quantity'], $curProduct);
+
+            $checkout->addQuantity($curQuantity);
+
+//            $this->em->persist($curQuantity);
+//            $this->em->persist($checkout);
+        }
+
+        return $checkout;
+    }
+
 //    public function countSpooled () {
 //        $qb = $this->createQueryBuilder('er')
 //            ->select('COUNT(er)')

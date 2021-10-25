@@ -37,6 +37,8 @@ class PurchaseQuantity extends BaseEntity
     protected $relatedProduct;
 
     /**
+     * @var $relatedCheckout \App\Entity\Purchase\Checkout
+     *
      * @ORM\ManyToOne(targetEntity="App\Entity\Purchase\Checkout", inversedBy="relatedQuantities")
      * @ORM\JoinColumn(name="related_checkout_id", referencedColumnName="id", nullable=false)
      *
@@ -79,6 +81,11 @@ class PurchaseQuantity extends BaseEntity
     public function setQuantity(string $quantity): void
     {
         $this->quantity = $quantity;
+
+        if (!empty($this->relatedCheckout)) {
+            // when the quantity changes, the checkout total should be updated (if one exists)
+            $this->relatedCheckout->calculateTotal();
+        }
     }
 
     /**

@@ -89,6 +89,8 @@ class BasePurchaseHandler
      * @param $jsonItems
      * @return array
      * @throws InvalidProductReferenceException
+     *
+     * Get the product entities/objs (based on the product reference provided).
      */
     private function parseJsonItems($jsonItems)
     {
@@ -108,34 +110,6 @@ class BasePurchaseHandler
     }
 
     /**
-     * @param array $items
-     * @return Checkout
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * items array accepts elements with properties of:
-     * - ['product'] => Product obj
-     * - ['quantity'] => int
-     */
-    private function createCheckout(array $items, Person $person): Checkout
-    {
-        $this->logger->info('in: '. __METHOD__ .'(). items: ', $items );
-        $checkout = $this->checkoutRepository->createNew($person);
-
-        foreach($items as $productRef => $curItem) {
-            $curProduct = $curItem['product'];
-            $curQuantity = $this->quantityRepo->createNew($curItem['quantity'], $curProduct);
-
-            $checkout->addQuantity($curQuantity);
-
-//            $this->em->persist($curQuantity);
-//            $this->em->persist($checkout);
-        }
-
-        $this->em->flush();
-        return $checkout;
-    }
-
-    /**
      * @param $jsonItems
      * @return Checkout
      * @throws InvalidProductReferenceException
@@ -147,7 +121,7 @@ class BasePurchaseHandler
     private function createFullCheckoutFromJsonItems(array $jsonItems, Person $person)
     {
         $items = $this->parseJsonItems($jsonItems);
-        return $this->createCheckout($items, $person);
+        return $this->checkoutRepository->createCheckoutByItems($items, $person);
     }
 
     /**
