@@ -11,8 +11,10 @@ use App\Repository\Purchase\PurchaseQuantityRepository;
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidCartTotalException;
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PaymentErrorException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\ProductQuantityInvalidException;
 use Doctrine\ORM\EntityManager;
+use Stripe\Error\InvalidRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
@@ -131,31 +133,41 @@ class BasePurchaseHandler
      * @return string
      * @throws InvalidProductReferenceException
      */
-    public function processPaymentRequest(string $stripeToken, int $amount, array $jsonItems, Person $person)
+    public function processPaymentRequest($stripeToken, int $amount, array $jsonItems, Person $person)
     {
         $checkout = $this->createFullCheckoutFromJsonItems($jsonItems, $person);
 
         $this->verifyPurchaseTotal($amount, $checkout);
 
-        // 2. get payment working
         // 2.2: populate the payment entities (And persist)
+
+        $this->attemptStripePayment($stripeToken, $amount);
+
         // 3. send email on success
 
-//        return $data = [
-//            'hi' => 'asdf'
-//        ];
-//        $token = $request->request->get('stripeToken');
-
-//        \Stripe\Stripe::setApiKey($this->stripe_api_key);
-//        \Stripe\Charge::create(array(
-//            "amount"        => $amount * 100,
-//            "currency"      => "aud",
-//            "source"        => $stripeToken,
-//            "description"   => "First test charge!"
-//        ));
-
-        $data = 'working';
+        $data = 'Success';
         return $data;
+    }
+
+    private function attemptStripePayment($stripeToken, int $amount)
+    {
+//        dump($stripeToken);
+//        die('fff');
+        $tokenVal = $stripeToken['id'];
+        \Stripe\Stripe::setApiKey($this->stripe_api_key);
+        // charge object reference: https://stripe.com/docs/api/charges/object
+        try {
+            $chargeObj = \Stripe\Charge::create(array(
+                "amount"        => $amount,
+                "currency"      => "aud",
+                "source"        => $tokenVal,
+                "description"   => "First test charge!"
+            ));
+        } catch (InvalidRequest $e) {
+//            dump($e);
+            throw new PaymentErrorException($e);
+        }
+//        dump($result);
     }
 
     /**
@@ -168,6 +180,8 @@ class BasePurchaseHandler
     private function verifyPurchaseTotal($providedTotal, Checkout $checkout)
     {
         $this->logger->info('in: '. __METHOD__ .'(). $checkout: ', [$checkout]);
+
+        $checkout->calculateTotal($this->logger);
 
         $calculatedTotal = $checkout->getTotal();
 

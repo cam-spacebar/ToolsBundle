@@ -5,6 +5,7 @@ namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 use App\Entity\Person;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Psr\Log\LoggerInterface;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 
@@ -165,16 +166,26 @@ class Checkout extends BaseEntity
         return true;
     }
 
-    public function calculateTotal()
+    public function calculateTotal(?LoggerInterface $logger = null)
     {
         /**
          * @var $curQuantity \App\Entity\Purchase\PurchaseQuantity
          */
         foreach($this->relatedQuantities as $key => $curQuantity) {
             $curProduct = $curQuantity->getRelatedProduct();
+            if (!empty($logger)) {
+                $logger->info('product: '. $curProduct->getReference() .': '. $curProduct->getPrice() .' x'. $curQuantity->getQuantity());
+            }
+
+
             $this->total = $curProduct->getPrice() * $curQuantity->getQuantity();
         }
 
         return $this;
+    }
+
+    private function log()
+    {
+
     }
 }

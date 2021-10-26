@@ -35,6 +35,8 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     const PRODUCT_REF_INVALID                   = 1110;
     const INVALID_CART_TOTAL                    = 1120;
     const PRODUCT_QUANTITY_INVALID              = 1130;
+    const STRIPE_PAYMENT_ERROR                  = 1140;
+
 
     // Add new route marker: #CMDKKD00-generic
     private static $initialStatusCodes = [
@@ -42,9 +44,9 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         self::OK                                    => ['msg'               => 'Request fine.',
                                                         'HTTPStatusCode'    => 200],
         self::INPUT_MISSING                         => ['msg'               => 'You are missing an input parameter',
-                                                        'HTTPStatusCode'    => 401],
+                                                        'HTTPStatusCode'    => 400],
         self::INVALID_EMAIL_ADDRESS                 => ['msg'               => 'Email could not be found.',
-                                                        'HTTPStatusCode'    => 401],
+                                                        'HTTPStatusCode'    => 400],            // todo: should this be 401 for authentication related throws?!
         self::ALREADY_LOGGED_IN                     => ['msg'               => 'You are already logged in!',
                                                         'HTTPStatusCode'    => 200],
         self::ERROR_BUT_ALREADY_LOGGED_IN           => ['msg'               => 'There was an error in your login attempt, however you are already logged in.',
@@ -66,14 +68,18 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
 
         // purchase codes:
         self::PRODUCT_REF_INVALID                   => ['msg'               => 'A product with the reference provided does not exist.',
-                                                        'HTTPStatusCode'    => 401],
+                                                        'HTTPStatusCode'    => 400],
         self::INVALID_CART_TOTAL                    => ['msg'               => 'The total provided does not match the one calculated on the backend',
-                                                        'HTTPStatusCode'    => 401],
+                                                        'HTTPStatusCode'    => 400],
         self::PRODUCT_QUANTITY_INVALID              => ['msg'               => 'Product quantity cannot be 0 or negative.',
-                                                        'HTTPStatusCode'    => 401]
-
-
+                                                        'HTTPStatusCode'    => 400],
+        self::STRIPE_PAYMENT_ERROR                  => ['msg'               => self::USE_CLIENT_MSG,
+                                                        'HTTPStatusCode'    => 400]
     ];
+
+    // use this when the app should use the exception message, not a "stdMessage" message
+    // todo: throw an exception if a stdMessage exists but the exception constructor has a client messge - they both shouldn't exist, its confusing.
+    const USE_CLIENT_MSG = 'MARKER#23Dzwdcfko2#FCW';
 
     /**
      * @var int|null
@@ -120,6 +126,21 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         return $stdResponse ['HTTPStatusCode'];
     }
 
+    // get the message that can be displayed to the user.
+    public function getUserMessage()
+    {
+        $stdResponse = $this->getPayload();
+
+        if ($stdResponse['msg'] == self::USE_CLIENT_MSG) {
+            // use the custom message configured in the exceptions constructor.
+            return $this->getMessage();
+//            die ('use client message die()');
+        } else {
+            return $this->getStandardResponseMsg();
+        }
+    }
+
+    // get the stdMessage (in the const array above)
     public function getStandardResponseMsg(): string
     {
         $stdResponse = $this->getPayload();

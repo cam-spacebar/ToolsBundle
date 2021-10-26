@@ -111,7 +111,7 @@ class ResponseAssembler
 
         $HTTPStatusCode = 200;
         if (!empty($error)) {
-            $respMsg = $error->getStandardResponseMsg();
+            $respMsg = $error->getUserMessage();
             $HTTPStatusCode = $error->getHTTPStatusCode();
 
             $rootKeys['error_msgs'] = $respMsg; // $error->getPublicMsg();

@@ -8,7 +8,7 @@ use VisageFour\Bundle\ToolsBundle\Classes\UniqueConstantsList;
  * Trait HasAUniqueConstantsListTrait
  * @package VisageFour\Bundle\ToolsBundle\Traits
  *
- * This trait provides a shorthand (and abstracted away) set of methods for interacting with the UCL.
+ * This trait provides a shorthand (and abstracted away) set of methods for interacting with the UCL (unique constants list).
  *
  * Why this trait exists:
  * - This exists because there are cases where a class cannot extend UniqueConstantsList (due to single parent inheritance) - this often happens with classes that need to extend \Exception.
