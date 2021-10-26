@@ -168,6 +168,7 @@ class Checkout extends BaseEntity
 
     public function calculateTotal(?LoggerInterface $logger = null)
     {
+        $this->total = 0;
         /**
          * @var $curQuantity \App\Entity\Purchase\PurchaseQuantity
          */
@@ -178,7 +179,7 @@ class Checkout extends BaseEntity
             }
 
 
-            $this->total = $curProduct->getPrice() * $curQuantity->getQuantity();
+            $this->total = $this->total + ($curProduct->getPrice() * $curQuantity->getQuantity());
         }
 
         return $this;
