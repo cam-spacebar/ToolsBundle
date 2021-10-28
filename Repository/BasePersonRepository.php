@@ -39,7 +39,7 @@ class BasePersonRepository extends ServiceEntityRepository
      *
      */
     public function findOneByEmailCanonical ($email, $throwExceptionIfNotFound = true) {
-        $this->logger->info('looking for person with email: '. $email);
+        $this->logger->info('looking for person with email (in DB): '. $email);
         $emailCanon = BasePerson::canonicalizeEmail($email);
 
         $result = $this->findOneBy(array(

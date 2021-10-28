@@ -14,6 +14,7 @@ use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidCartTotalEx
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PaymentErrorException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\ProductQuantityInvalidException;
 use Doctrine\ORM\EntityManager;
+use Stripe\Customer;
 use Stripe\Error\InvalidRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
@@ -141,7 +142,7 @@ class BasePurchaseHandler
 
         // 2.2: populate the payment entities (And persist)
 
-        $this->attemptStripePayment($stripeToken, $amount);
+        $this->attemptStripePayment($stripeToken, $amount, $person);
 
         // 3. send email on success
 
@@ -149,25 +150,56 @@ class BasePurchaseHandler
         return $data;
     }
 
-    private function attemptStripePayment($stripeToken, int $amount)
+    private function setStripeAPIKey()
     {
-//        dump($stripeToken);
-//        die('fff');
-        $tokenVal = $stripeToken['id'];
         \Stripe\Stripe::setApiKey($this->stripe_api_key);
+    }
+
+    private function attemptStripePayment($stripeToken, int $amount, person $person)
+    {
+        $this->logger->info('attempting stripe payment for amount: '. $amount .' and person: '. $person->getEmail());
+        $this->setStripeAPIKey();
+        $tokenVal = $stripeToken['id'];
+        $customer = $this->findOrCreateStripeCustomerObj($person, $tokenVal);
         // charge object reference: https://stripe.com/docs/api/charges/object
         try {
             $chargeObj = \Stripe\Charge::create(array(
                 "amount"        => $amount,
                 "currency"      => "aud",
-                "source"        => $tokenVal,
-                "description"   => "First test charge!"
+//                "source"        => $tokenVal,
+                "description"   => "First test charge!",
+                "customer"      => $person->getStripeCustomerId(),
             ));
+            $this->logger->info('stripe charge obj: ', [$chargeObj]);
         } catch (InvalidRequest $e) {
-//            dump($e);
             throw new PaymentErrorException($e);
         }
-//        dump($result);
+
+        return true;
+    }
+
+    // retrieve (or create) a stripe customer
+    private function findOrCreateStripeCustomerObj (person $person, $tokenVal): Customer  {
+        $this->logger->info('stripe token: '. $tokenVal);
+        if (empty($person->getStripeCustomerId())) {
+            $this->logger->info('creating new stripe customer for email address: '. $person->getEmail());
+            // create new stripe customer id
+            $customer = \Stripe\Customer::create([
+                'email' => $person->getEmail(),
+                'source' => $tokenVal
+            ]);
+            $person->setStripeCustomerId($customer->id);
+        } else {
+            $this->logger->info('Retrieving stripe customer obj for email: '. $person->getEmail());
+            $customer = \Stripe\Customer::retrieve($person->getStripeCustomerId());
+
+            $customer->source = $tokenVal;
+            $customer->save();
+        }
+
+        $this->em->persist($person);
+
+        return $customer;
     }
 
     /**
