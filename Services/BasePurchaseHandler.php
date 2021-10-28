@@ -142,7 +142,7 @@ class BasePurchaseHandler
 
         // 2.2: populate the payment entities (And persist)
 
-        $this->attemptStripePayment($stripeToken, $amount, $person);
+        $this->attemptStripePayment($stripeToken, $checkout);
 
         // 3. send email on success
 
@@ -155,24 +155,75 @@ class BasePurchaseHandler
         \Stripe\Stripe::setApiKey($this->stripe_api_key);
     }
 
-    private function attemptStripePayment($stripeToken, int $amount, person $person)
+    private function attemptStripePayment($stripeToken, Checkout $checkout)
     {
+        $amount = $checkout->getTotal();
+        $person = $checkout->getRelatedPerson();
         $this->logger->info('attempting stripe payment for amount: '. $amount .' and person: '. $person->getEmail());
         $this->setStripeAPIKey();
         $tokenVal = $stripeToken['id'];
         $customer = $this->findOrCreateStripeCustomerObj($person, $tokenVal);
         // charge object reference: https://stripe.com/docs/api/charges/object
         try {
-            $chargeObj = \Stripe\Charge::create(array(
-                "amount"        => $amount,
-                "currency"      => "aud",
-//                "source"        => $tokenVal,
-                "description"   => "First test charge!",
-                "customer"      => $person->getStripeCustomerId(),
-            ));
-            $this->logger->info('stripe charge obj: ', [$chargeObj]);
+//            $chargeObj = \Stripe\Charge::create(array(
+//                "amount"        => $amount,
+//                "currency"      => "aud",
+////                "source"        => $tokenVal,
+//                "description"   => "First test charge!",
+//                "customer"      => $person->getStripeCustomerId(),
+//            ));
+//            $this->logger->info('stripe charge obj: ', [$chargeObj]);
+//            \Stripe\InvoiceItem::create(array(
+//                "amount" => $amount,
+//                "currency" => "aud",
+//                "customer" => $person->getStripeCustomerId(),
+//                "description" => "item1"
+//            ));
+//            $invoice = \Stripe\Invoice::create(array(
+//                "customer" => $person->getStripeCustomerId()
+//            ));
+//            $invoice->pay();
+            $this->createInvoiceAndPopulate($checkout);
+
         } catch (InvalidRequest $e) {
             throw new PaymentErrorException($e);
+        }
+
+        return true;
+    }
+
+    // Create a stripe invoice and add the products to it
+
+    private function createInvoiceAndPopulate (Checkout $checkout)
+    {
+        $person = $checkout->getRelatedPerson();
+        /** @var $curQuantity PurchaseQuantity */
+        foreach ($checkout->getRelatedQuantities() as $curI => $curQuantity) {
+            $curProduct = $curQuantity->getRelatedProduct();
+            $this->logger->info('(Stripe invoice) adding product: '. $curProduct->getReference() .', quantity: '. $curQuantity->getQuantity());
+            $this->addQuantityToInvoice($curQuantity);
+        }
+        $invoice = \Stripe\Invoice::create(array(
+            "customer" => $person->getStripeCustomerId()
+        ));
+        $invoice->pay();
+
+    }
+
+    private function addQuantityToInvoice(PurchaseQuantity $quantity)
+    {
+        $product = $quantity->getRelatedProduct();
+        $person = $quantity->getRelatedCheckout()->getRelatedPerson();
+
+        for ($i = 0; $i < $quantity->getQuantity(); $i++) {
+            $curAmount = $product->getPrice();
+            $this->logger->info('adding to total invoice amount: '. $curAmount);
+            \Stripe\InvoiceItem::create(array(
+                "amount"        => $curAmount,
+                "currency"      => "aud",
+                "customer"      => $person->getStripeCustomerId(),
+                "description"   => $product->getReference() .': '. $product->getTitle()
+            ));
         }
 
         return true;
