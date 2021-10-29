@@ -40,6 +40,15 @@ class Checkout extends BaseEntity
      */
     protected $status;
 
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="paymentCode", type="string", nullable=true)
+     *
+     * The error code that's returned from the payment gateway (i.e. stripe)
+     */
+    protected $paymentCode;
+
     const AWAITING_PAYMENT = 200;
     const PAID = 300;
     const ERROR_ON_PAYMENT_ATTEMPT = 400;
@@ -107,7 +116,7 @@ class Checkout extends BaseEntity
     }
 
     /**
-     * @param string $total
+     * @param int $total
      */
     public function setTotal(int $total): void
     {
@@ -204,5 +213,21 @@ class Checkout extends BaseEntity
     private function log()
     {
 
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentCode(): string
+    {
+        return $this->paymentCode;
+    }
+
+    /**
+     * @param string $code
+     */
+    public function setPaymentCode(string $paymentCode): void
+    {
+        $this->paymentCode = $paymentCode;
     }
 }

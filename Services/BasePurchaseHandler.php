@@ -162,6 +162,7 @@ class BasePurchaseHandler
         $this->logger->info('attempting stripe payment for amount: '. $amount .' and person: '. $person->getEmail());
         $this->setStripeAPIKey();
         $tokenVal = $stripeToken['id'];
+        $this->em->persist($checkout);
 
         // charge object reference: https://stripe.com/docs/api/charges/object
         try {
@@ -177,13 +178,20 @@ class BasePurchaseHandler
 //            ));
 
         } catch (InvalidRequest $e) {
+            $checkout->setStatus(Checkout::ERROR_ON_PAYMENT_ATTEMPT);
+
+            $jsonErr = $e->getJsonBody();
+            $errorCode = $jsonErr['error']['code'];
+            $checkout->setPaymentCode('stripe::'. $errorCode);
+
             throw new PaymentErrorException($e, $this->logger);
         } catch (ApiConnection $e) {
-            throw new CannotConnectToStripeException($e, $this->logger);
+            $checkout->setStatus(Checkout::ERROR_ON_PAYMENT_ATTEMPT);
+            $checkout->setPaymentCode('custom::no_api_connection' );         // use "custom" to indicate that this was not a code from stripe.
+            throw new CannotConnectToStripeException($e);
         }
 
         $checkout->setStatus(\VisageFour\Bundle\ToolsBundle\Entity\Purchase\Checkout::PAID);
-        $this->em->persist($checkout);
 
         return true;
     }
