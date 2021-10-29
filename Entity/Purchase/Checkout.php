@@ -36,7 +36,7 @@ class Checkout extends BaseEntity
      *
      * @ORM\Column(name="status", type="integer", nullable=false)
      *
-     * the status of the checkout
+     * The status of the checkout
      */
     protected $status;
 
@@ -183,6 +183,22 @@ class Checkout extends BaseEntity
         }
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param int $status
+     */
+    public function setStatus(int $status): void
+    {
+        $this->status = $status;
     }
 
     private function log()

@@ -10,11 +10,13 @@ use App\Repository\Purchase\ProductRepository;
 use App\Repository\Purchase\PurchaseQuantityRepository;
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
+use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\CannotConnectToStripeException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidCartTotalException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PaymentErrorException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\ProductQuantityInvalidException;
 use Doctrine\ORM\EntityManager;
 use Stripe\Customer;
+use Stripe\Error\ApiConnection;
 use Stripe\Error\InvalidRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
@@ -140,14 +142,12 @@ class BasePurchaseHandler
 
         $this->verifyPurchaseTotal($amount, $checkout);
 
-        // 2.2: populate the payment entities (And persist)
-
         $this->attemptStripePayment($stripeToken, $checkout);
 
-        // 3. send email on success
+        // todo: 3. send email on success
 
-        $data = 'Success';
-        return $data;
+
+        return true;
     }
 
     private function setStripeAPIKey()
@@ -162,9 +162,12 @@ class BasePurchaseHandler
         $this->logger->info('attempting stripe payment for amount: '. $amount .' and person: '. $person->getEmail());
         $this->setStripeAPIKey();
         $tokenVal = $stripeToken['id'];
-        $customer = $this->findOrCreateStripeCustomerObj($person, $tokenVal);
+
         // charge object reference: https://stripe.com/docs/api/charges/object
         try {
+            $customer = $this->findOrCreateStripeCustomerObj($person, $tokenVal);
+            $this->createInvoiceAndPopulate($checkout);
+            // old stripe charge method:
 //            $chargeObj = \Stripe\Charge::create(array(
 //                "amount"        => $amount,
 //                "currency"      => "aud",
@@ -172,22 +175,15 @@ class BasePurchaseHandler
 //                "description"   => "First test charge!",
 //                "customer"      => $person->getStripeCustomerId(),
 //            ));
-//            $this->logger->info('stripe charge obj: ', [$chargeObj]);
-//            \Stripe\InvoiceItem::create(array(
-//                "amount" => $amount,
-//                "currency" => "aud",
-//                "customer" => $person->getStripeCustomerId(),
-//                "description" => "item1"
-//            ));
-//            $invoice = \Stripe\Invoice::create(array(
-//                "customer" => $person->getStripeCustomerId()
-//            ));
-//            $invoice->pay();
-            $this->createInvoiceAndPopulate($checkout);
 
         } catch (InvalidRequest $e) {
-            throw new PaymentErrorException($e);
+            throw new PaymentErrorException($e, $this->logger);
+        } catch (ApiConnection $e) {
+            throw new CannotConnectToStripeException($e, $this->logger);
         }
+
+        $checkout->setStatus(\VisageFour\Bundle\ToolsBundle\Entity\Purchase\Checkout::PAID);
+        $this->em->persist($checkout);
 
         return true;
     }

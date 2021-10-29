@@ -1,6 +1,7 @@
 <?php
 
 namespace VisageFour\Bundle\ToolsBundle\Repository;
+use App\Entity\Person;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PersonNotFoundException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -38,7 +39,7 @@ class BasePersonRepository extends ServiceEntityRepository
     /**
      *
      */
-    public function findOneByEmailCanonical ($email, $throwExceptionIfNotFound = true) {
+    public function findOneByEmailCanonical ($email, $throwExceptionIfNotFound = true): Person {
         $this->logger->info('looking for person with email (in DB): '. $email);
         $emailCanon = BasePerson::canonicalizeEmail($email);
 

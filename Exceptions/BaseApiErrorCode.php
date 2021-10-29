@@ -37,6 +37,8 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     const PRODUCT_QUANTITY_INVALID              = 1130;
     const STRIPE_PAYMENT_ERROR                  = 1140;
 
+    const CANNOT_CONNECT_TO_STRIPE              = 1201;
+
 
     // Add new route marker: #CMDKKD00-generic
     private static $initialStatusCodes = [
@@ -74,6 +76,8 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         self::PRODUCT_QUANTITY_INVALID              => ['msg'               => 'Product quantity cannot be 0 or negative.',
                                                         'HTTPStatusCode'    => 400],
         self::STRIPE_PAYMENT_ERROR                  => ['msg'               => self::USE_CLIENT_MSG,
+                                                        'HTTPStatusCode'    => 400],
+        self::CANNOT_CONNECT_TO_STRIPE              => ['msg'               => self::USE_CLIENT_MSG,
                                                         'HTTPStatusCode'    => 400]
     ];
 
