@@ -165,4 +165,17 @@ class BaseSecurityController extends CustomController
             return $ra->handleException($e);
         }
     }
+
+    /**
+     * @Route("/getLoggedInPerson", name="getLoggedInPerson", methods={"GET"})
+     *
+     * does nothing - other than return the Person that's currently logged in - used for react app to load when initially opening
+     */
+    public function getLoggedInPersonAction(Request $request, ResponseAssembler $ra): JsonResponse
+    {
+
+        return $ra->assembleJsonResponse();
+    }
+
+
 }

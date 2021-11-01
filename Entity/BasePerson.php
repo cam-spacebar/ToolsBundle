@@ -2,12 +2,10 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
-use VisageFour\Bundle\ToolsBundle\Services\Security\AppSecurity;
 use App\Services\FrontendUrl;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Exceptions\ApiErrorCode;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
-use App\Exceptions\AccountNotRegisteredException;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotVerifiedException;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -19,7 +17,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use VisageFour\Bundle\ToolsBundle\Interfaces\CanNormalize;
 use VisageFour\Bundle\ToolsBundle\Statics\StaticInternational;
 use Doctrine\ORM\Mapping\MappedSuperclass;
-
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 /*
  * BasePerson
@@ -50,7 +48,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @Groups({"zapierSpreadsheet"})
+     * @Groups({"zapierSpreadsheet", "api_person:read"})
      */
     protected $id;
 
@@ -79,7 +77,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      *     choices = { "mr", "ms", "mrs" },
      *     message = "Choose a valid title"
      * )
-     * @Groups({"zapierSpreadsheet"})
+     * @Groups({"zapierSpreadsheet", "api_person:read", "api_person:write"})
      */
     protected $title;
 
@@ -89,15 +87,18 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      * @var int
      *
      * @ORM\Column(name="isRegistered", type="boolean", nullable=true)
+     * @Groups({"api_person:read", "api_person:write"})
+     *
      */
     protected $isRegistered;
 
     /**
      * Has the user verified that their email address is real?
      *
-     * @var string
+     * @var bool
      *
      * @ORM\Column(name="isVerified", type="boolean", nullable=false)
+     * @Groups({"api_person:read", "api_person:write"})
      */
     protected $isVerified;
 
@@ -124,6 +125,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"api_person:write"})
      * This must be the encoded string (not the raw password string)
      * To encode, use: PasswordManager->validatePasswordAndEncode()
      */
@@ -138,7 +140,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      * @var string
      *
      * @ORM\Column(name="firstName", type="string", length=40, nullable=true)
-     * @Groups({"zapierSpreadsheet"})
+     * @Groups({"zapierSpreadsheet", "api_person:read", "api_person:write"})
      * @Assert\NotBlank(groups={"registration"}, message="Name must be entered")
      */
     protected $firstName;
@@ -148,7 +150,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      *
      * @ORM\Column(name="lastName", type="string", length=20, nullable=true)
      * @Assert\NotBlank(groups={"detailed"}, message="Last name must be entered")
-     * @Groups({"zapierSpreadsheet"})
+     * @Groups({"zapierSpreadsheet", "api_person:read", "api_person:write"})
      */
     protected $lastName;
 
@@ -172,7 +174,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      * @var string
      *
      * @ORM\Column(name="email", type="string", length=100, unique=false, nullable=true)
-     * @Groups({"zapierSpreadsheet"})
+     * @Groups({"zapierSpreadsheet", "api_person:write"})
      * @Assert\NotBlank(groups={"registration"}, message="Email address must be entered")
      */
     protected $email;
@@ -181,7 +183,8 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      * @var string
      *
      * @ORM\Column(name="emailCanonical", type="string", length=100, unique=false, nullable=true)
-     * @Groups({"zapierSpreadsheet"})
+     * @Groups({"zapierSpreadsheet", "api_person:read"})
+     * @SerializedName("email")
      */
     protected $emailCanonical;
 
@@ -632,10 +635,15 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
         return false;
     }
 
+    public function setIsVerified($isVerified)
+    {
+        $this->setAccountIsVerified($isVerified);
+    }
+
     public function setAccountIsVerified(bool $isVerified): self
     {
         if ($isVerified && !$this->isRegistered()) {
-            throw new AccountNotRegisteredException($this->email);
+            throw new \VisageFour\Bundle\ToolsBundle\Exceptions\AccountNotRegisteredException($this->email);
         }
 
         $this->isVerified = $isVerified;

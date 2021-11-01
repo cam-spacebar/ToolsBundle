@@ -4,7 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Repository\Purchase;
 
 use App\Entity\Purchase\Product;
 use App\Entity\Purchase\PurchaseQuantity;
-use App\VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
+use VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
@@ -22,7 +22,7 @@ class PurchaseQuantityRepository extends BaseRepository
     public function createNew(int $quantity, Product $product)
     {
         $curQuantity = new PurchaseQuantity($quantity, $product);
-        $this->logEntityCreationAndPersist($curQuantity);
+        $this->persistAndLogEntityCreation($curQuantity);
 
         return $curQuantity;
     }

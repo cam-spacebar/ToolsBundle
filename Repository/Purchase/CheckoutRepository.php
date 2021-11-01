@@ -3,7 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Repository\Purchase;
 
 use App\Entity\Person;
-use App\VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
+use VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\Purchase\Checkout;
@@ -26,7 +26,7 @@ class CheckoutRepository extends BaseRepository
     public function createNew(Person $person)
     {
         $checkout = new Checkout($person);
-        $this->logEntityCreationAndPersist($checkout);
+        $this->persistAndLogEntityCreation($checkout);
 
         return $checkout;
     }

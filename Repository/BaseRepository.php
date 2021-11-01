@@ -4,7 +4,7 @@
 * by: cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Repository;
+namespace VisageFour\Bundle\ToolsBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
@@ -15,7 +15,7 @@ class BaseRepository extends ServiceEntityRepository
     use LoggerTrait;
     use EntityManagerTrait;
 
-    protected function logEntityCreationAndPersist($newObj, $persist = true)
+    protected function persistAndLogEntityCreation($newObj, $persist = true)
     {
         $className = (new \ReflectionClass($newObj))->getShortName();
         $this->logger->info(

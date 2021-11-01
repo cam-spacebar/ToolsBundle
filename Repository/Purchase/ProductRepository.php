@@ -4,11 +4,12 @@ namespace VisageFour\Bundle\ToolsBundle\Repository\Purchase;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
 
 /**
 
  */
-class ProductRepository extends ServiceEntityRepository
+class ProductRepository extends BaseRepository
 {
     public function __construct (ManagerRegistry $registry, $class) {
         parent::__construct($registry, $class);
