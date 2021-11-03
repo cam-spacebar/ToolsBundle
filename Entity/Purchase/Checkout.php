@@ -3,6 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
 use App\Entity\Person;
+use App\Entity\Purchase\Coupon;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Psr\Log\LoggerInterface;
@@ -69,12 +70,22 @@ class Checkout extends BaseEntity
     protected $relatedQuantities;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Purchase\Coupon", inversedBy="relatedCheckouts")
+     * @ORM\JoinColumn(name="related_coupon_id", referencedColumnName="id")
+     *
+     * a discount coupon used on this checkout.
+     *
+     * @var Coupon
+     */
+    protected $relatedCoupon;
+
+    /**
      */
     public function __construct(Person $person, string $status = self::AWAITING_PAYMENT)
     {
 //        set person
 //        check all quantities have the same person (when added).
-//        calculate totas when quantity have changes.
+//        calculate totals when quantity have changes.
 
         $this->setRelatedPerson($person);
         $this->status = $status;
@@ -229,5 +240,26 @@ class Checkout extends BaseEntity
     public function setPaymentCode(string $paymentCode): void
     {
         $this->paymentCode = $paymentCode;
+    }
+
+    /**
+     * @return Coupon
+     */
+    public function getRelatedCoupon(): Coupon
+    {
+        return $this->relatedCoupon;
+    }
+
+    /**
+     * @param Coupon $relatedCoupon
+     * @param bool $addToRelation
+     */
+    public function setRelatedCoupon(Coupon $relatedCoupon, $addToRelation = true): void
+    {
+        if ($addToRelation) {
+            $relatedCoupon->addRelatedCheckout($this);
+        }
+
+        $this->relatedCoupon = $relatedCoupon;
     }
 }

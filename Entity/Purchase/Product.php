@@ -2,6 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
+use App\Entity\Purchase\Coupon;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -62,18 +63,16 @@ class Product extends BaseEntity
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Purchase\PurchaseQuantity", mappedBy="relatedProduct")
      *
-     * A link to all previous completed checkouts of this product
+     * A link to all previous completed checkouts of this product.
      */
     protected $relatedPurchaseQuantities;
 
     /**
-     * zzz  @ORM\ManyToOne(targetEntity="Twencha\Bundle\EventRegistrationBundle\Entity\Round", inversedBy="variantProducts")
-     * zzz @ORM\JoinColumn(name="related_product_parent_id", referencedColumnName="id", nullable=true)
+     * @ORM\ManyToMany(targetEntity="App\Entity\Purchase\Coupon", mappedBy="relatedAffectedProducts")
      *
-     * todo: complete this
-     * if it has a parent, this product is a variant
+     * Coupons that can be used on this product
      */
-//    private $parentProduct;
+    protected $relatedCoupons;
 
     /**
      * Product constructor.
@@ -83,7 +82,8 @@ class Product extends BaseEntity
      */
     public function __construct($title, $reference, $description, $price)
     {
-        $this->relatedPurchaseQuantities      = new ArrayCollection();
+        $this->relatedPurchaseQuantities    = new ArrayCollection();
+        $this->relatedCoupons               = new ArrayCollection();
 
         $this->title        = $title;
         $this->reference    = $reference;
@@ -196,5 +196,32 @@ class Product extends BaseEntity
     public function setTitle(string $title): void
     {
         $this->title = $title;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getRelatedCoupons()
+    {
+        return $this->relatedCoupons;
+    }
+
+    /**
+     * @param Coupon $coupon
+     * @param bool $addToOppositeSide
+     * @return bool
+     */
+    public function addRelatedCoupon(Coupon $coupon, $addToOppositeSide = true): bool
+    {
+        if ($this->relatedCoupons->contains($coupon)) {
+            return true;
+        }
+
+        $this->relatedCoupons->add($coupon);
+        if ($addToOppositeSide) {
+            $coupon->addRelatedAffectedProduct($this, false);
+        }
+
+        return true;
     }
 }

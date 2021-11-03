@@ -7,9 +7,11 @@
 namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
 use App\Entity\Person;
+use Doctrine\Common\Collections\ArrayCollection;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\MappedSuperclass;
+use App\Entity\Purchase\Checkout;
 
 /**
  * @MappedSuperClass
@@ -26,7 +28,7 @@ class BaseCoupon extends BaseEntity
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
@@ -35,7 +37,7 @@ class BaseCoupon extends BaseEntity
      *
      * Name of the event series.
      */
-    private $code;
+    protected $code;
 
     /**
      * @var string
@@ -44,7 +46,7 @@ class BaseCoupon extends BaseEntity
      *
      * Amount of the discount (in cents)
      */
-    private $discountAmount;
+    protected $discountAmount;
 
     /**
      * @var string
@@ -53,35 +55,60 @@ class BaseCoupon extends BaseEntity
      *
      * Amount of the discount (as a percent)
      */
-    private $discountPercent;
+    protected $discountPercent;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Person", inversedBy="salesCoupons")
-     * @ORM\JoinColumn(name="related_promoter_person_id", referencedColumnName="id")
+     * @var string
      *
-     * the "promoter" (i.e. sales person) responsible for promoting this coupon - if one exists.
+     * @ORM\Column(name="description", type="string", length=150, nullable=true)
      *
-     * @var Person
-     */
-    private $relatedSalesPerson;
+     * A public description of what the coupon does (e.g. "")
+     **/
+    protected $description;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Person", inversedBy="salesCoupons")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Person", inversedBy="relatedSalesCoupons")
      * @ORM\JoinColumn(name="related_promoter_person_id", referencedColumnName="id")
      *
      * The "Promoter" (i.e. sales person) responsible for promoting this coupon - if one exists.
      *
      * @var Person
      */
-    private $relatedPromoter;
+    protected $relatedPromoter;
 
-    // todo:
-    // checkout one to many
-    // internal description
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Purchase\Checkout", mappedBy="relatedCoupon")
+     *
+     * All checkouts where this coupon has been used/applied.
+     */
+    protected $relatedCheckouts;
 
-    public function __construct($code)
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Purchase\Product", inversedBy="relatedCoupons")
+     * @ORM\JoinTable(name="coupons_to_affected_products")
+     *
+     * The products that are affected by the coupon (i.e. what products the coupon can be used on)
+     *
+     */
+    protected $relatedAffectedProducts;
+
+    public function __construct($code, array $affectedProducts, string $description = null, int $discountAmountInCents = null, int $discountPercent = null)
     {
+        if(empty($discountAmount) && empty($discountPercent)) {
+            throw new \Exception('discountAmount and discountPercent cannot both be empty.');
+        }
+
         $this->code = $code;
+        $this->description              = $description;
+        $this->discountAmount           = $discountAmountInCents;
+        $this->discountPercent          = $discountPercent;
+
+        $this->relatedCheckouts         = new ArrayCollection();
+        $this->relatedAffectedProducts  = new ArrayCollection();
+
+        foreach ($affectedProducts as $curI => $curProd) {
+            $this->addRelatedAffectedProduct($curProd);
+        }
     }
 
     /**
@@ -142,30 +169,109 @@ class BaseCoupon extends BaseEntity
 
     /**
      * @param Person $relatedPromoter
+     * @param bool $addToPerson
      */
-    public function setRelatedPromoter(Person $relatedPromoter): void
+    public function setRelatedPromoter(Person $relatedPromoter, $addToRelation = true): void
     {
+        if ($addToRelation) {
+            $relatedPromoter->addSalesCoupons($this);
+        }
+
         $this->relatedPromoter = $relatedPromoter;
     }
 
     /**
-     * @return Person
+     * @return ArrayCollection
      */
-    public function getRelatedSalesPerson(): Person
+    public function getRelatedCheckouts()
     {
-        return $this->relatedSalesPerson;
+        return $this->relatedCheckouts;
     }
 
     /**
-     * @param Person $relatedSalesPerson
-     * @param bool $addToPerson
+     * @param Checkout $checkout
      */
-    public function setRelatedSalesPerson(Person $relatedSalesPerson, $addToPerson = true): void
+    public function addRelatedCheckout(Checkout $checkout, $addToRelation = true)
     {
-        if ($addToPerson) {
-            $relatedSalesPerson->addSalesCoupons($this);
+        if ($this->relatedCheckouts->contains($checkout)) {
+            return true;
+        }
+        $this->relatedCheckouts->add($checkout);
+        if ($addToRelation) {
+            $checkout->setRelatedCoupon($this);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getRelatedAffectedProducts()
+    {
+        return $this->relatedAffectedProducts;
+    }
+
+    /**
+     * @param \App\Entity\Purchase\Product $product
+     * @param bool $addToOppositeSide
+     * @return bool
+     */
+    public function addRelatedAffectedProduct(\App\Entity\Purchase\Product $product, $addToOppositeSide = true):bool
+    {
+        if ($this->relatedAffectedProducts->contains($product)) {
+            return true;
         }
 
-        $this->relatedSalesPerson = $relatedSalesPerson;
+        $this->relatedAffectedProducts->add($product);
+        if ($addToOppositeSide) {
+            $product->addRelatedCoupon($this, false);
+        }
+
+        return true;
+    }
+
+    /**
+     * Outputs info on the entity (to the console) when it is created in fixtures.
+     * (for more info see: VisageFour > BaseFixture Marker: #sn1la)
+     */
+    public function fixtureDetails ()
+    {
+        $promoterEmail = (empty($this->relatedPromoter)) ? 'no promoter' : $this->relatedPromoter->getEmail();
+        return ([
+//            'title'         => $this->title,
+            'amount'            => $this->discountAmount,
+            'percent'           => $this->discountPercent,
+            'description'       => $this->description,
+            'promoter'          => $promoterEmail,
+            'affectedProducts'  => $this->getAffectProductsAsString()
+        ]);
+    }
+
+    public function getAffectProductsAsString()
+    {
+        $return = '';
+        /**
+         * @var $curProd \App\Entity\Purchase\Product
+         */
+        foreach ($this->getRelatedAffectedProducts() as $curI => $curProd) {
+            $return = $return . ', '. $curProd->getTitle();
+        }
+
+        return $return;
     }
 }
