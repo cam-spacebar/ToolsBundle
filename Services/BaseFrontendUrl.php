@@ -188,7 +188,7 @@ class BaseFrontendUrl implements FrontendUrlInterface
     const FORMAT_ABSOLUTE  = 'ABSOLUTE';
     public function getFrontendUrl(string $constant, $urlData = [], $format = self::FORMAT_RELATIVE)
     {
-        $populatedPath = $this->generateURLPart($constant, $urlData); // yyy
+        $populatedPath = $this->generateURLPart($constant, $urlData);
 
         switch ($format) {
             case self::FORMAT_RELATIVE:

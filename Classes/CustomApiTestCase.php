@@ -26,11 +26,18 @@ use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
  * Class CustomApiTestCase
  * @package VisageFour\Bundle\ToolsBundle\Classes
  *
- * this class reduces boiler-plate code such as: creating users, sending requests (functional testing) setup and tear down etc.
+ * === Test Case Documentation: ===
+ * run using:
+ * - ./vendor/bin/phpunit
+ * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/xyz-sub-folder/xyz-Test.php
+ * - ./vendor/bin/phpunit --filter xyz-methodName ClassName path/to/file.php
  *
- * Testing framework documentation:
- * https://docs.google.com/presentation/d/1tAEVY-Ypdv1ClBrCzfk3EqI2QK_wBxd80isKieJDRyw/edit
+ * Create new test case [P-CB-087]
+ * https://docs.google.com/presentation/d/1-AYb7xtRScoWsB3jxHnThsBJVgwY8DzEKLacGVCB28c/edit#slide=id.p
+ *
+ * (comment version: 1.01)
  */
+
 abstract class CustomApiTestCase extends ApiTestCase
 {
     /** @var PersonManager */

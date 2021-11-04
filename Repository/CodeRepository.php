@@ -13,7 +13,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\Code;
  */
 class CodeRepository extends ServiceEntityRepository
 {
-    public function __construct (ManagerRegistry $registry, $class) {
+    public function __construct (ManagerRegistry $registry, $class = Code::class) {
         parent::__construct($registry, $class);
     }
     public function getByCode($code) : ?Code

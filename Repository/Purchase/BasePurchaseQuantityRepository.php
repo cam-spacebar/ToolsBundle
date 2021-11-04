@@ -4,7 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Repository\Purchase;
 
 use App\Entity\Purchase\Product;
 use App\Entity\Purchase\PurchaseQuantity;
-use VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
+use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
@@ -12,10 +12,10 @@ use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 /**
 
  */
-class PurchaseQuantityRepository extends BaseRepository
+class BasePurchaseQuantityRepository extends BaseRepository
 {
 
-    public function __construct (ManagerRegistry $registry, $class) {
+    public function __construct (ManagerRegistry $registry, $class = PurchaseQuantity::class) {
         parent::__construct($registry, $class);
     }
 

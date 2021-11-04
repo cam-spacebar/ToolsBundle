@@ -4,7 +4,7 @@
 * by: cameron
 */
 
-namespace VisageFour\Bundle\ToolsBundle\Repository;
+namespace VisageFour\Bundle\ToolsBundle\Repository\NoAutowire;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;

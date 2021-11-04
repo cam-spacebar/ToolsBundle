@@ -2,7 +2,10 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
+use App\Entity\Purchase\Coupon;
 use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\Purchase\Product;
+use App\Entity\Purchase\Checkout;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
@@ -10,7 +13,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 /**
  * @MappedSuperClass
  */
-class PurchaseQuantity extends BaseEntity
+class BasePurchaseQuantity extends BaseEntity
 {
     /**
      * @var int
@@ -33,6 +36,8 @@ class PurchaseQuantity extends BaseEntity
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Purchase\Product", inversedBy="relatedPurchaseQuantities")
      * @ORM\JoinColumn(name="related_product_id", referencedColumnName="id", nullable=false)
+     *
+     * @var $relatedProduct Product
      */
     protected $relatedProduct;
 
@@ -118,5 +123,21 @@ class PurchaseQuantity extends BaseEntity
     public function setRelatedCheckout(Checkout $relatedCheckout): void
     {
         $this->relatedCheckout = $relatedCheckout;
+    }
+
+    /**
+     * Return the total of the products price * quantity amount (apply the discount coupon - if one exists)
+     */
+    public function getTotal(Coupon $coupon)
+    {
+        return $coupon->getDiscountedPrice($this->relatedProduct);
+    }
+
+    /**
+     * Return the total of the products price * quantity amount
+     */
+    public function getTotalWithoutCoupon()
+    {
+        return $this->relatedProduct->getPrice() * $this->getQuantity();
     }
 }

@@ -4,14 +4,15 @@ namespace VisageFour\Bundle\ToolsBundle\Repository\Purchase;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
+use VisageFour\Bundle\ToolsBundle\Entity\Purchase\BaseProduct;
+use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 
 /**
 
  */
-class ProductRepository extends BaseRepository
+class BaseProductRepository extends BaseRepository
 {
-    public function __construct (ManagerRegistry $registry, $class) {
+    public function __construct (ManagerRegistry $registry, $class = BaseProduct::class) {
         parent::__construct($registry, $class);
     }
 //    public function countSpooled () {

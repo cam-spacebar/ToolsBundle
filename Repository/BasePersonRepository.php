@@ -16,7 +16,7 @@ class BasePersonRepository extends ServiceEntityRepository
 {
     use LoggerTrait;
 
-    public function __construct(ManagerRegistry $registry, $entityClassName)
+    public function __construct(ManagerRegistry $registry, $entityClassName = BasePerson::class)
     {
         // note: you must create a class that overrides this and passes in the correct $entityClassName parameter.
         // the commented out section below cannot be used:

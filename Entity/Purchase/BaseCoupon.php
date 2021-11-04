@@ -12,6 +12,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use App\Entity\Purchase\Checkout;
+use App\Entity\Purchase\Product;
 
 /**
  * @MappedSuperClass
@@ -96,6 +97,14 @@ class BaseCoupon extends BaseEntity
     {
         if(empty($discountAmount) && empty($discountPercent)) {
             throw new \Exception('discountAmount and discountPercent cannot both be empty.');
+        }
+
+        if ($discountPercent > 100) {
+            throw new \Exception ('discount percent of: '. $discountPercent .'% is not permitted. please provide 100 or less');
+        }
+
+        if ($discountPercent <= 0) {
+            throw new \Exception ('discount percent of: '. $discountPercent .'% is not permitted. please provide a number above 0 or set to null.');
         }
 
         $this->code = $code;
@@ -227,11 +236,11 @@ class BaseCoupon extends BaseEntity
     }
 
     /**
-     * @param \App\Entity\Purchase\Product $product
+     * @param Product $product
      * @param bool $addToOppositeSide
      * @return bool
      */
-    public function addRelatedAffectedProduct(\App\Entity\Purchase\Product $product, $addToOppositeSide = true):bool
+    public function addRelatedAffectedProduct(Product $product, $addToOppositeSide = true):bool
     {
         if ($this->relatedAffectedProducts->contains($product)) {
             return true;
@@ -273,5 +282,45 @@ class BaseCoupon extends BaseEntity
         }
 
         return $return;
+    }
+
+    /**
+     * @param Product $product
+     * @return bool
+     *
+     * return true if the discount coupon affects this product.
+     */
+    public function doesCouponApplyToProduct(Product $product)
+    {
+        return $this->relatedAffectedProducts->contains($product);
+    }
+
+    /**
+     * @param Product $product
+     * @return int
+     * @throws \Exception
+     *
+     * applies the discount coupon (if coupon affects the provided $product) or:
+     * returns the normal price if the coupon doesn't affect the product
+     */
+    public function getDiscountedPrice(Product $product)
+    {
+        // check if this product is affected by the coupon:
+        if ($this->doesCouponApplyToProduct($product)) {
+            if (!empty($this->discountAmount)) {
+                $newPrice = $product->getPrice() - $this->discountAmount;
+            } elseif(!empty($this->discountPercent)) {
+                $newPrice = $product->getPrice() * ($this->discountPercent / 100);
+            } else {
+                throw new \Exception ('neither discountPercent or discountAmount set');
+            }
+        } else {
+            return $product->getPrice();
+        }
+
+        // don't allow a negative number to be returned
+        if ($newPrice < 0) {
+            return 0;
+        }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace VisageFour\ToolsBundle\Tests\UserSystem;
+namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Entity\Person;
@@ -11,14 +11,18 @@ use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 
 /**
  *
- * Run using:
+ * === Test Case Documentation: ===
+ * run using:
  * - ./vendor/bin/phpunit
  * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UserSystem/ForgotMyPasswordTest.php
  * - ./vendor/bin/phpunit --filter changePasswordCorrectly ClassName path/to/file.php
  *
- * Testing framework documentation:
- * https://docs.google.com/presentation/d/1tAEVY-Ypdv1ClBrCzfk3EqI2QK_wBxd80isKieJDRyw/edit
+ * Create new test case [P-CB-087]
+ * https://docs.google.com/presentation/d/1-AYb7xtRScoWsB3jxHnThsBJVgwY8DzEKLacGVCB28c/edit#slide=id.p
+ *
+ * (comment version: 1.01)
  */
+
 
 // controller method (being tested): resetPasswordAction()
 class ForgotMyPasswordTest extends CustomApiTestCase

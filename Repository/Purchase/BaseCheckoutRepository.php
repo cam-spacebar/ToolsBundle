@@ -3,22 +3,23 @@
 namespace VisageFour\Bundle\ToolsBundle\Repository\Purchase;
 
 use App\Entity\Person;
-use VisageFour\Bundle\ToolsBundle\Repository\BaseRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use VisageFour\Bundle\ToolsBundle\Entity\Purchase\BaseCheckout;
+use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\Purchase\Checkout;
+use App\Repository\Purchase\PurchaseQuantityRepository;
 
 /**
 
  */
-class CheckoutRepository extends BaseRepository
+class BaseCheckoutRepository extends BaseRepository
 {
     /**
-     * @var \App\Repository\Purchase\PurchaseQuantityRepository
+     * @var PurchaseQuantityRepository
      */
     private $quantityRepo;
 
-    public function __construct (ManagerRegistry $registry, $class, \App\Repository\Purchase\PurchaseQuantityRepository $quanRepo) {
+    public function __construct (ManagerRegistry $registry, PurchaseQuantityRepository $quanRepo, $class = BaseCheckout::class) {
         parent::__construct($registry, $class);
         $this->quantityRepo = $quanRepo;
     }
@@ -42,6 +43,7 @@ class CheckoutRepository extends BaseRepository
         $checkout = $this->createNew($person);
 
         foreach($items as $productRef => $curItem) {
+//            dump($curItem);
             $curProduct = $curItem['product'];
             $curQuantity = $this->quantityRepo->createNew($curItem['quantity'], $curProduct);
 

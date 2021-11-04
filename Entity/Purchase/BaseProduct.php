@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
 /**
  * @MappedSuperClass
  */
-class Product extends BaseEntity
+class BaseProduct extends BaseEntity
 {
     /**
      * @var int
@@ -142,6 +142,14 @@ class Product extends BaseEntity
     public function getPrice(): int
     {
         return $this->price;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getPriceWithCouponApplied(Coupon $coupon): int
+    {
+        return $coupon->getDiscountedPrice($this);
     }
 
     /**

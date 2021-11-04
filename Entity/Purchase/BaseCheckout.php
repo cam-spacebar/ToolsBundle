@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
 /**
  * @MappedSuperClass
  */
-class Checkout extends BaseEntity
+class BaseCheckout extends BaseEntity
 {
 
     /**
@@ -59,9 +59,18 @@ class Checkout extends BaseEntity
      *
      * @ORM\Column(name="total", type="integer", nullable=false)
      *
-     * The total price of all items in the checkout - in cents (not dollars)
+     * The total price of all items in the checkout - in cents (not dollars) and INCLUDING discount coupons
      */
     protected $total;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="totalWithoutCoupons", type="integer", nullable=false)
+     *
+     * The total price of all items in the checkout - in cents (not dollars) and WITHOUT discount coupons
+     */
+    protected $totalWithoutCoupons;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Purchase\PurchaseQuantity", mappedBy="relatedCheckout")
@@ -121,18 +130,26 @@ class Checkout extends BaseEntity
     /**
      * @return integer
      */
+    public function getTotalWithoutCoupons(): int
+    {
+        return $this->totalWithoutCoupons;
+    }
+
+    /**
+     * @return integer
+     */
     public function getTotal(): int
     {
         return $this->total;
     }
 
-    /**
-     * @param int $total
-     */
-    public function setTotal(int $total): void
-    {
-        $this->total = $total;
-    }
+//    /**
+//     * @param int $total
+//     */
+//    public function setTotal(int $total): void
+//    {
+//        $this->total = $total;
+//    }
 
     /**
      * @return ArrayCollection
@@ -186,20 +203,28 @@ class Checkout extends BaseEntity
         return true;
     }
 
+    /**
+     * @param LoggerInterface|null $logger
+     * @return $this
+     *
+     * calculate totals (both with coupon and without a discount coupon)
+     */
     public function calculateTotal(?LoggerInterface $logger = null)
     {
         $this->total = 0;
+        $this->totalWithoutCoupons = 0;
+
         /**
          * @var $curQuantity \App\Entity\Purchase\PurchaseQuantity
          */
         foreach($this->relatedQuantities as $key => $curQuantity) {
             $curProduct = $curQuantity->getRelatedProduct();
             if (!empty($logger)) {
-                $logger->info('product: '. $curProduct->getReference() .': '. $curProduct->getPrice() .' x'. $curQuantity->getQuantity());
+                $logger->info('Product: '. $curProduct->getReference() .': '. $curProduct->getPrice() .' x'. $curQuantity->getQuantity());
             }
 
-
-            $this->total = $this->total + ($curProduct->getPrice() * $curQuantity->getQuantity());
+            $this->total = $this->total + $curQuantity->getTotal($this->getRelatedCoupon());
+            $this->totalWithoutCoupons = $this->totalWithoutCoupons + $curQuantity->getTotalWithoutCoupon();
         }
 
         return $this;
@@ -245,7 +270,7 @@ class Checkout extends BaseEntity
     /**
      * @return Coupon
      */
-    public function getRelatedCoupon(): Coupon
+    public function getRelatedCoupon(): ?Coupon
     {
         return $this->relatedCoupon;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace VisageFour\ToolsBundle\Tests\UserSystem;
+namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
@@ -11,19 +11,21 @@ use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
  * Class SecurityTest
  * @package App\Tests\Service
  *
- * run using:
+ * === Test Case Documentation: ===
+ * Run all tests:
  * - ./vendor/bin/phpunit
+ * Run all the tests in this file:
  * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UserSystem/ChangePasswordTest.php
- * - ./vendor/bin/phpunit --filter changePasswordCorrectly ClassName path/to/file.php
  *
- * Testing framework documentation:
- * https://docs.google.com/presentation/d/1tAEVY-Ypdv1ClBrCzfk3EqI2QK_wBxd80isKieJDRyw/edit
+ * Create new test case [P-CB-087]
+ * https://docs.google.com/presentation/d/1-AYb7xtRScoWsB3jxHnThsBJVgwY8DzEKLacGVCB28c/edit#slide=id.p
+ *
+ * (comment version: 1.02)
  */
 
 // controller method (being tested): changePasswordAction()
 class ChangePasswordTest extends CustomApiTestCase
 {
-
     /**
      * Setup that is specific to this test case.
      * (this runs once prior to each test case / method())

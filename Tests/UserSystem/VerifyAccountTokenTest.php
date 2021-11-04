@@ -1,6 +1,6 @@
 <?php
 
-namespace VisageFour\ToolsBundle\Tests\UserSystem;
+namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
@@ -13,7 +13,7 @@ use VisageFour\Bundle\ToolsBundle\Classes\CustomApiTestCase;
  * run using:
  * - ./vendor/bin/phpunit
  * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UserSystem/VerifyAccountTokenTest.php
- * - ./vendor/bin/phpunit --filter verifyAccountWithCorrectToken
+ * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UserSystem/VerifyAccountTokenTest.php --filter verifyAccountWithCorrectToken
  *
  * Testing framework documentation:
  * https://docs.google.com/presentation/d/1tAEVY-Ypdv1ClBrCzfk3EqI2QK_wBxd80isKieJDRyw/edit
@@ -44,6 +44,7 @@ class VerifyAccountTokenTest extends CustomApiTestCase
 
     /**
      * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UserSystem/VerifyAccountTokenTest.php --filter verifyAccountWithCorrectToken
      */
     public function verifyEmailWithIncorrectToken(): void
     {
@@ -65,7 +66,7 @@ class VerifyAccountTokenTest extends CustomApiTestCase
 
     }
 
-    /**MissingInputException
+    /**
      * @test
      */
     public function verifyAccountWithCorrectToken(): void

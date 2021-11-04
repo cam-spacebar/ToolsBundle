@@ -1,6 +1,6 @@
 <?php
 
-namespace VisageFour\ToolsBundle\Tests\UserSystem;
+namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
