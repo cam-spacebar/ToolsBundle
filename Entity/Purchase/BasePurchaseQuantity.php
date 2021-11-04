@@ -53,10 +53,10 @@ class BasePurchaseQuantity extends BaseEntity
 
     /**
      * PurchaseQuantity constructor.
-     * @param $quantity
+     * @param integer $quantity
      * @param Product $product
      */
-    public function __construct($quantity, Product $product)
+    public function __construct(int $quantity, Product $product)
     {
         $this->setQuantity($quantity);
         $this->setRelatedProduct($product);
@@ -128,9 +128,15 @@ class BasePurchaseQuantity extends BaseEntity
     /**
      * Return the total of the products price * quantity amount (apply the discount coupon - if one exists)
      */
-    public function getTotal(Coupon $coupon)
+    public function getTotal(?Coupon $coupon)
     {
-        return $coupon->getDiscountedPrice($this->relatedProduct);
+        if (!empty($coupon)) {
+//            print '=--======'."\n";
+            return $coupon->getDiscountedPrice($this->relatedProduct) * $this->getQuantity();
+        } else {
+            return $this->getTotalWithoutCoupon();
+        }
+
     }
 
     /**
@@ -138,6 +144,7 @@ class BasePurchaseQuantity extends BaseEntity
      */
     public function getTotalWithoutCoupon()
     {
+//        print $this->relatedProduct->getPrice() .' * '. $this->getQuantity() .'. ';
         return $this->relatedProduct->getPrice() * $this->getQuantity();
     }
 }

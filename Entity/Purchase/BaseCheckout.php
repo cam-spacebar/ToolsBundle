@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
 use App\Entity\Person;
 use App\Entity\Purchase\Coupon;
+use App\Entity\Purchase\PurchaseQuantity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Psr\Log\LoggerInterface;
@@ -130,7 +131,7 @@ class BaseCheckout extends BaseEntity
     /**
      * @return integer
      */
-    public function getTotalWithoutCoupons(): int
+    public function getTotalWithoutCoupon(): int
     {
         return $this->totalWithoutCoupons;
     }
@@ -176,7 +177,9 @@ class BaseCheckout extends BaseEntity
         }
 
         // recalculate the total - as it will have changed.
+
         $this->calculateTotal();
+//        print "\n\ncaclulating totla: ". $this->total . " with outcoupon: ". $this->totalWithoutCoupons;
 
         return true;
     }
@@ -279,12 +282,70 @@ class BaseCheckout extends BaseEntity
      * @param Coupon $relatedCoupon
      * @param bool $addToRelation
      */
-    public function setRelatedCoupon(Coupon $relatedCoupon, $addToRelation = true): void
+    public function setRelatedCoupon(?Coupon $relatedCoupon, $addToRelation = true): void
     {
         if ($addToRelation) {
-            $relatedCoupon->addRelatedCheckout($this);
+            if (!empty($relatedCoupon)) {
+                $relatedCoupon->addRelatedCheckout($this);
+            }
+
+            // recalculate total, as the coupon has changed!
+            $this->calculateTotal();
         }
 
         $this->relatedCoupon = $relatedCoupon;
+
+    }
+
+    private function getCouponAsString()
+    {
+        if (empty($this->relatedCoupon)) {
+            return 'no coupon set';
+        } else {
+            return $this->relatedCoupon->getAsString();
+        }
+
+    }
+
+    private function getCouponsAffectedProductsAsString()
+    {
+        if (empty($this->getRelatedCoupon())) {
+            return 'n/a';
+        } else {
+            return $this->getRelatedCoupon()->getAffectedProductsAsString();
+        }
+    }
+
+    /**
+     * Display the contents of this object to the console
+     * (ussually used for automated testing)
+     */
+    public function outputContentsToConsole ($lineBreak = "\n") {
+        $lb = $lineBreak;
+        print $lb. "=== Checkout Contents === ". $lb;
+        print "coupon: ". $this->getCouponAsString() .$lb;
+        print "Products affected by coupon: ". $this->getCouponsAffectedProductsAsString() .$lb;
+        $count = 1;
+        /**
+         * @var $curQuantity PurchaseQuantity
+         */
+        foreach ($this->relatedQuantities as $curI => $curQuantity) {
+            print "- Item #". $count .": product reference: ". $curQuantity->getRelatedProduct()->getReference()
+                . ' ('. $curQuantity->getRelatedProduct()->getPrice() .' each)'
+                .' x'. $curQuantity->getQuantity()
+                .' = '.$curQuantity->getTotal($this->relatedCoupon)
+                .' (' . $curQuantity->getTotalWithoutCoupon() .' - without coupon)'.
+                $lb
+            ;
+            $count++;
+        }
+
+        print $lb;
+        $total = $this->getTotal();
+        $totalWithoutCoupon = $this->getTotalWithoutCoupon();
+        print "Total: ". $total .$lb;
+        print "Total (without coupon): ". $totalWithoutCoupon .$lb;
+//        dump($totalWithoutCoupon, $total);
+        print "Discounted amount (using coupon): ". ($totalWithoutCoupon - $total) .$lb;
     }
 }

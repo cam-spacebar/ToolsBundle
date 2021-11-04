@@ -93,18 +93,29 @@ class BaseCoupon extends BaseEntity
      */
     protected $relatedAffectedProducts;
 
+    protected function onlyAllowOneDiscountType()
+    {
+        $codeStr = ' Coupon code: "'. $this->code .'"';
+        if(empty($this->discountAmount) && empty($this->discountPercent)) {
+            throw new \Exception('discountAmount and discountPercent cannot both be empty.'. $codeStr);
+        }
+
+        if(!empty($this->discountAmount) && !empty($this->discountPercent)) {
+            throw new \Exception('discountAmount and discountPercent cannot both be set.'. $codeStr);
+        }
+    }
+
     public function __construct($code, array $affectedProducts, string $description = null, int $discountAmountInCents = null, int $discountPercent = null)
     {
-        if(empty($discountAmount) && empty($discountPercent)) {
-            throw new \Exception('discountAmount and discountPercent cannot both be empty.');
-        }
 
-        if ($discountPercent > 100) {
-            throw new \Exception ('discount percent of: '. $discountPercent .'% is not permitted. please provide 100 or less');
-        }
+        if (!empty($discountPercent)) {
+            if ($discountPercent > 100) {
+                throw new \Exception ('discount percent of: '. $discountPercent .'% is not permitted. please provide 100 or less');
+            }
 
-        if ($discountPercent <= 0) {
-            throw new \Exception ('discount percent of: '. $discountPercent .'% is not permitted. please provide a number above 0 or set to null.');
+            if ($discountPercent <= 0) {
+                throw new \Exception ('discount percent of: '. $discountPercent .'% is not permitted. please provide a number above 0 or set to null.');
+            }
         }
 
         $this->code = $code;
@@ -118,6 +129,8 @@ class BaseCoupon extends BaseEntity
         foreach ($affectedProducts as $curI => $curProd) {
             $this->addRelatedAffectedProduct($curProd);
         }
+
+        $this->onlyAllowOneDiscountType();
     }
 
     /**
@@ -267,11 +280,11 @@ class BaseCoupon extends BaseEntity
             'percent'           => $this->discountPercent,
             'description'       => $this->description,
             'promoter'          => $promoterEmail,
-            'affectedProducts'  => $this->getAffectProductsAsString()
+            'affectedProducts'  => $this->getAffectedProductsAsString()
         ]);
     }
 
-    public function getAffectProductsAsString()
+    public function getAffectedProductsAsString()
     {
         $return = '';
         /**
@@ -282,6 +295,11 @@ class BaseCoupon extends BaseEntity
         }
 
         return $return;
+    }
+
+    public function getAsString()
+    {
+        return 'discount ($): '. $this->discountAmount . ', discount (%): '. $this->discountPercent;
     }
 
     /**
@@ -300,19 +318,21 @@ class BaseCoupon extends BaseEntity
      * @return int
      * @throws \Exception
      *
-     * applies the discount coupon (if coupon affects the provided $product) or:
+     * Applies the discount coupon (if coupon affects the provided $product) or:
      * returns the normal price if the coupon doesn't affect the product
      */
     public function getDiscountedPrice(Product $product)
     {
+        $this->onlyAllowOneDiscountType();
+
         // check if this product is affected by the coupon:
         if ($this->doesCouponApplyToProduct($product)) {
             if (!empty($this->discountAmount)) {
                 $newPrice = $product->getPrice() - $this->discountAmount;
             } elseif(!empty($this->discountPercent)) {
-                $newPrice = $product->getPrice() * ($this->discountPercent / 100);
-            } else {
-                throw new \Exception ('neither discountPercent or discountAmount set');
+//                print "\n\n============ discounted price!!: ". $product->getReference() ."\n\n";
+//                print "==== discoutned price variables: price: ". $product->getPrice() .", discount mulitplyer: ". ((100 - $this->discountPercent)/100)."\n";
+                $newPrice = $product->getPrice() * ((100 - $this->discountPercent)/100);
             }
         } else {
             return $product->getPrice();
@@ -322,5 +342,7 @@ class BaseCoupon extends BaseEntity
         if ($newPrice < 0) {
             return 0;
         }
+
+        return $newPrice;
     }
 }
