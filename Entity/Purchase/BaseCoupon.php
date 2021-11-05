@@ -7,6 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
 use App\Entity\Person;
+use App\Entity\Purchase\AttributionTag;
 use Doctrine\Common\Collections\ArrayCollection;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping as ORM;
@@ -93,17 +94,10 @@ class BaseCoupon extends BaseEntity
      */
     protected $relatedAffectedProducts;
 
-    protected function onlyAllowOneDiscountType()
-    {
-        $codeStr = ' Coupon code: "'. $this->code .'"';
-        if(empty($this->discountAmount) && empty($this->discountPercent)) {
-            throw new \Exception('discountAmount and discountPercent cannot both be empty.'. $codeStr);
-        }
-
-        if(!empty($this->discountAmount) && !empty($this->discountPercent)) {
-            throw new \Exception('discountAmount and discountPercent cannot both be set.'. $codeStr);
-        }
-    }
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Purchase\AttributionTag", mappedBy="relatedCoupons")
+     */
+    protected $relatedAttributionTags;
 
     public function __construct($code, array $affectedProducts, string $description = null, int $discountAmountInCents = null, int $discountPercent = null)
     {
@@ -125,12 +119,26 @@ class BaseCoupon extends BaseEntity
 
         $this->relatedCheckouts         = new ArrayCollection();
         $this->relatedAffectedProducts  = new ArrayCollection();
+        $this->relatedAttributionTags   = new ArrayCollection();
 
         foreach ($affectedProducts as $curI => $curProd) {
             $this->addRelatedAffectedProduct($curProd);
         }
 
         $this->onlyAllowOneDiscountType();
+    }
+
+    // check for errors in discountAmount and discountPercent
+    protected function onlyAllowOneDiscountType()
+    {
+        $codeStr = ' Coupon code: "'. $this->code .'"';
+        if(empty($this->discountAmount) && empty($this->discountPercent)) {
+            throw new \Exception('discountAmount and discountPercent cannot both be empty.'. $codeStr);
+        }
+
+        if(!empty($this->discountAmount) && !empty($this->discountPercent)) {
+            throw new \Exception('discountAmount and discountPercent cannot both be set.'. $codeStr);
+        }
     }
 
     /**
@@ -265,6 +273,38 @@ class BaseCoupon extends BaseEntity
         }
 
         return true;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getRelatedAttributionTags()
+    {
+        return $this->relatedAttributionTags;
+    }
+
+    /**
+     * @param AttributionTag $attributionTag
+     * @param bool $updateOppositeRelation
+     */
+    public function addRelatedAttributionTag(AttributionTag $attributionTag, $updateOppositeRelation = true)
+    {
+        if ($updateOppositeRelation) {
+            $attributionTag->addRelatedCoupon($this);
+        }
+        $this->relatedAttributionTags->add($attributionTag);
+    }
+
+    /**
+     * @param BaseAttributionTag $attributionTag
+     * @param bool $updateOppositeRelation
+     */
+    public function removeRelatedAttributionTag(BaseAttributionTag $attributionTag, $updateOppositeRelation = true)
+    {
+        if ($updateOppositeRelation) {
+            $attributionTag->removeRelatedCoupon($this, false);
+        }
+        $this->relatedAttributionTags->removeElement($attributionTag);
     }
 
     /**
