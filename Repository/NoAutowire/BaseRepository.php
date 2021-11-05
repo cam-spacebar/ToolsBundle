@@ -15,16 +15,41 @@ class BaseRepository extends ServiceEntityRepository
     use LoggerTrait;
     use EntityManagerTrait;
 
+    // when set to true, it will print the contents of the object to the console when an entity object is instantiated.
+    // Use this for fixtures or for when writing tests.
+    protected $outputValuesOnCreation = false;
+
+    /**
+     * @return bool
+     */
+    public function isOutputValuesOnCreation(): bool
+    {
+        return $this->outputValuesOnCreation;
+    }
+
+    /**
+     * @param bool $outputValuesOnCreation
+     */
+    public function setOutputValuesOnCreation(bool $outputValuesOnCreation): void
+    {
+        $this->outputValuesOnCreation = $outputValuesOnCreation;
+    }
+
     protected function persistAndLogEntityCreation($newObj, $persist = true)
     {
         $className = (new \ReflectionClass($newObj))->getShortName();
         $this->logger->info(
-            'Creating new entity: '. $className,
+            'New entity created: '. $className,
             [$newObj]
         );
 
         if ($persist) {
             $this->persist($newObj);
+        }
+
+        if ($this->outputValuesOnCreation) {
+            print "\nNew entity created: ";
+            $newObj->outputContents();
         }
     }
 }

@@ -114,7 +114,7 @@ class CouponTest extends KernelTestCase
 
 //        convert all entities to \App from \VisageFour - as they need to have a DB table.
 
-        /** @var $checkoutRepo BaseCheckoutRepository */
+        /** @var $checkoutRepo CheckoutRepository */
         $checkoutRepo = $container->get('test.'. CheckoutRepository::class);
 
         /** @var $personRepo BasePersonRepository */

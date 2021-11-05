@@ -6,6 +6,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity;
 
+use App\Entity\Purchase\AttributionTag;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\ORM\Mapping as ORM;
@@ -37,6 +38,7 @@ class BaseTag extends BaseEntity
      * @ORM\ManyToOne(targetEntity="App\Entity\Purchase\AttributionTag", inversedBy="relatedChildTags")
      * @ORM\JoinColumn(name="related_parent_tag_id", referencedColumnName="id", nullable=true)
      *
+     * @var $relatedParent AttributionTag
      */
     protected $relatedParent;
 
@@ -47,7 +49,7 @@ class BaseTag extends BaseEntity
     protected $relatedChildTags;
 
     /**
-     * @var int
+     * @var string
      *
      * @ORM\Column(name="name", type="string", nullable=false)
      *
@@ -69,17 +71,17 @@ class BaseTag extends BaseEntity
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getName(): int
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param int $name
+     * @param string $name
      */
-    public function setName(int $name): void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -128,6 +130,28 @@ class BaseTag extends BaseEntity
         }
 
         $this->relatedParent = $parentTag;
+    }
 
+    // used with BaseEntity->outputContents() (for console or testing)
+    public function getOutputContents()
+    {
+        return [
+            'name'      => $this->name,
+            'parent'    => $this->getParentName()
+        ];
+    }
+
+    public function __toString()
+    {
+        return $this->name;
+    }
+
+    public function getParentName()
+    {
+        if (!empty($this->relatedParent)) {
+            return $this->relatedParent->getName();
+        }
+
+        return null;
     }
 }

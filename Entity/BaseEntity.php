@@ -93,4 +93,22 @@ abstract class BaseEntity implements BaseEntityInterface
 
         return $text;
     }
+
+    // outputs the important details about the object, specifically for console (for use with either: fixtures or testing)
+    public function outputContents($lineBreak = "\n")
+    {
+        $lb = $lineBreak;
+        $className = get_class($this);
+        print $className .' contents: '. $this . $lb;
+        if (method_exists($this, 'getOutputContents')) {
+            $data = $this->getOutputContents();
+
+            foreach ($data as $fieldName => $value) {
+                print ' - '. $fieldName . ': '. $value .$lb;
+            }
+            print $lb;
+        } else {
+            throw new \Exception('unable to outputContents(), as the method: getOutputContents() does not exist on the entity: '. $className);
+        }
+    }
 }
