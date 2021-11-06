@@ -100,6 +100,8 @@ class BaseCheckout extends BaseEntity
         $this->setRelatedPerson($person);
         $this->status = $status;
         $this->relatedQuantities = new ArrayCollection();
+        $this->total = 0;
+        $this->totalWithoutCoupons = 0;
     }
 
     /**
@@ -316,16 +318,22 @@ class BaseCheckout extends BaseEntity
         }
     }
 
+    public function outputContents($lineBreak = "\n")
+    {
+        $this->outputContentsToConsole($lineBreak);
+    }
+
     /**
      * Display the contents of this object to the console
      * (ussually used for automated testing)
      */
     public function outputContentsToConsole ($lineBreak = "\n") {
         $lb = $lineBreak;
-        print $lb. "=== Checkout Contents === ". $lb;
+//        print $lb. "=== Checkout Contents === ". $lb;
         print "coupon: ". $this->getCouponAsString() .$lb;
         print "Products affected by coupon: ". $this->getCouponsAffectedProductsAsString() .$lb;
         $count = 1;
+
         /**
          * @var $curQuantity PurchaseQuantity
          */

@@ -27,7 +27,7 @@ class BaseCheckoutRepository extends BaseRepository
     public function createNew(Person $person)
     {
         $checkout = new Checkout($person);
-        $this->persistAndLogEntityCreation($checkout);
+//        $this->persistAndLogEntityCreation($checkout);        // don't run this - there's no info yet
 
         return $checkout;
     }
@@ -52,6 +52,7 @@ class BaseCheckoutRepository extends BaseRepository
 //            $this->em->persist($curQuantity);
 //            $this->em->persist($checkout);
         }
+        $this->persistAndLogEntityCreation($checkout);
 
         return $checkout;
     }

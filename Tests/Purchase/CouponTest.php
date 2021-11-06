@@ -78,6 +78,8 @@ class CouponTest extends KernelTestCase
 
         );
 
+//        $ATag = $this->Cou
+
         $this->registrationCoupon100 = new Coupon(
             'zreg100',
             [$this->regProd],
@@ -112,13 +114,16 @@ class CouponTest extends KernelTestCase
 
         $container = self::$kernel->getContainer();
 
-//        convert all entities to \App from \VisageFour - as they need to have a DB table.
-
         /** @var $checkoutRepo CheckoutRepository */
         $checkoutRepo = $container->get('test.'. CheckoutRepository::class);
+        $checkoutRepo->setOutputValuesOnCreation(true);
 
         /** @var $personRepo BasePersonRepository */
         $personRepo = $container->get('test.'. PersonRepository::class);
+
+        continue from here - centralize above and introduce Attribution Tags
+
+
         $person = $personRepo->findOneByEmailCanonical('cameronrobertburns@gmail.com');
 
         $items1 = [
@@ -133,9 +138,11 @@ class CouponTest extends KernelTestCase
         ];
         $checkout1 = $checkoutRepo->createCheckoutByItems($items1, $person);
         $checkout1->setRelatedCoupon($this->badgeCoupon);
-        $checkout1->outputContentsToConsole();
+//        $checkout1->outputContentsToConsole();
 
         $this->assertSame(1746, $checkout1->getTotal(), '$checkout1 total is not correct.');
+
+
 
         $items2 = [
             [
@@ -149,7 +156,7 @@ class CouponTest extends KernelTestCase
         ];
         $checkout2 = $checkoutRepo->createCheckoutByItems($items2, $person);
         $checkout2->setRelatedCoupon($this->registrationCoupon100);
-        $checkout2->outputContentsToConsole();
+//        $checkout2->outputContentsToConsole();
 
         $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 total is not correct.');
 

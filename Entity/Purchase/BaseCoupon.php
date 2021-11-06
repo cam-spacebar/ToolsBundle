@@ -101,7 +101,6 @@ class BaseCoupon extends BaseEntity
 
     public function __construct($code, array $affectedProducts, string $description = null, int $discountAmountInCents = null, int $discountPercent = null)
     {
-
         if (!empty($discountPercent)) {
             if ($discountPercent > 100) {
                 throw new \Exception ('discount percent of: '. $discountPercent .'% is not permitted. please provide 100 or less');
@@ -311,7 +310,7 @@ class BaseCoupon extends BaseEntity
      * Outputs info on the entity (to the console) when it is created in fixtures.
      * (for more info see: VisageFour > BaseFixture Marker: #sn1la)
      */
-    public function fixtureDetails ()
+    public function getOutputContents ()
     {
         $promoterEmail = (empty($this->relatedPromoter)) ? 'no promoter' : $this->relatedPromoter->getEmail();
         return ([

@@ -95,6 +95,7 @@ abstract class BaseEntity implements BaseEntityInterface
     }
 
     // outputs the important details about the object, specifically for console (for use with either: fixtures or testing)
+    // you can override this if you want to provide a custom output (ussually this is useful for larger/complex entities with relations such as: ToolsBundle::Checkout)
     public function outputContents($lineBreak = "\n")
     {
         $lb = $lineBreak;
@@ -110,5 +111,10 @@ abstract class BaseEntity implements BaseEntityInterface
         } else {
             throw new \Exception('unable to outputContents(), as the method: getOutputContents() does not exist on the entity: '. $className);
         }
+    }
+
+    public function getShortName()
+    {
+        return (new \ReflectionClass($this))->getShortName();
     }
 }

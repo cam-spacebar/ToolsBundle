@@ -9,6 +9,7 @@ namespace VisageFour\Bundle\ToolsBundle\Repository\NoAutowire;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 use VisageFour\Bundle\ToolsBundle\Traits\EntityManagerTrait;
+use Doctrine\Persistence\ManagerRegistry;
 
 class BaseRepository extends ServiceEntityRepository
 {
@@ -32,12 +33,21 @@ class BaseRepository extends ServiceEntityRepository
      */
     public function setOutputValuesOnCreation(bool $outputValuesOnCreation): void
     {
+        if ($outputValuesOnCreation == true) {
+            print "\n==== OUTPUT ENTITY VALUES ON CREATION = true (for: '. $this->_entityName .' Repository) ====";
+        }
+
         $this->outputValuesOnCreation = $outputValuesOnCreation;
+    }
+
+    public function __construct (ManagerRegistry $registry, $class) {
+        parent::__construct($registry, $class);
+        $this->class = $class;
     }
 
     protected function persistAndLogEntityCreation($newObj, $persist = true)
     {
-        $className = (new \ReflectionClass($newObj))->getShortName();
+        $className = $newObj->getShortName();
         $this->logger->info(
             'New entity created: '. $className,
             [$newObj]
@@ -47,8 +57,8 @@ class BaseRepository extends ServiceEntityRepository
             $this->persist($newObj);
         }
 
-        if ($this->outputValuesOnCreation) {
-            print "\nNew entity created: ";
+        if ($this->outputValuesOnCreation == true) {
+            print "\n== New ". $className ." entity created: \n";
             $newObj->outputContents();
         }
     }
