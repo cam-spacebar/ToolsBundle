@@ -176,6 +176,7 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
      * @ORM\Column(name="email", type="string", length=100, unique=false, nullable=true)
      * @Groups({"zapierSpreadsheet", "api_person:write"})
      * @Assert\NotBlank(groups={"registration"}, message="Email address must be entered")
+     * @Assert\Email()
      */
     protected $email;
 

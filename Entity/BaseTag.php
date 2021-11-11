@@ -11,6 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\ORM\Mapping as ORM;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
+use VisageFour\Bundle\ToolsBundle\Interfaces\TagInterface;
 
 /**
  * @MappedSuperClass
@@ -25,7 +26,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
  */
 class BaseTag extends BaseEntity
 {
-    /**
+    /**T
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
@@ -60,7 +61,7 @@ class BaseTag extends BaseEntity
     /**
      * BaseTag constructor.
      */
-    public function __construct($name, Tag $parent = null)
+    public function __construct($name, $parent = null)
     {
         $this->name = $name;
         $this->relatedChildTags = new ArrayCollection();
@@ -95,11 +96,11 @@ class BaseTag extends BaseEntity
     }
 
     /**
-     * @param Tag $tag
+     * @param TagInterface $tag
      * @param bool $addToOppositeSide
      * @return bool
      */
-    public function addRelatedChildTag(Tag $tag, $addToOppositeSide = true): bool
+    public function addRelatedChildTag(TagInterface $tag, $addToOppositeSide = true): bool
     {
         if ($this->relatedChildTags->contains($tag)) {
             return true;
@@ -114,14 +115,14 @@ class BaseTag extends BaseEntity
     }
 
     /**
-     * @return Tag
+     * @return TagInterface
      */
-    public function getRelatedParentTag(): ?Tag
+    public function getRelatedParentTag(): ?TagInterface
     {
         return $this->relatedParent;
     }
 
-    public function setRelatedParentTag(?Tag $parentTag, $addToRelation = true): void
+    public function setRelatedParentTag(?TagInterface $parentTag, $addToRelation = true): void
     {
         if ($addToRelation) {
             if (!empty($parentTag)) {

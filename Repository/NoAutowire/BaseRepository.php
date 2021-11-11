@@ -34,7 +34,7 @@ class BaseRepository extends ServiceEntityRepository
     public function setOutputValuesOnCreation(bool $outputValuesOnCreation): void
     {
         if ($outputValuesOnCreation == true) {
-            print "\n==== OUTPUT ENTITY VALUES ON CREATION = true (for: '. $this->_entityName .' Repository) ====";
+            print "\n==== OUTPUT ENTITY VALUES ON CREATION = true (for: \"$this->_entityName\" Repository) ====";
         }
 
         $this->outputValuesOnCreation = $outputValuesOnCreation;

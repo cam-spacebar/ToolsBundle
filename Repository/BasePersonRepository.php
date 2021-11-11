@@ -6,13 +6,14 @@ use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PersonNotFoundExce
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Entity\BasePerson;
+use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 /**
  * BasePersonRepository
  *
  */
-class BasePersonRepository extends ServiceEntityRepository
+class BasePersonRepository extends BaseRepository
 {
     use LoggerTrait;
 
@@ -52,6 +53,7 @@ class BasePersonRepository extends ServiceEntityRepository
         }
 
         $this->logger->info('found person with email: '. $email .': ', [$result]);
+
         return $result;
     }
 }

@@ -9,6 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use App\Entity\Purchase\PurchaseQuantity;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @MappedSuperClass
@@ -55,8 +56,10 @@ class BaseProduct extends BaseEntity
      * @var string
      *
      * @ORM\Column(name="reference", type="string", length=50, unique=true, nullable=false)
+     * @Groups({"api_coupon:read", "api_product:item:get"})
      *
      * a unique reference to the product (used instead of id)
+     *
      */
     protected $reference;
 

@@ -109,7 +109,8 @@ abstract class BaseEntity implements BaseEntityInterface
             }
             print $lb;
         } else {
-            throw new \Exception('unable to outputContents(), as the method: getOutputContents() does not exist on the entity: '. $className);
+            throw new \Exception('unable to outputContents(), as the method: getOutputContents() does not exist on the entity: '. $className
+                .'. Please create it, or alternatively (For more complex entities, you can override outputContents() for a custom appearance.');
         }
     }
 

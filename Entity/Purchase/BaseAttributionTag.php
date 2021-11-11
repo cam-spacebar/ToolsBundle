@@ -6,6 +6,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
+use App\Entity\Purchase\AttributionTag;
 use App\Entity\Purchase\Coupon;
 use Doctrine\Common\Collections\ArrayCollection;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseTag;
@@ -29,8 +30,9 @@ class BaseAttributionTag extends BaseTag
      */
     protected $relatedCoupons;
 
-    public function __construct () {
+    public function __construct (string $name, AttributionTag $parent = null) {
         $this->relatedCoupons     = new ArrayCollection();
+        parent::__construct($name, $parent);
     }
 
     /**
@@ -48,8 +50,9 @@ class BaseAttributionTag extends BaseTag
     public function addRelatedCoupon(Coupon $coupon, $updateOppositeRelation = true)
     {
         if ($updateOppositeRelation) {
-            $coupon->addRelatedAttributionTag($this);
+            $coupon->addRelatedAttributionTag($this, false);
         }
+
         $this->relatedCoupons->add($coupon);
     }
 

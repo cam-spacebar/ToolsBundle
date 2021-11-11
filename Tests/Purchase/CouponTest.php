@@ -8,10 +8,13 @@ namespace App\VisageFour\Bundle\ToolsBundle\Tests\Purchase;
 
 namespace VisageFour\Bundle\ToolsBundle\Tests\Purchase;
 
+use App\Entity\Person;
 use App\Entity\Purchase\Checkout;
 use App\Entity\Purchase\Coupon;
 use App\Entity\Purchase\Product;
+use App\Repository\Purchase\AttributionTagRepository;
 use App\Repository\Purchase\CheckoutRepository;
+use App\Repository\Purchase\CouponRepository;
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -42,13 +45,45 @@ class CouponTest extends KernelTestCase
 {
     /** @var Coupon */
     private $registrationCoupon100;
+
     /** @var Coupon */
     private $badgeCoupon50;
 
     /** @var Product */
     private $regProd;
+
     /** @var Product */
     private $badgeProd;
+
+    /** @var CheckoutRepository */
+    private $checkoutRepo;
+
+    /** @var $personRepo PersonRepository */
+    private $personRepo;
+
+    /** @var $couponRepo CouponRepository */
+    private $couponRepo;
+
+    /** @var $attributionTagRepo AttributionTagRepository */
+    private $attributionTagRepo;
+
+    private function getServices($debuggingOutputOn)
+    {
+        $container = self::$kernel->getContainer();
+
+        $this->checkoutRepo = $container->get('test.'. CheckoutRepository::class);
+        $this->checkoutRepo->setOutputValuesOnCreation($debuggingOutputOn);
+
+        $this->personRepo = $container->get('test.'. PersonRepository::class);
+        $this->personRepo->setOutputValuesOnCreation($debuggingOutputOn);
+
+        $this->couponRepo = $container->get('test.'. CouponRepository::class);
+        $this->couponRepo->setOutputValuesOnCreation($debuggingOutputOn);
+
+        $this->attributionTagRepo = $container->get('test.'. AttributionTagRepository::class);
+        $this->attributionTagRepo->setOutputValuesOnCreation($debuggingOutputOn);
+//        die('asd');
+    }
 
     /**
      * Setup that is specific to this test case.
@@ -56,10 +91,17 @@ class CouponTest extends KernelTestCase
      */
     protected function customSetUp()
     {
+        $this->getServices(true);
+
+        $person1 = new Person();
+
+        $this->ATag1 = $this->attributionTagRepo->createNew('Facebook');
+        $this->ATag2FBP = $this->attributionTagRepo->createNew('Facebook Page', $this->ATag1);
+
         $this->badgeProd = new Product(
             'Attendee badge',
             'le_badge',
-            'A badge that contains 2 flags: one representing the language the attendee speaks and the other representing the langauge they are learning.',
+            'A badge that contains 2 flags: one representing the language the attendee speaks and the other representing the language they are learning.',
             450
         );
 
@@ -70,15 +112,8 @@ class CouponTest extends KernelTestCase
             1050
         );
 
-        $this->badgeCoupon = new Coupon(
-            'zbadge',
-            [$this->badgeProd],
-            '$1.02 off replacement badges',
-            102
-
-        );
-
-//        $ATag = $this->Cou
+        $this->badgeCoupon = $this->couponRepo->createNew($this->ATag2FBP, $person1, 'zbadge', [$this->badgeProd], '$1.02 off replacement badges', 102);
+//        die('asdf');
 
         $this->registrationCoupon100 = new Coupon(
             'zreg100',
@@ -87,8 +122,6 @@ class CouponTest extends KernelTestCase
             0,
             98.21
         );
-
-//        $this->checkoutRepository =
 
         return true;
     }
@@ -112,19 +145,7 @@ class CouponTest extends KernelTestCase
         self::bootKernel();
         $this->customSetUp();
 
-        $container = self::$kernel->getContainer();
-
-        /** @var $checkoutRepo CheckoutRepository */
-        $checkoutRepo = $container->get('test.'. CheckoutRepository::class);
-        $checkoutRepo->setOutputValuesOnCreation(true);
-
-        /** @var $personRepo BasePersonRepository */
-        $personRepo = $container->get('test.'. PersonRepository::class);
-
-        continue from here - centralize above and introduce Attribution Tags
-
-
-        $person = $personRepo->findOneByEmailCanonical('cameronrobertburns@gmail.com');
+        $person = $this->personRepo->findOneByEmailCanonical('cameronrobertburns@gmail.com');
 
         $items1 = [
             [
@@ -136,13 +157,11 @@ class CouponTest extends KernelTestCase
                 'quantity'  => 1
             ]
         ];
-        $checkout1 = $checkoutRepo->createCheckoutByItems($items1, $person);
+        $checkout1 = $this->checkoutRepo->createCheckoutByItems($items1, $person);
         $checkout1->setRelatedCoupon($this->badgeCoupon);
 //        $checkout1->outputContentsToConsole();
 
         $this->assertSame(1746, $checkout1->getTotal(), '$checkout1 total is not correct.');
-
-
 
         $items2 = [
             [
@@ -154,11 +173,16 @@ class CouponTest extends KernelTestCase
                 'quantity'  => 2
             ]
         ];
-        $checkout2 = $checkoutRepo->createCheckoutByItems($items2, $person);
+
+        $checkout2 = $this->checkoutRepo->createCheckoutByItems($items2, $person);
         $checkout2->setRelatedCoupon($this->registrationCoupon100);
 //        $checkout2->outputContentsToConsole();
 
         $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 total is not correct.');
+
+        $checkout2->setRelatedCoupon(null);
+        $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 (without coupon) total is not correct.');
+
 
 //        print "\n\nTotal (with coupon of: \"". $checkout->getRelatedCoupon()->getAsString() ."%\" applied): ". $checkout->getTotal() .", total (without discount coupon): ". $checkout->getTotalWithoutCoupon();
     }

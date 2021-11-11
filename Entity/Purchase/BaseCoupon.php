@@ -6,6 +6,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity\Purchase;
 
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Person;
 use App\Entity\Purchase\AttributionTag;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,12 +15,21 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use App\Entity\Purchase\Checkout;
 use App\Entity\Purchase\Product;
-
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Annotation\ApiProperty;
 /**
  * @MappedSuperClass
  *
  * Coupons allows users to receive discounts on products.
  * They also allow us to track "sales people" and what sales are attributed to them.
+ * aaa - ApiResource(
+ *     collectionOperations={},
+ *     itemOperations={
+ *         "get"={
+ *             "normalizationContext"={"groups"={"api_coupon:read"}}
+ *         }
+ *     }
+ * )
  */
 class BaseCoupon extends BaseEntity
 {
@@ -29,6 +39,7 @@ class BaseCoupon extends BaseEntity
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @ApiProperty(identifier=false)
      */
     protected $id;
 
@@ -36,6 +47,8 @@ class BaseCoupon extends BaseEntity
      * @var string
      *
      * @ORM\Column(name="code", type="string", length=75)
+     * @Groups({"api_coupon:read"})
+     * @ApiProperty(identifier=true)
      *
      * Name of the event series.
      */
@@ -45,6 +58,7 @@ class BaseCoupon extends BaseEntity
      * @var string
      *
      * @ORM\Column(name="discount_amount", type="integer")
+     * @Groups({"api_coupon:read"})
      *
      * Amount of the discount (in cents)
      */
@@ -54,6 +68,7 @@ class BaseCoupon extends BaseEntity
      * @var string
      *
      * @ORM\Column(name="discount_percent", type="integer")
+     * @Groups({"api_coupon:read"})
      *
      * Amount of the discount (as a percent)
      */
@@ -63,6 +78,7 @@ class BaseCoupon extends BaseEntity
      * @var string
      *
      * @ORM\Column(name="description", type="string", length=150, nullable=true)
+     * @Groups({"api_coupon:read"})
      *
      * A public description of what the coupon does (e.g. "")
      **/
@@ -88,6 +104,7 @@ class BaseCoupon extends BaseEntity
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Purchase\Product", inversedBy="relatedCoupons")
      * @ORM\JoinTable(name="coupons_to_affected_products")
+     * @Groups({"api_coupon:read"})
      *
      * The products that are affected by the coupon (i.e. what products the coupon can be used on)
      *
@@ -191,7 +208,7 @@ class BaseCoupon extends BaseEntity
     /**
      * @return Person
      */
-    public function getRelatedPromoter(): Person
+    public function getRelatedPromoter(): ?Person
     {
         return $this->relatedPromoter;
     }
@@ -203,7 +220,7 @@ class BaseCoupon extends BaseEntity
     public function setRelatedPromoter(Person $relatedPromoter, $addToRelation = true): void
     {
         if ($addToRelation) {
-            $relatedPromoter->addSalesCoupons($this);
+            $relatedPromoter->addRelatedSalesCoupon($this, false);
         }
 
         $this->relatedPromoter = $relatedPromoter;
@@ -289,16 +306,16 @@ class BaseCoupon extends BaseEntity
     public function addRelatedAttributionTag(AttributionTag $attributionTag, $updateOppositeRelation = true)
     {
         if ($updateOppositeRelation) {
-            $attributionTag->addRelatedCoupon($this);
+            $attributionTag->addRelatedCoupon($this, false);
         }
         $this->relatedAttributionTags->add($attributionTag);
     }
 
     /**
-     * @param BaseAttributionTag $attributionTag
+     * @param AttributionTag $attributionTag
      * @param bool $updateOppositeRelation
      */
-    public function removeRelatedAttributionTag(BaseAttributionTag $attributionTag, $updateOppositeRelation = true)
+    public function removeRelatedAttributionTag(AttributionTag $attributionTag, $updateOppositeRelation = true)
     {
         if ($updateOppositeRelation) {
             $attributionTag->removeRelatedCoupon($this, false);
