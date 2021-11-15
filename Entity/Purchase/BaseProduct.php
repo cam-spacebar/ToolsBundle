@@ -10,6 +10,7 @@ use App\Entity\Purchase\PurchaseQuantity;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Annotation\ApiProperty;
 
 /**
  * @MappedSuperClass
@@ -22,6 +23,7 @@ class BaseProduct extends BaseEntity
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @ApiProperty(identifier=false)
      */
     protected $id;
 
@@ -57,6 +59,7 @@ class BaseProduct extends BaseEntity
      *
      * @ORM\Column(name="reference", type="string", length=50, unique=true, nullable=false)
      * @Groups({"api_coupon:read", "api_product:item:get"})
+     * @ApiProperty(identifier=true)
      *
      * a unique reference to the product (used instead of id)
      *
