@@ -31,6 +31,7 @@ class BaseProduct extends BaseEntity
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=128, unique=false, nullable=false)
+     * @Groups({"api_coupon:read", "api_product:item:get"})
      *
      * Title of the product (or the variant title - if it has a parent)
      */
@@ -49,6 +50,7 @@ class BaseProduct extends BaseEntity
      * @var string
      *
      * @ORM\Column(name="price", type="integer", nullable=false)
+     * @Groups({"api_coupon:read", "api_product:item:get"})
      *
      * price - in cents.
      */
