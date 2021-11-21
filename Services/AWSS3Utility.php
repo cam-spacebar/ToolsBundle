@@ -15,16 +15,9 @@ use Psr\Log\LoggerInterface;
  * Class AWSS3Utility
  * @package VisageFour\Bundle\ToolsBundle\Services
  *
- * example service definition:
+ * Example service definition:
  *
-
-visage_four.aws_s3_utility:
-    class: VisageFour\Bundle\ToolsBundle\Services\AWSS3Utility
-    arguments:
-        - @doctrine.orm.entity_manager
-        - @logger
-        - "%gaufrette_amazon_s3_key%"
-        - "%gaufrette_amazon_s3_secret%"
+ * I think this was used for uploading to S3 directly from a front-end component.
  */
 class AWSS3Utility {
 

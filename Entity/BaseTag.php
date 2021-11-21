@@ -26,7 +26,7 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\TagInterface;
  */
 class BaseTag extends BaseEntity
 {
-    /**T
+    /**
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
@@ -41,7 +41,7 @@ class BaseTag extends BaseEntity
      *
      * @var $relatedParent AttributionTag
      */
-    protected $relatedParent;
+    protected $relatedParentTag;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Purchase\AttributionTag", mappedBy="relatedParentTag")
@@ -67,7 +67,7 @@ class BaseTag extends BaseEntity
         $this->relatedChildTags = new ArrayCollection();
 
         if (!empty($parent)) {
-            $this->relatedParent = $parent;
+            $this->relatedParentTag = $parent;
         }
     }
 
@@ -119,7 +119,7 @@ class BaseTag extends BaseEntity
      */
     public function getRelatedParentTag(): ?TagInterface
     {
-        return $this->relatedParent;
+        return $this->relatedParentTag;
     }
 
     public function setRelatedParentTag(?TagInterface $parentTag, $addToRelation = true): void
@@ -130,7 +130,7 @@ class BaseTag extends BaseEntity
             }
         }
 
-        $this->relatedParent = $parentTag;
+        $this->relatedParentTag = $parentTag;
     }
 
     // used with BaseEntity->outputContents() (for console or testing)
@@ -149,8 +149,8 @@ class BaseTag extends BaseEntity
 
     public function getParentName()
     {
-        if (!empty($this->relatedParent)) {
-            return $this->relatedParent->getName();
+        if (!empty($this->relatedParentTag)) {
+            return $this->relatedParentTag->getName();
         }
 
         return null;
