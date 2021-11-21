@@ -4,14 +4,18 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Entity\FileManager;
+namespace VisageFour\Bundle\ToolsBundle\Entity\FileManager;
 
+use App\Entity\Person;
 use Doctrine\ORM\Mapping as ORM;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 
 /**
  * Class File
  * @package App\VisageFour\Bundle\ToolsBundle\Entity\FileManager
+ *
+ * @ORM\Table(name="visagefour_file")
+ * @ORM\Entity(repositoryClass="Twencha\Bundle\EventRegistrationBundle\Repository\FileRepository")
  *
  * this entity stores details about a file that's created/uploaded. important details like:
  * owner person, file size, original name and even alows for things like version history of a file and duplication detection (via checksum hash)
@@ -67,6 +71,8 @@ class File extends BaseEntity
     private $description;
 
     /**
+     * @var Person
+     *
      * @ORM\ManyToOne(targetEntity="App\Entity\Person", inversedBy="Person")
      * @ORM\JoinColumn(name="ownerPerson_id", referencedColumnName="id")
      */
@@ -93,22 +99,161 @@ class File extends BaseEntity
      */
     private $deletionDateTime;
 
-    /**
+    /*
      * @var File
      *
-     * @ORM\OneToMany(targetEntity="File", mappedBy="priorVersions")
+     * @ORM\OneToMany(targetEntity="File", mappedBy="relatedPriorVersion")
      *
      * The new version of the file (if it's replaced) - this allows for version history.
      * (note: its plural "priorVersions", because you technically could have multiple new files that have stem from this one.)
      */
-    private $newVersions;
+//    private $relatedNewVersions;
 
-    /**
+    /*
      * @var File
      *
+     * @ORM\ManyToOne(targetEntity="File", inversedBy="relatedNewVersions")
+     * @ORM\JoinColumn(name="related_prior_version_id", referencedColumnName="id", nullable=true)
      *
-     *
-     * The new version of the file (if it's replaced) - this allows for version history.
+     * The prior/"old" version of this file when it is updated/replaced - this allows for version history (and metadata about past file versions)
      */
-    private $priorVersion;
+//    private $relatedPriorVersion;
+
+    /**
+     * @return string
+     */
+    public function getFilename(): string
+    {
+        return $this->filename;
+    }
+
+    /**
+     * @param string $filename
+     */
+    public function setFilename(string $filename): void
+    {
+        $this->filename = $filename;
+    }
+
+    public function __construct($originalFilename, $isDeleted = false, $flaggedForDelete = false)
+    {
+        $this->originalFilename     = $originalFilename;
+        $this->isDeleted            = $isDeleted;
+        $this->flaggedForDelete     = $flaggedForDelete;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDeletionDateTime(): \DateTime
+    {
+        return $this->deletionDateTime;
+    }
+
+    /**
+     * @param \DateTime $deletionDateTime
+     */
+    public function setDeletionDateTime(\DateTime $deletionDateTime): void
+    {
+        $this->deletionDateTime = $deletionDateTime;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileExtension(): string
+    {
+        return $this->fileExtension;
+    }
+
+    /**
+     * @param string $fileExtension
+     */
+    public function setFileExtension(string $fileExtension): void
+    {
+        $this->fileExtension = $fileExtension;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFilesize(): int
+    {
+        return $this->filesize;
+    }
+
+    /**
+     * @param int $filesize
+     */
+    public function setFilesize(int $filesize): void
+    {
+        $this->filesize = $filesize;
+    }
+
+    /**
+     * @return int
+     */
+    public function getContentsCheckSum(): int
+    {
+        return $this->contentsCheckSum;
+    }
+
+    /**
+     * @param int $contentsCheckSum
+     */
+    public function setContentsCheckSum(int $contentsCheckSum): void
+    {
+        $this->contentsCheckSum = $contentsCheckSum;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @return Person
+     */
+    public function getRelatedOwnerPerson(): ?Person
+    {
+        return $this->relatedOwnerPerson;
+    }
+
+    /**
+     * @param Person $newOwner
+     * @param bool $addToRelation
+     */
+    public function setRelatedOwnerPerson(Person $newOwner, $addToRelation = true): void
+    {
+        if ($addToRelation) {
+            $newOwner->addRelatedFileIOwn($this, false);
+        }
+
+        $this->relatedOwnerPerson = $newOwner;
+    }
+
+    // used with BaseEntity->outputContents() (for console or testing)
+    public function getOutputContents()
+    {
+        return [
+            'name'          => $this->filename,
+            'ownerPerson'   => $this->relatedOwnerPerson->getEmail()
+        ];
+    }
+
+    public function __toString()
+    {
+        return $this->filename;
+    }
 }
