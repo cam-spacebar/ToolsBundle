@@ -10,6 +10,7 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
  * This class manages uploading and downloading files from services like Amazon S3
  */
 
+use App\Entity\FileManager\File;
 use App\Repository\FileManager\FileRepository;
 use Doctrine\ORM\EntityManager;
 use League\Flysystem\FilesystemInterface;
@@ -68,7 +69,7 @@ class FileManager
         }
     }
 
-    public function persistFile ($filePath, $targetFilepath, $overwriteFile = false) {
+    public function persistFile ($filePath, $targetFilepath, $overwriteFile = false):File {
         // todo: create a record for the file in DB
         // todo: check for duplicate upload?
 
@@ -80,7 +81,6 @@ class FileManager
         }
 
         $stream = fopen($filePath, 'r');
-        $pathParts = pathinfo($filePath);
 
         // persist image to remote storage
         if (!$this->fileSystem->has($targetFilepath) && !$overwriteFile) {
@@ -97,9 +97,9 @@ class FileManager
         //$this->consoleOutput ($consoleMsg);
         $this->logger->info($infoMsg);
 
-        $this->fileRepo->createNewByFilepath($filePath, $targetFilepath);
+        $newFile = $this->fileRepo->createNewByFilepath($filePath, $targetFilepath);
 
-        return $result;
+        return $newFile;
     }
 
     public function downloadFile ($filePath, $targetFilepath, $overwriteFile = false) {

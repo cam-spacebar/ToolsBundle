@@ -7,9 +7,9 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Tests\FileManager;
 
 use App\Entity\FileManager\File;
+use App\VisageFour\Bundle\ToolsBundle\Classes\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
  * Class SecurityTest
@@ -26,11 +26,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  *
  * (comment version: 1.02)
  */
-class FileManagerTest extends KernelTestCase
+class FileManagerTest extends CustomKernelTestCase
 {
-    /** @var EntityManager */
-    private $em;
-
     /** @var FileManager */
     private $fileManager;
 
@@ -41,9 +38,7 @@ class FileManagerTest extends KernelTestCase
         $this->fileManager = $container->get('test.'. FileManager::class);
 //        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
 
-        $this->em = self::$kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
+        $this->getEntityManager();
     }
 
     /**
@@ -54,35 +49,9 @@ class FileManagerTest extends KernelTestCase
     {
         $this->getServices(true);
 
-//        $person1 = new Person();
-//
-//        $this->ATag1 = $this->attributionTagRepo->createNew('Facebook');
-//        $this->ATag2FBP = $this->attributionTagRepo->createNew('Facebook Page', $this->ATag1);
-//
-//        $this->badgeProd = new Product(
-//            'Attendee badge',
-//            'le_badge',
-//            'A badge that contains 2 flags: one representing the language the attendee speaks and the other representing the language they are learning.',
-//            450
-//        );
-//
-//        $this->regProd = new Product(
-//            'Attendee registration',
-//            'le_registration',
-//            'Registration allows the attendee to enter the Language Exchange event.',
-//            1050
-//        );
-//
-//        $this->badgeCoupon = $this->couponRepo->createNew($this->ATag2FBP, $person1, 'zbadge', [$this->badgeProd], '$1.02 off replacement badges', 102);
-////        die('asdf');
-//
-//        $this->registrationCoupon100 = new Coupon(
-//            'zreg100',
-//            [$this->regProd],
-//            '92.21% off membership registration',
-//            0,
-//            98.21
-//        );
+        $this->truncateEntities([
+            File::class
+        ]);
 
         return true;
     }
@@ -109,36 +78,13 @@ class FileManagerTest extends KernelTestCase
         $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/testfile.txt';
         $targetFilepath = 'test/testfile-x.txt';
 
-        // delete the file (from previous test, to prevent duplicate error)
-        $this->fileManager->deleteRemoteFile($targetFilepath, false);
-
-        $result = $this->fileManager->persistFile($filepath, $targetFilepath);
+        $file = $this->fileManager->persistFile($filepath, $targetFilepath);
 
         $this->em->flush();
-        $this->assertNumberofDBTableRecords(1, File::class);
+        $this->assertNumberOfDBTableRecords(1, File::class);
 
-        $this->assertSame(true, $result, '$this->fileSystem->writeStream() must return true');
-
-    }
-
-    work from here:
-- implement truncate entities
-- document in process for creating tests
-- download a file test
-
-    private function assertNumberofDBTableRecords($expectedCount, $entityName)
-    {
-        $count = (int) $this->em->getRepository($entityName)
-            ->createQueryBuilder('s')
-            ->select('COUNT(s.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $this->assertSame(
-            $expectedCount,
-            $count,
-            'Failed: test expect '. $expectedCount .' DB records but instead found '. $count .' records (of: '. $entityName .'). Note: remember to use truncateEntities() at the start of each test.'
-        );
+        // delete the file (from previous test, to prevent duplicate error)
+        $this->fileManager->deleteRemoteFile($targetFilepath, false);
     }
 
     /**
@@ -155,10 +101,7 @@ class FileManagerTest extends KernelTestCase
 
         // todo: delete the file if its already in the local FS
 
-        // delete the file (from previous test, to prevent duplicate error)
-        $this->fileManager->deleteFile($remoteFilepath);
-
-        $result = $this->fileManager->persistFile($filepath, $targetFilepath);
+        $file = $this->fileManager->persistFile($filepath, $targetFilepath);
 
         $this->assertSame(true, $result, '$this->>fileSystem->writeStream() must return true');
 
