@@ -15,13 +15,22 @@ use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
  * @package App\VisageFour\Bundle\ToolsBundle\Entity\FileManager
  *
  * @ORM\Table(name="visagefour_file")
- * @ORM\Entity(repositoryClass="Twencha\Bundle\EventRegistrationBundle\Repository\FileRepository")
+ * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\FileManager\FileRepository")
  *
  * this entity stores details about a file that's created/uploaded. important details like:
  * owner person, file size, original name and even alows for things like version history of a file and duplication detection (via checksum hash)
  */
 class File extends BaseEntity
 {
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
     /**
      * @var string
      *
@@ -55,9 +64,9 @@ class File extends BaseEntity
     private $filesize;
 
     /**
-     * @var integer
+     * @var string
      *
-     * @ORM\Column(name="filesize", type="integer", nullable=true)
+     * @ORM\Column(name="contentsCheckSum", type="string", length=32, nullable=true)
      *
      * the MD5 cryptographic hash of the file contents (designed to help determine if uploaded files are duplicates).
      */
@@ -193,15 +202,15 @@ class File extends BaseEntity
     /**
      * @return int
      */
-    public function getContentsCheckSum(): int
+    public function getContentsCheckSum(): string
     {
         return $this->contentsCheckSum;
     }
 
     /**
-     * @param int $contentsCheckSum
+     * @param string $contentsCheckSum
      */
-    public function setContentsCheckSum(int $contentsCheckSum): void
+    public function setContentsCheckSum(string $contentsCheckSum): void
     {
         $this->contentsCheckSum = $contentsCheckSum;
     }
@@ -255,5 +264,13 @@ class File extends BaseEntity
     public function __toString()
     {
         return $this->filename;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
     }
 }

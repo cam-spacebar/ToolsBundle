@@ -4,12 +4,13 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Services;
+namespace VisageFour\Bundle\ToolsBundle\Services;
 
 /*
  * This class manages uploading and downloading files from services like Amazon S3
  */
 
+use App\Repository\FileManager\FileRepository;
 use Doctrine\ORM\EntityManager;
 use League\Flysystem\FilesystemInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
@@ -20,11 +21,13 @@ class FileManager
 
     private $em;
     private $fileSystem;
+    private $fileRepo;
 
-    public function __construct(EntityManager $em, FilesystemInterface $fileSystem)
+    public function __construct(EntityManager $em, FilesystemInterface $publicUploadsFilesystem, FileRepository $fileRepo)
     {
         $this->em                   = $em;
-        $this->fileSystem           = $fileSystem;
+        $this->fileSystem           = $publicUploadsFilesystem;
+        $this->fileRepo             = $fileRepo;
     }
 //    public function downloadImage(image $image)
 //    {
@@ -65,12 +68,14 @@ class FileManager
             //throw new \Exception ($errMsg2);
         }
 
-        $imageData = file_get_contents($filePath);
+        $fileData = file_get_contents($filePath);
         $pathParts = pathinfo($filePath);
+
+        $this->fileSystem->write($targetFilepath, $fileData);
 
         // persist image to off-server storage
         if (!$this->fileSystem->has($targetFilepath)) {
-            $this->fileSystem->write($targetFilepath, $imageData);
+            $this->fileSystem->write($targetFilepath, $fileData);
         } else {
             // it may not occur due to the image->Id being added to each filename
             throw new \Exception ('This file already exists');
@@ -81,5 +86,13 @@ class FileManager
         $this->logger->info($infoMsg);
 
         return true;
+    }
+
+    /**
+     * @return FileRepository
+     */
+    public function getFileRepo(): FileRepository
+    {
+        return $this->fileRepo;
     }
 }

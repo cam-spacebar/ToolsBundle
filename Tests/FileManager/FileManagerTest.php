@@ -6,6 +6,7 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Tests\FileManager;
 
+use VisageFour\Bundle\ToolsBundle\Services\FileManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -25,12 +26,15 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class FileManagerTest extends KernelTestCase
 {
+    /** @var FileManager */
+    private $fileManager;
+
     private function getServices($debuggingOutputOn)
     {
         $container = self::$kernel->getContainer();
 
-//        $this->checkoutRepo = $container->get('test.'. CheckoutRepository::class);
-//        $this->checkoutRepo->setOutputValuesOnCreation($debuggingOutputOn);
+        $this->fileManager = $container->get('test.'. FileManager::class);
+        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
 
     }
 
@@ -85,52 +89,59 @@ class FileManagerTest extends KernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Purchase/CouponTest.php --filter applyCouponToCheckout
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter uploadFileToS3
      *
      * Test calculation of totals (with and without a coupon)
      */
-    public function applyCouponToCheckout(): void
+    public function uploadFileToS3(): void
     {
         self::bootKernel();
         $this->customSetUp();
 
-        $person = $this->personRepo->findOneByEmailCanonical('cameronrobertburns@gmail.com');
+        $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/testfile.txt';
+        $targetFilepath = 'test/testfile-x.txt';
 
-        $items1 = [
-            [
-                'product'   => $this->badgeProd,
-                'quantity'  => 2
-            ],
-            [
-                'product'   => $this->regProd,
-                'quantity'  => 1
-            ]
-        ];
-        $checkout1 = $this->checkoutRepo->createCheckoutByItems($items1, $person);
-        $checkout1->setRelatedCoupon($this->badgeCoupon);
-//        $checkout1->outputContentsToConsole();
+        $this->fileManager->PersistFile($filepath, $targetFilepath);
 
-        $this->assertSame(1746, $checkout1->getTotal(), '$checkout1 total is not correct.');
+//        $person = $this->personRepo->findOneByEmailCanonical('cameronrobertburns@gmail.com');
 
-        $items2 = [
-            [
-                'product'   => $this->badgeProd,
-                'quantity'  => 3
-            ],
-            [
-                'product'   => $this->regProd,
-                'quantity'  => 2
-            ]
-        ];
-
-        $checkout2 = $this->checkoutRepo->createCheckoutByItems($items2, $person);
-        $checkout2->setRelatedCoupon($this->registrationCoupon100);
+//        $items1 = [
+//            [
+//                'product'   => $this->badgeProd,
+//                'quantity'  => 2
+//            ],
+//            [
+//                'product'   => $this->regProd,
+//                'quantity'  => 1
+//            ]
+//        ];
+//        $checkout1 = $this->checkoutRepo->createCheckoutByItems($items1, $person);
+//        $checkout1->setRelatedCoupon($this->badgeCoupon);
+////        $checkout1->outputContentsToConsole();
+//
+//        $this->assertSame(1746, $checkout1->getTotal(), '$checkout1 total is not correct.');
+//
+//        $items2 = [
+//            [
+//                'product'   => $this->badgeProd,
+//                'quantity'  => 3
+//            ],
+//            [
+//                'product'   => $this->regProd,
+//                'quantity'  => 2
+//            ]
+//        ];
+//
+//        $checkout2 = $this->checkoutRepo->createCheckoutByItems($items2, $person);
+//        $checkout2->setRelatedCoupon($this->registrationCoupon100);
 //        $checkout2->outputContentsToConsole();
 
-        $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 total is not correct.');
+//        $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 total is not correct.');
 
-        $checkout2->setRelatedCoupon(null);
-        $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 (without coupon) total is not correct.');
+//        $checkout2->setRelatedCoupon(null);
+//        $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 (without coupon) total is not correct.');
+
+
 
 
 //        print "\n\nTotal (with coupon of: \"". $checkout->getRelatedCoupon()->getAsString() ."%\" applied): ". $checkout->getTotal() .", total (without discount coupon): ". $checkout->getTotalWithoutCoupon();
