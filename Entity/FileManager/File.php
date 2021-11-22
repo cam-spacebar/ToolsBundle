@@ -9,13 +9,12 @@ namespace VisageFour\Bundle\ToolsBundle\Entity\FileManager;
 use App\Entity\Person;
 use Doctrine\ORM\Mapping as ORM;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
+use Doctrine\ORM\Mapping\MappedSuperclass;
 
 /**
+ * @MappedSuperclass
  * Class File
  * @package App\VisageFour\Bundle\ToolsBundle\Entity\FileManager
- *
- * @ORM\Table(name="visagefour_file")
- * @ORM\Entity(repositoryClass="VisageFour\Bundle\ToolsBundle\Repository\FileManager\FileRepository")
  *
  * this entity stores details about a file that's created/uploaded. important details like:
  * owner person, file size, original name and even alows for things like version history of a file and duplication detection (via checksum hash)
@@ -34,11 +33,11 @@ class File extends BaseEntity
     /**
      * @var string
      *
-     * @ORM\Column(name="filename", type="string", length=255)
+     * @ORM\Column(name="remoteFilePath", type="string", length=255)
      *
-     * the filename, wherever it's stored (e.g. AWS S3)
+     * the remoteFilePath, wherever it's stored (e.g. AWS S3)
      */
-    private $filename;
+    private $remoteFilePath;
 
     /**
      * @var string
@@ -104,7 +103,7 @@ class File extends BaseEntity
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="deletionDateTime", type="datetime")
+     * @ORM\Column(name="deletionDateTime", type="datetime", nullable=true)
      */
     private $deletionDateTime;
 
@@ -131,24 +130,36 @@ class File extends BaseEntity
     /**
      * @return string
      */
-    public function getFilename(): string
+    public function getRemoteFilePath(): string
     {
-        return $this->filename;
+        return $this->remoteFilePath;
     }
 
     /**
-     * @param string $filename
+     * @param string $remoteFilePath
      */
-    public function setFilename(string $filename): void
+    public function setRemoteFilePath(string $remoteFilePath): void
     {
-        $this->filename = $filename;
+        $this->remoteFilePath = $remoteFilePath;
     }
 
-    public function __construct($originalFilename, $isDeleted = false, $flaggedForDelete = false)
+    public function __construct($filepath, $isDeleted = false, $flaggedForDelete = false)
     {
+        if (!is_file($filepath)) {
+            throw new \Exception('the file with filepath: "'. $filepath .'" does not exist');
+        }
+        $parts = pathinfo($filepath);
+        $originalFilename = $parts['basename'];
         $this->originalFilename     = $originalFilename;
-        $this->isDeleted            = $isDeleted;
+
+        $filesizeInBytes = filesize($filepath);
+        $this->filesize             = $filesizeInBytes;
+
+        $checksum = md5_file($filepath);
+        $this->contentsCheckSum     = $checksum;
+
         $this->flaggedForDelete     = $flaggedForDelete;
+        $this->isDeleted            = $isDeleted;
     }
 
     /**
@@ -256,14 +267,15 @@ class File extends BaseEntity
     public function getOutputContents()
     {
         return [
-            'name'          => $this->filename,
-            'ownerPerson'   => $this->relatedOwnerPerson->getEmail()
+            'remoteFilePath'    => $this->remoteFilePath,
+            'originalFilename'  => $this->originalFilename,
+            'ownerPerson'       => $this->relatedOwnerPerson->getEmail()
         ];
     }
 
     public function __toString()
     {
-        return $this->filename;
+        return $this->originalFilename;
     }
 
     /**

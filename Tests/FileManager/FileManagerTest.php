@@ -6,6 +6,8 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Tests\FileManager;
 
+use App\Entity\FileManager\File;
+use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -26,6 +28,9 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class FileManagerTest extends KernelTestCase
 {
+    /** @var EntityManager */
+    private $em;
+
     /** @var FileManager */
     private $fileManager;
 
@@ -34,8 +39,11 @@ class FileManagerTest extends KernelTestCase
         $container = self::$kernel->getContainer();
 
         $this->fileManager = $container->get('test.'. FileManager::class);
-        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
+//        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
 
+        $this->em = self::$kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
     }
 
     /**
@@ -91,7 +99,7 @@ class FileManagerTest extends KernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter uploadFileToS3
      *
-     * Test calculation of totals (with and without a coupon)
+     * upload a .txt file to AWS S3 and create a DB record for a File entity
      */
     public function uploadFileToS3(): void
     {
@@ -101,49 +109,58 @@ class FileManagerTest extends KernelTestCase
         $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/testfile.txt';
         $targetFilepath = 'test/testfile-x.txt';
 
-        $this->fileManager->PersistFile($filepath, $targetFilepath);
+        // delete the file (from previous test, to prevent duplicate error)
+        $this->fileManager->deleteRemoteFile($targetFilepath, false);
 
-//        $person = $this->personRepo->findOneByEmailCanonical('cameronrobertburns@gmail.com');
+        $result = $this->fileManager->persistFile($filepath, $targetFilepath);
 
-//        $items1 = [
-//            [
-//                'product'   => $this->badgeProd,
-//                'quantity'  => 2
-//            ],
-//            [
-//                'product'   => $this->regProd,
-//                'quantity'  => 1
-//            ]
-//        ];
-//        $checkout1 = $this->checkoutRepo->createCheckoutByItems($items1, $person);
-//        $checkout1->setRelatedCoupon($this->badgeCoupon);
-////        $checkout1->outputContentsToConsole();
-//
-//        $this->assertSame(1746, $checkout1->getTotal(), '$checkout1 total is not correct.');
-//
-//        $items2 = [
-//            [
-//                'product'   => $this->badgeProd,
-//                'quantity'  => 3
-//            ],
-//            [
-//                'product'   => $this->regProd,
-//                'quantity'  => 2
-//            ]
-//        ];
-//
-//        $checkout2 = $this->checkoutRepo->createCheckoutByItems($items2, $person);
-//        $checkout2->setRelatedCoupon($this->registrationCoupon100);
-//        $checkout2->outputContentsToConsole();
+        $this->em->flush();
+        $this->assertNumberofDBTableRecords(1, File::class);
 
-//        $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 total is not correct.');
+        $this->assertSame(true, $result, '$this->fileSystem->writeStream() must return true');
 
-//        $checkout2->setRelatedCoupon(null);
-//        $this->assertSame(1392, $checkout2->getTotal(), '$checkout2 (without coupon) total is not correct.');
+    }
 
+    work from here:
+- implement truncate entities
+- document in process for creating tests
+- download a file test
 
+    private function assertNumberofDBTableRecords($expectedCount, $entityName)
+    {
+        $count = (int) $this->em->getRepository($entityName)
+            ->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
 
+        $this->assertSame(
+            $expectedCount,
+            $count,
+            'Failed: test expect '. $expectedCount .' DB records but instead found '. $count .' records (of: '. $entityName .'). Note: remember to use truncateEntities() at the start of each test.'
+        );
+    }
 
-//        print "\n\nTotal (with coupon of: \"". $checkout->getRelatedCoupon()->getAsString() ."%\" applied): ". $checkout->getTotal() .", total (without discount coupon): ". $checkout->getTotalWithoutCoupon();
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter downloadFileFromS3
+     *
+     */
+    public function downloadFileFromS3(): void
+    {
+        self::bootKernel();
+        $this->customSetUp();
+
+        $remoteFilepath = 'test/testfile-x.txt';
+
+        // todo: delete the file if its already in the local FS
+
+        // delete the file (from previous test, to prevent duplicate error)
+        $this->fileManager->deleteFile($remoteFilepath);
+
+        $result = $this->fileManager->persistFile($filepath, $targetFilepath);
+
+        $this->assertSame(true, $result, '$this->>fileSystem->writeStream() must return true');
+
     }
 }
