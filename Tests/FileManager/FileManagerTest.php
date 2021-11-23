@@ -87,6 +87,7 @@ class FileManagerTest extends CustomKernelTestCase
         $this->fileManager->deleteRemoteFile($targetFilepath, false);
 
         $file = $this->fileManager->persistFile($filepath, $targetFilepath);
+        $remoteFilepath = $file->getRemoteFilePath();
 
         $this->em->flush();
         $this->assertNumberOfDBTableRecords(1, File::class);
@@ -95,6 +96,12 @@ class FileManagerTest extends CustomKernelTestCase
         $this->fileManager->deleteFile($file);
         $this->em->flush();
         $this->assertNumberOfDBTableRecords(0, File::class);
+
+        $original_exists = (is_file($filepath));
+        $this->assertEquals(false, $original_exists, 'the local file was not deleted during the deletion process');
+
+        $remoteFileIsDeleted = ($this->fileManager->doesRemoteFileExist($remoteFilepath));
+        $this->assertEquals(false, $remoteFileIsDeleted, 'the remote file was not deleted during the deletion process');
     }
 
     /**
@@ -108,8 +115,9 @@ class FileManagerTest extends CustomKernelTestCase
         self::bootKernel();
         $this->customSetUp();
 
-        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/testfile.txt';
-        $targetFilepath = 'test/testfile-x.txt';
+        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/';
+        $filepathA = 'DuplicateA/duplicate.txt';
+        $filepathB = 'DuplicateB/testfile-x.txt';
 
         $file = $this->fileManager->persistFile($filepathA, $targetFilepath);
         $file = $this->fileManager->persistFile($filepathB, $targetFilepath);

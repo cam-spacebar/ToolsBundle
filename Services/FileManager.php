@@ -100,6 +100,11 @@ class FileManager
         $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalFilename());
     }
 
+    public function doesRemoteFileExist($filepath)
+    {
+        return ($this->fileSystem->has($filepath));
+    }
+
     public function persistFile ($filePath, $targetFilepath = null):File {
         // todo: create a record for the file in DB
         // todo: check for duplicate upload?
