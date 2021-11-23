@@ -42,6 +42,16 @@ class File extends BaseEntity
     /**
      * @var string
      *
+     * @ORM\Column(name="localFilePath", type="string", length=255, nullable=true)
+     *
+     * the local filepath of the file. This is set when creating the file (from the original) or when downloading from the remote - as a temporary file.
+     * (note: the $localFilePath should be treated as unreliable - as the hosting is ephemeral (so: always check the file exists before using it).
+     */
+    private $localFilePath;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="originalFilename", type="string", length=255, nullable=false)
      */
     private $originalFilename;
@@ -58,7 +68,7 @@ class File extends BaseEntity
      *
      * @ORM\Column(name="filesize", type="integer", nullable=true)
      *
-     * Filesize in (bytes?)
+     * Filesize in (bytes)
      */
     private $filesize;
 
@@ -136,6 +146,22 @@ class File extends BaseEntity
     }
 
     /**
+     * @return string
+     */
+    public function getLocalFilePath(): string
+    {
+        return $this->localFilePath;
+    }
+
+    /**
+     * @param string $localFilePath
+     */
+    public function setLocalFilePath(string $localFilePath): void
+    {
+        $this->localFilePath = $localFilePath;
+    }
+
+    /**
      * @param string $remoteFilePath
      */
     public function setRemoteFilePath(string $remoteFilePath): void
@@ -148,11 +174,15 @@ class File extends BaseEntity
         if (!is_file($filepath)) {
             throw new \Exception('the file with filepath: "'. $filepath .'" does not exist');
         }
+        $this->localFilePath        = $filepath;
         $parts = pathinfo($filepath);
         $originalFilename = $parts['basename'];
         $this->originalFilename     = $originalFilename;
 
-        $filesizeInBytes = filesize($filepath);
+        $ext = pathinfo($filepath, PATHINFO_EXTENSION);
+        $this->fileExtension        = $ext;
+
+        $filesizeInBytes            = filesize($filepath);
         $this->filesize             = $filesizeInBytes;
 
         $checksum = md5_file($filepath);
@@ -176,6 +206,11 @@ class File extends BaseEntity
     public function setDeletionDateTime(\DateTime $deletionDateTime): void
     {
         $this->deletionDateTime = $deletionDateTime;
+    }
+
+    public function setDeleteDateTimeToNow(): void
+    {
+        $this->deletionDateTime = new \DateTime('now');
     }
 
     /**
@@ -284,5 +319,37 @@ class File extends BaseEntity
     public function getId(): int
     {
         return $this->id;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeleted(): bool
+    {
+        return $this->isDeleted;
+    }
+
+    /**
+     * @param bool $isDeleted
+     */
+    public function setIsDeleted(bool $isDeleted): void
+    {
+        $this->isDeleted = $isDeleted;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOriginalFilename(): string
+    {
+        return $this->originalFilename;
+    }
+
+    /**
+     * @param string $originalFilename
+     */
+    public function setOriginalFilename(string $originalFilename): void
+    {
+        $this->originalFilename = $originalFilename;
     }
 }

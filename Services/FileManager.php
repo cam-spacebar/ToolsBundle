@@ -58,10 +58,12 @@ class FileManager
 //        return $image;
 //    }
 
-    public function deleteRemoteFile($remoteFilepath, $throwExceptionIfFileDoesNotExist = true)
+    public function deleteRemoteFile(string $remoteFilepath, $throwExceptionIfFileDoesNotExist = true)
     {
+        // todo: remove this and just use the flysystem exceptions instead?
+
         if ($this->fileSystem->has($remoteFilepath)) {
-            $this->fileSystem->delete($remoteFilepath);
+            return $this->fileSystem->delete($remoteFilepath);
         } else {
             if ($throwExceptionIfFileDoesNotExist) {
                 throw new \Exception('File does not exist. (filepath: "'. $remoteFilepath .'")');
@@ -69,7 +71,36 @@ class FileManager
         }
     }
 
-    public function persistFile ($filePath, $targetFilepath, $overwriteFile = false):File {
+    public function deleteLocalFile(File $file)
+    {
+        $filepath = $file->getLocalFilePath();
+        if (is_file($filepath)) {
+            unlink($filepath);
+        }
+
+        $this->logger->info('deleted local file: '. $filepath);
+        return true;
+    }
+
+    /**
+     * @param File $file
+     * @throws \League\Flysystem\FileNotFoundException
+     * Delete the remote and local file and the File DB record
+     */
+    public function deleteFile(File $file)
+    {
+        $remoteFilepath = $file->getRemoteFilePath();
+        $this->deleteRemoteFile($remoteFilepath);
+
+        $this->deleteLocalFile($file);
+        $this->fileRepo->deleteFile($file);
+
+        $this->em->remove($file);
+
+        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalFilename());
+    }
+
+    public function persistFile ($filePath, $targetFilepath = null):File {
         // todo: create a record for the file in DB
         // todo: check for duplicate upload?
 
@@ -83,11 +114,11 @@ class FileManager
         $stream = fopen($filePath, 'r');
 
         // persist image to remote storage
-        if (!$this->fileSystem->has($targetFilepath) && !$overwriteFile) {
-            $result = $this->fileSystem->writeStream($targetFilepath, $stream);
-        } else {
-            throw new \Exception ('This file already exists');
-        }
+//        if (!$this->fileSystem->has($targetFilepath) || $overwriteFile) {
+        $result = $this->fileSystem->writeStream($targetFilepath, $stream);
+//        } else {
+//            throw new \Exception ('This file already exists');
+//        }
 
         if (is_resource($stream)) {
             fclose($stream);

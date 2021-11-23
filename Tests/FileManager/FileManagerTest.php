@@ -66,17 +66,25 @@ class FileManagerTest extends CustomKernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter uploadFileToS3
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter uploadFileToRemoteS3AndDelete
      *
-     * upload a .txt file to AWS S3 and create a DB record for a File entity
+     * upload a .txt file to AWS S3 and test overwriting it with another file
      */
-    public function uploadFileToS3(): void
+    public function uploadFileToRemoteS3AndDelete(): void
     {
         self::bootKernel();
         $this->customSetUp();
 
-        $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/testfile.txt';
-        $targetFilepath = 'test/testfile-x.txt';
+        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/DeleteFile/';
+        $original_filepath = $basepath .'testfile.txt';
+        $filepath = $basepath .'copy_of_testfile.txt';
+
+        // copy the original, as the local file provided will be deleted
+        copy( $original_filepath, $filepath );
+
+        $targetFilepath = 'test/testfile.txt';
+
+        $this->fileManager->deleteRemoteFile($targetFilepath, false);
 
         $file = $this->fileManager->persistFile($filepath, $targetFilepath);
 
@@ -84,7 +92,29 @@ class FileManagerTest extends CustomKernelTestCase
         $this->assertNumberOfDBTableRecords(1, File::class);
 
         // delete the file (from previous test, to prevent duplicate error)
-        $this->fileManager->deleteRemoteFile($targetFilepath, false);
+        $this->fileManager->deleteFile($file);
+        $this->em->flush();
+        $this->assertNumberOfDBTableRecords(0, File::class);
+    }
+
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter uploadDuplicateFilenames
+     *
+     * Test duplicate filename mitigation on both remote storage and on local storage.
+     */
+    public function uploadDuplicateFilenames(): void
+    {
+        self::bootKernel();
+        $this->customSetUp();
+
+        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/testfile.txt';
+        $targetFilepath = 'test/testfile-x.txt';
+
+        $file = $this->fileManager->persistFile($filepathA, $targetFilepath);
+        $file = $this->fileManager->persistFile($filepathB, $targetFilepath);
+
+
     }
 
     /**
