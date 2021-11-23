@@ -105,7 +105,67 @@ class FileManager
         return ($this->fileSystem->has($filepath));
     }
 
-    public function persistFile ($filePath, $targetFilepath = null):File {
+    /**
+     * @param $haystack
+     * @param $needle
+     * @return bool
+     * returns true if the last character/s of $haystack is $needle
+     * it's useful in preventing paths being passed in with an ending "/" (as this is often added).
+     */
+    function throwExceptionIfEndsWith( $haystack, $needle ) {
+        $length = strlen( $needle );
+        if( !$length ) {
+            throw new \Exception ('string cannot end with a "'. $needle .'". String: '. $haystack );
+//            return true;
+        }
+
+        return substr( $haystack, -$length ) === $needle;
+    }
+
+    /**
+     * @param $filepath
+     * @param null $targetSubfolder
+     *
+     * Create a target path for the remote file that isn't currently used in the remote storage.
+     */
+    private function createRemoteFilepath($filepath, $targetSubfolder = null)
+    {
+        $parts = pathinfo($filepath);
+        $filename = $parts['basename'];
+
+        $subfolder = (empty($targetSubfolder)) ? '' : $targetSubfolder .'/';
+
+        $fullPath = $subfolder . $filename;
+        $this->logger->info('Candidate remote $fullPath: '. $fullPath);
+
+        // check if the filepath already exists on the remote server
+        if ($this->fileSystem->has($fullPath)) {
+            $curExt = pathinfo($fullPath, PATHINFO_EXTENSION);
+            $curName = pathinfo($fullPath, PATHINFO_FILENAME);
+            $maxLoops = 1000;
+            for ($i = 1; $i <= $maxLoops; $i++) {
+
+                $fullPath = $subfolder. $curName .'_'. $i .'.'. $curExt;
+//                print "\n". $fullPath ."\n";
+                $this->logger->info($curName .'_'. $curExt);
+
+                $isApproved = !$this->fileSystem->has($fullPath);
+                if ($isApproved) {
+//                    print 'fullpath approved: '. $fullPath ."\n";
+                    return $fullPath;
+                }
+//                print ($isApproved) ? 'yes' : 'no';
+            }
+            throw new \Exception('exceeded '. $maxLoops .' loops - trying to find a filename.');
+        }
+
+        return $fullPath;
+    }
+
+    /**
+     * Uploads the file to remote storage (AWS S3) and creates a DB record: File (And persists it to the DB).
+     */
+    public function persistFile ($filePath, $targetSubfolder = null):File {
         // todo: create a record for the file in DB
         // todo: check for duplicate upload?
 
@@ -116,14 +176,11 @@ class FileManager
             throw new \Exception ($errMsg);
         }
 
+        $targetFilepath = $this->createRemoteFilepath($filePath, $targetSubfolder);
+
         $stream = fopen($filePath, 'r');
 
-        // persist image to remote storage
-//        if (!$this->fileSystem->has($targetFilepath) || $overwriteFile) {
         $result = $this->fileSystem->writeStream($targetFilepath, $stream);
-//        } else {
-//            throw new \Exception ('This file already exists');
-//        }
 
         if (is_resource($stream)) {
             fclose($stream);

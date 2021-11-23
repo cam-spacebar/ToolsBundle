@@ -65,6 +65,23 @@ class FileManagerTest extends CustomKernelTestCase
     }
 
     /**
+     * @param $filepath
+     * duplicates a local file, because the file that is used in a test is ussually deleted (during cleanup)
+     */
+    private function duplicateLocalFile($path, $filename)
+    {
+        $this->fileManager->throwExceptionIfEndsWith($path, '/');
+
+        $originalFilepath = $path.'/'.$filename;
+        $newFilepath = $path.'/' .'copy_of_'. $filename;
+
+        // copy the original, as the local file provided will be deleted
+        copy( $originalFilepath, $newFilepath );
+
+        return $newFilepath;
+    }
+
+    /**
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter uploadFileToRemoteS3AndDelete
      *
@@ -75,18 +92,13 @@ class FileManagerTest extends CustomKernelTestCase
         self::bootKernel();
         $this->customSetUp();
 
-        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/DeleteFile/';
-        $original_filepath = $basepath .'testfile.txt';
-        $filepath = $basepath .'copy_of_testfile.txt';
+        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/DeleteFile';
+        $filepath = $this->duplicateLocalFile($basepath, 'testfile.txt');
 
-        // copy the original, as the local file provided will be deleted
-        copy( $original_filepath, $filepath );
+//        $targetFilepath = 'test/testfile.txt';
+//        $this->fileManager->deleteRemoteFile($targetFilepath, false);
 
-        $targetFilepath = 'test/testfile.txt';
-
-        $this->fileManager->deleteRemoteFile($targetFilepath, false);
-
-        $file = $this->fileManager->persistFile($filepath, $targetFilepath);
+        $file = $this->fileManager->persistFile($filepath);
         $remoteFilepath = $file->getRemoteFilePath();
 
         $this->em->flush();
@@ -116,13 +128,19 @@ class FileManagerTest extends CustomKernelTestCase
         $this->customSetUp();
 
         $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/';
-        $filepathA = 'DuplicateA/duplicate.txt';
-        $filepathB = 'DuplicateB/testfile-x.txt';
+        $filepathA = $this->duplicateLocalFile($basepath .'DuplicateA', 'duplicate.txt');
+        $filepathB = $this->duplicateLocalFile($basepath .'DuplicateB', 'duplicate.txt');
+        $targetSubFolder = 'tests';
 
-        $file = $this->fileManager->persistFile($filepathA, $targetFilepath);
-        $file = $this->fileManager->persistFile($filepathB, $targetFilepath);
+        $fileA = $this->fileManager->persistFile($filepathA, $targetSubFolder);
+        $fileB = $this->fileManager->persistFile($filepathB, $targetSubFolder);
+        $this->em->flush();
 
+        $this->assertNumberOfDBTableRecords(2, File::class);
 
+        // clean up
+//        $this->fileManager->deleteFile($fileA);
+//        $this->fileManager->deleteFile($fileB);
     }
 
     /**
