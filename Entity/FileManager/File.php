@@ -153,6 +153,12 @@ class File extends BaseEntity
         return $this->localFilePath;
     }
 
+    public function getLocalFilename()
+    {
+        $parts = pathinfo($this->localFilePath);
+        return $parts['basename'];
+    }
+
     /**
      * @param string $localFilePath
      */

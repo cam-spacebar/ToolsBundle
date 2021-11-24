@@ -23,12 +23,17 @@ class FileManager
     private $em;
     private $fileSystem;
     private $fileRepo;
+    private $bucketname;
 
-    public function __construct(EntityManager $em, FilesystemInterface $publicUploadsFilesystem, FileRepository $fileRepo)
+    // returns true if the file exists in cache (used for aserts in testing).
+    private $isLastCacheHitSuccessful;
+
+    public function __construct(EntityManager $em, FilesystemInterface $publicUploadsFilesystem, FileRepository $fileRepo, string $env_var_bucketName)
     {
         $this->em                   = $em;
         $this->fileSystem           = $publicUploadsFilesystem;
         $this->fileRepo             = $fileRepo;
+        $this->bucketname           = $env_var_bucketName;
     }
 //    public function downloadImage(image $image)
 //    {
@@ -163,12 +168,10 @@ class FileManager
     }
 
     /**
-     * Uploads the file to remote storage (AWS S3) and creates a DB record: File (And persists it to the DB).
+     * Uploads the file to remote storage (AWS S3), create a DB record: File (And persists it to the DB)
+     * and copy the file to the cache folder.
      */
     public function persistFile ($filePath, $targetSubfolder = null):File {
-        // todo: create a record for the file in DB
-        // todo: check for duplicate upload?
-
         if (!is_file($filePath)) {
             // todo: don't throw exception for worker processes, use log instead
             $errMsg = 'Cannot find file with path: '. $filePath;
@@ -178,13 +181,7 @@ class FileManager
 
         $targetFilepath = $this->createRemoteFilepath($filePath, $targetSubfolder);
 
-        $stream = fopen($filePath, 'r');
-
-        $result = $this->fileSystem->writeStream($targetFilepath, $stream);
-
-        if (is_resource($stream)) {
-            fclose($stream);
-        }
+        $this->writeRemoteFile($filePath, $targetFilepath);
 
         $infoMsg = "File Persisted to remote storage. Local filename: ". $filePath .' Target filename: '. $targetFilepath ."\n";
         //$this->consoleOutput ($consoleMsg);
@@ -192,11 +189,141 @@ class FileManager
 
         $newFile = $this->fileRepo->createNewByFilepath($filePath, $targetFilepath);
 
+        $this->copyFileToCache($filePath, $newFile);
+
         return $newFile;
     }
 
-    public function downloadFile ($filePath, $targetFilepath, $overwriteFile = false) {
+    /**
+     * @param string $localFilepath
+     * @param $remoteFilepath
+     * @return bool
+     * @throws \League\Flysystem\FileExistsException
+     *
+     * Write the file to the remote server (And close stream)
+     */
+    private function writeRemoteFile(string $localFilepath, $remoteFilepath)
+    {
+        $stream = fopen($localFilepath, 'r');
 
+        $result = $this->fileSystem->writeStream($remoteFilepath, $stream);
+
+        if (is_resource($stream)) {
+            fclose($stream);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Copy the original file to the cached files folder
+     * (why: this prevents a download from the remote storage - as the original file likely exists in an unusual place.)
+     */
+    private function copyFileToCache($originalFilepath, File $file)
+    {
+        $cacheFilepath = $this->generateUniqueLocalFilepath($file);
+        $this->createLocalDirectories($cacheFilepath);
+        copy( $originalFilepath, $cacheFilepath );
+
+        return true;
+    }
+
+    /**
+     * @param File $file
+     * @param $localFilepath
+     *
+     * Finds cache file or downloads $file from the remote storage to the local filesystem (cache).
+     */
+    public function getLocalFilepath (File $file, $subFolder = null) {
+        // check for file in local storage first
+        $cachedFP = $this->getCachedFilepath($file);
+
+        if ($cachedFP == false) {
+//            print "\n cache miss";
+            $this->isLastCacheHitSuccessful = false;
+            return $this->downloadFile($file);
+        }
+
+//        print "\n cache hit";
+        $this->isLastCacheHitSuccessful = true;
+
+        return $cachedFP;
+    }
+
+    /**
+     * Return false if no cache file exists, or return the $filepath to the cached file (if it does exist).
+     */
+    private function getCachedFilepath(File $file)
+    {
+        $localFilename = $this->generateUniqueLocalFilepath($file);
+//        print "\n file name: ". $localFilename;
+        if (is_file($localFilename)) {
+//            print "\n".'CACHE HIT';
+            // we can assume this is the same file as the remote file due to explanation at marker: #uniqueNaming1
+            $this->logger->info('cache hit: file is in local cache.');
+            return $localFilename;
+        }
+
+//        print "\n".'CACHE MISS';
+
+        return false;
+    }
+
+    /**
+     * @throws \League\Flysystem\FileNotFoundException
+     * Download the file from remote storage.
+     */
+    private function downloadFile(File $file)
+    {
+        $localFilename = $this->generateUniqueLocalFilepath($file);
+        $rfp = $file->getRemoteFilePath();
+        $stream = $this->fileSystem->readStream($rfp);
+
+//        $this->fileSystem->writeStream($destinationFolder.'/testxyz123.txt', $stream);
+
+//        $localFilename = $destinationFolder.'/testxyz123.txt';
+//        $stream = fopen($localFilename, 'w');
+
+        $this->createLocalDirectories($localFilename);
+
+        file_put_contents($localFilename, $stream);
+
+        if (is_resource($stream)) {
+            fclose($stream);
+        }
+
+        return $localFilename;
+    }
+
+    /**
+     * @param File $file
+     * Returns a local filepath that's unique to this file.
+     * Because the path is unique to this file (and mirrors the remote storage path), it can reliably be assumed that if the file exists,
+     * it corresponds (i.e. is) the same as the remote file (unless the remote file has been altered since it was last uploaded) - allowing us
+     * to cache files locally (and not download them again). (marker: #uniqueNaming1)
+     */
+    private function generateUniqueLocalFilepath(File $file)
+    {
+        // note: it looks like flysystem adds a "../" silently (to get out of /public)
+        $baseLocalFolder = 'var/awsS3Downloads/'. $this->bucketname;
+        return $baseLocalFolder .'/'. $file->getRemoteFilePath();
+    }
+
+    /**
+     * @param $filepath
+     * Recursively create directories (if they don't already exist).
+     */
+    private function createLocalDirectories($filepath)
+    {
+        $parts = pathinfo($filepath);
+        $dir1 = $parts['dirname'];
+//        print "\n".'target directory: '. $dir1 ."\n";
+
+        if (!is_dir($dir1)) {
+            // dir doesn't exist, make it
+//            print "\n".'creating dir: '. $dir1 ."\n";
+            mkdir($dir1, 0777, true);
+        }
     }
 
     /**
@@ -205,5 +332,13 @@ class FileManager
     public function getFileRepo(): FileRepository
     {
         return $this->fileRepo;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsLastCacheHitSuccessful(): bool
+    {
+        return $this->isLastCacheHitSuccessful;
     }
 }

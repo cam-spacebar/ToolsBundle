@@ -130,17 +130,66 @@ class FileManagerTest extends CustomKernelTestCase
         $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/';
         $filepathA = $this->duplicateLocalFile($basepath .'DuplicateA', 'duplicate.txt');
         $filepathB = $this->duplicateLocalFile($basepath .'DuplicateB', 'duplicate.txt');
-        $targetSubFolder = 'tests';
 
+        $targetSubFolder = 'tests';
         $fileA = $this->fileManager->persistFile($filepathA, $targetSubFolder);
         $fileB = $this->fileManager->persistFile($filepathB, $targetSubFolder);
         $this->em->flush();
 
         $this->assertNumberOfDBTableRecords(2, File::class);
 
+        $this->fileManager->getLocalFilepath($fileA);
+        $this->fileManager->getLocalFilepath($fileB);
+
         // clean up
 //        $this->fileManager->deleteFile($fileA);
 //        $this->fileManager->deleteFile($fileB);
+    }
+
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter testFileCache
+     *
+     * Test that the FileManager hits the cache (when requesting the file) and downloads the file when it doesn't exist.
+     */
+    public function testFileCache(): void
+    {
+        self::bootKernel();
+        $this->customSetUp();
+
+        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/DeleteFile';
+        $filepath = $this->duplicateLocalFile($basepath, 'testfile.txt');
+
+        $targetSubFolder = 'testFileCache';
+        $file = $this->fileManager->persistFile($filepath, $targetSubFolder);
+        $this->em->flush();
+
+        $cachedFilepath = $this->fileManager->getLocalFilepath($file);
+
+        $isCached = $this->fileManager->getIsLastCacheHitSuccessful();
+        $this->assertEquals(true, $isCached, 'The file should have been in the cache.');
+
+        unlink($cachedFilepath);
+
+        // the file must be downloaded this time.
+        $this->fileManager->getLocalFilepath($file);
+
+        $isCached = $this->fileManager->getIsLastCacheHitSuccessful();
+        $this->assertEquals(false, $isCached, 'The file should not be in the cache.');
+
+        // the file should once again be in the local cache.
+        $this->fileManager->getLocalFilepath($file);
+
+        $isCached = $this->fileManager->getIsLastCacheHitSuccessful();
+        $this->assertEquals(true, $isCached, 'The file should have been in the cache.');
+
+//        $isCached = $this->fileManager->getIsLastCacheHitSuccessful();
+//        $this->assertEquals(false, $isCached, 'The file should not have been in the cache.');
+
+        // clean up
+        $this->fileManager->deleteFile($file);
+        $this->em->flush();
+        $this->assertNumberOfDBTableRecords(0, File::class);
     }
 
     /**
