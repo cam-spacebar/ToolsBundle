@@ -6,10 +6,13 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity\FileManager;
 
+use App\Entity\FileManager\Template;
 use App\Entity\Person;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @MappedSuperclass
@@ -117,6 +120,11 @@ class File extends BaseEntity
      */
     private $deletionDateTime;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Template::class, mappedBy="relatedOriginalFile")
+     */
+    protected $relatedTemplates;
+
     /*
      * @var File
      *
@@ -180,12 +188,13 @@ class File extends BaseEntity
         if (!is_file($filepath)) {
             throw new \Exception('the file with filepath: "'. $filepath .'" does not exist');
         }
+
         $this->localFilePath        = $filepath;
-        $parts = pathinfo($filepath);
-        $originalFilename = $parts['basename'];
+        $parts                      = pathinfo($filepath);
+        $originalFilename           = $parts['basename'];
         $this->originalFilename     = $originalFilename;
 
-        $ext = pathinfo($filepath, PATHINFO_EXTENSION);
+        $ext                        = pathinfo($filepath, PATHINFO_EXTENSION);
         $this->fileExtension        = $ext;
 
         $filesizeInBytes            = filesize($filepath);
@@ -196,6 +205,50 @@ class File extends BaseEntity
 
         $this->flaggedForDelete     = $flaggedForDelete;
         $this->isDeleted            = $isDeleted;
+
+        $this->relatedTemplates     = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection|Template[]
+     */
+    public function getRelatedTemplates(): Collection
+    {
+        return $this->relatedTemplates;
+    }
+
+    public function addRelatedTemplate(Template $relatedTemplate): self
+    {
+        if (!$this->relatedTemplates->contains($relatedTemplate)) {
+            $this->relatedTemplates[] = $relatedTemplate;
+            $relatedTemplate->setRelatedOriginalFile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRelatedTemplate(Template $relatedTemplate): self
+    {
+        if ($this->relatedTemplates->removeElement($relatedTemplate)) {
+            // set the owning side to null (unless already changed)
+            if ($relatedTemplate->getRelatedOriginalFile() === $this) {
+                $relatedTemplate->setRelatedOriginalFile(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRelatedTemplate(): ?Template
+    {
+        return $this->relatedTemplate;
+    }
+
+    public function setRelatedTemplate(?Template $relatedTemplate): self
+    {
+        $this->relatedTemplate = $relatedTemplate;
+
+        return $this;
     }
 
     /**

@@ -35,33 +35,6 @@ class FileManager
         $this->fileRepo             = $fileRepo;
         $this->bucketname           = $env_var_bucketName;
     }
-//    public function downloadImage(image $image)
-//    {
-//        $remoteFilename     = $image->getFilename();
-//
-//        // remove %gaufrette_amazon_s3_folder% folder reference from original name when requesting the file
-//        $remoteFilename = str_replace($this->gauretteFolder .'/', '', $remoteFilename);
-//
-//        if ($this->gaufretteFS->has($remoteFilename)) {
-//            $imageTargetPath = $image->getImageStoreFilename();
-//            $this->createFolderIfDoesNotExist($imageTargetPath);
-//
-//            $imageData = $this->gaufretteFS->read($remoteFilename);
-//            $bytesWritten = file_put_contents($imageTargetPath, $imageData);
-//            $this->logger->info('Successfully downloaded image to: "'. $imageTargetPath .'". '. $image->getLoggerExtraInfo());
-//        } else {
-//            $this->logger->error('image with filename: '. $remoteFilename .' does not exist on AS S3. Cannot download. '. $image->getLoggerExtraInfo());
-//
-//            // couldn't find image in Gaufrette FS
-//            $image->setIsDeleted(true);
-//            $this->em->persist($image);
-//            $this->em->flush();
-//
-//            throw new \Exception ('Image exists in DB but not in Gaufrette FS. Image filename: "' . $remoteFilename . '"');
-//        }
-//
-//        return $image;
-//    }
 
     public function deleteRemoteFile(string $remoteFilepath, $throwExceptionIfFileDoesNotExist = true)
     {
@@ -271,7 +244,7 @@ class FileManager
 
     /**
      * @throws \League\Flysystem\FileNotFoundException
-     * Download the file from remote storage.
+     * Download the $file from remote storage into the local cache (i.e. var/)
      */
     private function downloadFile(File $file)
     {

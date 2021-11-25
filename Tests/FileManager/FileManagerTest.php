@@ -191,24 +191,4 @@ class FileManagerTest extends CustomKernelTestCase
         $this->em->flush();
         $this->assertNumberOfDBTableRecords(0, File::class);
     }
-
-    /**
-     * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter downloadFileFromS3
-     *
-     */
-    public function downloadFileFromS3(): void
-    {
-        self::bootKernel();
-        $this->customSetUp();
-
-        $remoteFilepath = 'test/testfile-x.txt';
-
-        // todo: delete the file if its already in the local FS
-
-        $file = $this->fileManager->persistFile($filepath, $targetFilepath);
-
-        $this->assertSame(true, $result, '$this->>fileSystem->writeStream() must return true');
-
-    }
 }
