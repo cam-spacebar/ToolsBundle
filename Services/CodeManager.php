@@ -2,7 +2,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Services;
 
-use VisageFour\Bundle\ToolsBundle\Services\CodeGeneration;
+use VisageFour\Bundle\ToolsBundle\Services\CodeGenerator;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -17,7 +17,7 @@ abstract class CodeManager extends BaseEntityManager {
 
     private $alphaNumbericMapping;
     /**
-     * @var CodeGeneration
+     * @var CodeGenerator
      */
     private $codeGenerator;
 
@@ -28,7 +28,7 @@ abstract class CodeManager extends BaseEntityManager {
      * @param EventDispatcherInterface $dispatcher
      * @param LoggerInterface $logger
     */
-    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, CodeGeneration $codeGenerator) {
+    public function __construct(EntityManager $em, $class, EventDispatcherInterface $dispatcher, LoggerInterface $logger, CodeGenerator $codeGenerator) {
         parent::__construct($em, $class, $dispatcher, $logger);
         $this->codeGenerator = $codeGenerator;
     }
@@ -89,7 +89,7 @@ abstract class CodeManager extends BaseEntityManager {
     private function createUniqueCodeStr ($codeGenStrat, $curLayersDeep = 1) {
         switch ($codeGenStrat) {
             case CODE::CODE_GEN_STRAT_BASIC:
-                $newCodeStr = $this->codeGenerator->createRandomCode(3, 3);
+                $newCodeStr     = $this->codeGenerator->createRandomCode(3, 3);
                 break;
             case CODE::CODE_GEN_STRAT_RAND_ALPHA_NUMBERIC:
                 $newCodeStr = $this->codeGenerator->genAlphaNumericCode(32);

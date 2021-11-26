@@ -4,7 +4,7 @@
 * by: Cameron
 */
 
-namespace VisageFour\Bundle\ToolsBundle\Services;
+namespace VisageFour\Bundle\ToolsBundle\Services\FileManager;
 
 /*
  * This class manages uploading and downloading files from services like Amazon S3

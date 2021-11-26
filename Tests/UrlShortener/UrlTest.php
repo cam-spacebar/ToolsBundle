@@ -1,15 +1,19 @@
 <?php
 /*
-* created on: 21/11/2021 - 13:11
+* created on: 26/11/2021 - 17:51
 * by: Cameron
 */
 
-namespace VisageFour\Bundle\ToolsBundle\Tests\FileManager;
+
+namespace App\VisageFour\Bundle\ToolsBundle\Tests\UrlShortener;
 
 use App\Entity\FileManager\File;
+use App\Entity\UrlShortener\Hit;
+use App\Entity\UrlShortener\Url;
+use App\Repository\UrlShortener\UrlRepository;
 use App\VisageFour\Bundle\ToolsBundle\Classes\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
-use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
+use VisageFour\Bundle\ToolsBundle\Services\FileManager;
 
 /**
  * Class SecurityTest
@@ -19,24 +23,26 @@ use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
  * Run all tests:
  * - ./vendor/bin/phpunit
  * Run all the tests in this file:
- * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/ImageOverlayTest.php
+ * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UrlShortener/UrlTest.php
  *
  * Create new test case [P-CB-087]
  * https://docs.google.com/presentation/d/1-AYb7xtRScoWsB3jxHnThsBJVgwY8DzEKLacGVCB28c/edit#slide=id.p
  *
  * (comment version: 1.02)
  */
-class ImageOverlayTest extends CustomKernelTestCase
+class UrlTest extends CustomKernelTestCase
 {
-    /** @var FileManager */
-    private $fileManager;
+    /**
+     * @var UrlRepository
+     */
+    private $urlRepo;
 
     private function getServices($debuggingOutputOn)
     {
         $container = self::$kernel->getContainer();
 
-        $this->fileManager = $container->get('test.'. FileManager::class);
-        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
+        $this->urlRepo = $container->get('test.'. UrlRepository::class);
+//        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
 
         $this->getEntityManager();
     }
@@ -50,7 +56,8 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->getServices(true);
 
         $this->truncateEntities([
-//            File::class
+            Url::class,
+            Hit::class
         ]);
 
         return true;
@@ -66,14 +73,19 @@ class ImageOverlayTest extends CustomKernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/ImageOverlayTest.php --filter createQRCodeOnFlyer
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UrlShortener/UrlTest.php --filter createShortenedURL
      *
-     * Upload a .txt file to AWS S3 and test overwriting it with another file
+     * upload a .txt file to AWS S3 and test overwriting it with another file
      */
-    public function createQRCodeOnFlyer(): void
+    public function createShortenedURL(): void
     {
         self::bootKernel();
         $this->customSetUp();
+
+        $url = $this->urlRepo->createNewShortenedUrl('www.NewToMelbourne.org/product1?coupon=11');
+
+        $this->assertNumberOfDBTableRecords(1, Url::class);
+
 
         // todo:
         // ShortUrl: URL, name, code, AttributionTag,

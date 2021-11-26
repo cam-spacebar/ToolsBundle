@@ -10,10 +10,11 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
  * Class CodeGenerator
  * @package VisageFour\Bundle\ToolsBundle\Services
  *
- * a class that does the heavy lifting of generating  codes
+ * a class that does the heavy lifting of generating codes
  */
-class CodeGeneration
+class CodeGenerator
 {
+    // generate (and return) a code, with x chars first, then y numbers
     public function createRandomCode ($noOfChrs = 3, $noOfNums = 3) {
         $response = '';
         for ($i = 0; $i < $noOfChrs; $i++) {
@@ -29,6 +30,7 @@ class CodeGeneration
         return $response;
     }
 
+    // generate (and return) a string of x alphanumeric chars
     public function genAlphaNumericCode (int $noOfChars) {
         $ANmapping = $this->getAlphaNumericMapping();
         $newCode = '';
@@ -47,7 +49,7 @@ class CodeGeneration
         return $newCode;
     }
 
-    function getAlphaNumericMapping () {
+    private function getAlphaNumericMapping () {
         if (empty($this->alphaNumbericMapping)) {
 
             $this->alphaNumbericMapping = array (
