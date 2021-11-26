@@ -28,6 +28,7 @@ class Code extends BaseEntity
      * by the child class.
      */
     protected $code;
+    static public $codeNoOfChars = 32;
 
     // code generation strategy
     const CODE_GEN_STRAT_BASIC              = 100;      // e.g. ecz348

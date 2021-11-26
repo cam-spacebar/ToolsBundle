@@ -9,8 +9,9 @@ namespace App\VisageFour\Bundle\ToolsBundle\Repository\UrlShortener;
 use App\Entity\UrlShortener\Url;
 use App\VisageFour\Bundle\ToolsBundle\Entity\UrlShortener\BaseUrl;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use VisageFour\Bundle\ToolsBundle\Repository\CodeRepository;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Services\CodeGenerator;
 
 /**
@@ -19,12 +20,8 @@ use VisageFour\Bundle\ToolsBundle\Services\CodeGenerator;
  * @method Url[]    findAll()
  * @method Url[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class BaseUrlRepository extends BaseRepository
+class BaseUrlRepository extends CodeRepository
 {
-    /**
-     * @var CodeGenerator
-     */
-    private $codeGenerator;
 
     /**
      * @var string
@@ -35,8 +32,7 @@ class BaseUrlRepository extends BaseRepository
 
     public function __construct(ManagerRegistry $registry, CodeGenerator $codeGen, string $backend_base_url)
     {
-        parent::__construct($registry, Url::class);
-        $this->codeGenerator    = $codeGen;
+        parent::__construct($registry, Url::class, $codeGen);
         $this->backendBaseUrl   = $backend_base_url;
     }
 
@@ -54,28 +50,6 @@ class BaseUrlRepository extends BaseRepository
         $this->persistAndLogEntityCreation($new);
 
         return $new;
-    }
-
-    // generate a unique (not used before) code
-    private function createNewUniqueCode($noOfCharsInCode, $loopNo = 0)
-    {
-        $newCode = $this->codeGenerator->genAlphaNumericCode($noOfCharsInCode);
-
-        // check if the code is unique or not
-        $result = $this->findOneBy([
-            'code'      => $newCode
-        ]);
-
-        if (!empty($result)) {
-            // loop until we find a new unique code
-            $loopNo = $loopNo +1;
-            if ($loopNo > 5000) {
-                throw new \Exception('unable to find a unique code even after '. $loopNo .' tries');
-            }
-            return $this->createNewUniqueCode($noOfCharsInCode, $loopNo);
-        }
-
-        return $newCode;
     }
 
 

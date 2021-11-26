@@ -84,40 +84,9 @@ class UrlTest extends CustomKernelTestCase
 
         $url = $this->urlRepo->createNewShortenedUrl('www.NewToMelbourne.org/product1?coupon=11');
 
+        $this->em->flush();
         $this->assertNumberOfDBTableRecords(1, Url::class);
 
 
-        // todo:
-        // ShortUrl: URL, name, code, AttributionTag,
-        // duplicate file
-        // create file DB record
-        // create the template
-        // generate new flyer (with QR code) - based on inputs (URL) provided
-
-//        $this->ImageOverlayManager
-//        $this->
-
-//        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/DeleteFile';
-//        $filepath = $this->duplicateLocalFile($basepath, 'testfile.txt');
-//
-////        $targetFilepath = 'test/testfile.txt';
-////        $this->fileManager->deleteRemoteFile($targetFilepath, false);
-//
-//        $file = $this->fileManager->persistFile($filepath);
-//        $remoteFilepath = $file->getRemoteFilePath();
-//
-//        $this->em->flush();
-//        $this->assertNumberOfDBTableRecords(1, File::class);
-//
-//        // delete the file (from previous test, to prevent duplicate error)
-//        $this->fileManager->deleteFile($file);
-//        $this->em->flush();
-//        $this->assertNumberOfDBTableRecords(0, File::class);
-//
-//        $original_exists = (is_file($filepath));
-//        $this->assertEquals(false, $original_exists, 'the local file was not deleted during the deletion process');
-//
-//        $remoteFileIsDeleted = ($this->fileManager->doesRemoteFileExist($remoteFilepath));
-//        $this->assertEquals(false, $remoteFileIsDeleted, 'the remote file was not deleted during the deletion process');
     }
 }

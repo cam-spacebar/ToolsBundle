@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\Common\Collections\Collection;
+use VisageFour\Bundle\ToolsBundle\Entity\Code;
 
 /**
  * Class BaseUrl
@@ -19,16 +20,8 @@ use Doctrine\Common\Collections\Collection;
  *
  * @MappedSuperclass
  */
-class BaseUrl
+class BaseUrl extends Code
 {
-
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
-
     /**
      * @ORM\Column(type="string", length=1024)
      *
@@ -42,22 +35,15 @@ class BaseUrl
     protected $name;
 
     /**
-     * @ORM\Column(type="string", length=32)
-     * the code of random characters at the end of the URL (the URL that can be "advertised")
-     *
-     */
-    protected $shortenedCode;
-
-    static public $codeNoOfChars = 32;
-
-    /**
      * @ORM\OneToMany(targetEntity=Hit::class, mappedBy="relatedUrl")
      */
     private $relatedHits;
 
     public function __construct(string $urlRedirect, string $shortenedCode)
     {
-        $this->relatedHits = new ArrayCollection();
+        $this->relatedHits      = new ArrayCollection();
+        $this->urlRedirect      = $urlRedirect;
+        $this->code             = $shortenedCode;
     }
 
     public function getId(): ?int
@@ -85,18 +71,6 @@ class BaseUrl
     public function setName(?string $name): self
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getShortenedCode(): ?string
-    {
-        return $this->shortenedCode;
-    }
-
-    public function setShortenedCode(string $shortenedCode): self
-    {
-        $this->shortenedCode = $shortenedCode;
 
         return $this;
     }

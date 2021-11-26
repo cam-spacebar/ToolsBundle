@@ -34,7 +34,6 @@ class CodeGenerator
     public function genAlphaNumericCode (int $noOfChars) {
         $ANmapping = $this->getAlphaNumericMapping();
         $newCode = '';
-        $noOfChars = 20;
 
         for ($i=1; $i <= $noOfChars; $i++) {
             $curVal = rand(1, 34);
