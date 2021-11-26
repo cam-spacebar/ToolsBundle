@@ -65,23 +65,6 @@ class FileManagerTest extends CustomKernelTestCase
     }
 
     /**
-     * @param $filepath
-     * duplicates a local file, because the file that is used in a test is ussually deleted (during cleanup)
-     */
-    private function duplicateLocalFile($path, $filename)
-    {
-        $this->fileManager->throwExceptionIfEndsWith($path, '/');
-
-        $originalFilepath = $path.'/'.$filename;
-        $newFilepath = $path.'/' .'copy_of_'. $filename;
-
-        // copy the original, as the local file provided will be deleted
-        copy( $originalFilepath, $newFilepath );
-
-        return $newFilepath;
-    }
-
-    /**
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php --filter uploadFileToRemoteS3AndDelete
      *

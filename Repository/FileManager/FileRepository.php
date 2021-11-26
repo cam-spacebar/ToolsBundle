@@ -12,9 +12,10 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 
 class FileRepository extends BaseRepository
 {
-    public function __construct (ManagerRegistry $registry, $class = File::class) {
-        parent::__construct($registry, $class);
-    }
+//    public function __construct (ManagerRegistry $registry, $class = File::class) {
+//        parent::__construct($registry, $class);
+//    }
+
     public function createNewFromRealFile (string $filename)
     {
         $new = new File($filename);

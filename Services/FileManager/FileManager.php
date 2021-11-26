@@ -90,7 +90,7 @@ class FileManager
      * returns true if the last character/s of $haystack is $needle
      * it's useful in preventing paths being passed in with an ending "/" (as this is often added).
      */
-    function throwExceptionIfEndsWith( $haystack, $needle ) {
+    static public function throwExceptionIfEndsWith( $haystack, $needle ) {
         $length = strlen( $needle );
         if( !$length ) {
             throw new \Exception ('string cannot end with a "'. $needle .'". String: '. $haystack );

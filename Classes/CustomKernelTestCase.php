@@ -8,6 +8,7 @@ namespace App\VisageFour\Bundle\ToolsBundle\Classes;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use VisageFour\Bundle\ToolsBundle\Services\FileManager;
 
 class CustomKernelTestCase extends KernelTestCase
 {
@@ -57,5 +58,23 @@ class CustomKernelTestCase extends KernelTestCase
         if ($databasePlatform->supportsForeignKeyConstraints()) {
             $connection->query('SET FOREIGN_KEY_CHECKS=1');
         }
+    }
+
+    /**
+     * @param $filepath
+     * duplicates a local file and returns the new filename
+     * initinially used: because the file that is used in a FileManager test is deleted (during cleanup)
+     */
+    public function duplicateLocalFile($path, $filename)
+    {
+        FileManager::throwExceptionIfEndsWith($path, '/');
+
+        $originalFilepath = $path.'/'.$filename;
+        $newFilepath = $path.'/' .'copy_of_'. $filename;
+
+        // copy the original, as the local file provided will be deleted
+        copy( $originalFilepath, $newFilepath );
+
+        return $newFilepath;
     }
 }

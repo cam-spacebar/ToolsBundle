@@ -18,6 +18,15 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 class BaseTemplateRepository extends BaseRepository
 {
 
+    public function createNewxxxx (string $filename)
+    {
+//        $new = new ???();
+
+//        $this->persistAndLogEntityCreation($new);
+
+//        return $new;
+    }
+
     // /**
     //  * @return Template[] Returns an array of Template objects
     //  */
