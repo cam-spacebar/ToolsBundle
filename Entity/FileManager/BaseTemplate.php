@@ -7,6 +7,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Entity\FileManager;
 
+use App\Entity\FileManager\ImageOverlay;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -28,7 +29,7 @@ class BaseTemplate extends BaseEntity
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=File::class, inversedBy="relatedTemplates")
@@ -41,9 +42,15 @@ class BaseTemplate extends BaseEntity
      */
     protected $relatedDerivativeFiles;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ImageOverlay::class, mappedBy="relatedTemplate", orphanRemoval=true)
+     */
+    protected $relatedImageOverlays;
+
     public function __construct()
     {
-        $this->relatedDerivativeFiles = new ArrayCollection();
+        $this->relatedDerivativeFiles   = new ArrayCollection();
+        $this->relatedImageOverlays     = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -87,6 +94,37 @@ class BaseTemplate extends BaseEntity
             // set the owning side to null (unless already changed)
             if ($relatedDerivativeFile->getRelatedTemplate() === $this) {
                 $relatedDerivativeFile->setRelatedTemplate(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @return Collection|ImageOverlay[]
+     */
+    public function getRelatedImageOverlays(): Collection
+    {
+        return $this->relatedImageOverlays;
+    }
+
+    public function addRelatedImageOverlay(ImageOverlay $relatedImageOverlay): self
+    {
+        if (!$this->relatedImageOverlays->contains($relatedImageOverlay)) {
+            $this->relatedImageOverlays[] = $relatedImageOverlay;
+            $relatedImageOverlay->setRelatedTemplate($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRelatedImageOverlay(ImageOverlay $relatedImageOverlay): self
+    {
+        if ($this->relatedImageOverlays->removeElement($relatedImageOverlay)) {
+            // set the owning side to null (unless already changed)
+            if ($relatedImageOverlay->getRelatedTemplate() === $this) {
+                $relatedImageOverlay->setRelatedTemplate(null);
             }
         }
 
