@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Controller\AdminMenuController;
 use App\Controller\SecurityController;
+use VisageFour\Bundle\ToolsBundle\Controller\UrlShortener\LandingPageController;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
 
@@ -40,6 +41,7 @@ class BaseFrontendUrl implements FrontendUrlInterface
     const USER_REGISTRATION         = 'USER_REGISTRATION';
     const ACCOUNT_VERIFICATION      = 'ACCOUNT_VERIFICATION';
     const NEW_ACCOUNT               = 'NEW_ACCOUNT';
+    const SHORTENED_URL_LP          = 'SHORTENED_URL_LP';
 
     const NO_FRONTEND = 'NO_FRONTEND';      // placeholder to indicate that there's no "front-end", maybe because the "front-end" is acctually delivered via the backend as HTML (not a react client)
 
@@ -321,6 +323,11 @@ class BaseFrontendUrl implements FrontendUrlInterface
                 'controller'        => SecurityController::class .'::registerNewUserAction',
                 'route_name'        => 'newAccount',
                 'front_end'         => '/newAccount'
+            ],
+            self::SHORTENED_URL_LP => [
+                'controller'        => LandingPageController::class .'::LandingPageAction',
+                'route_name'        => 'urlShortenedLandingPage',
+                'front_end'         => ''
             ],
     //        self::ACCOUNT_VERIFICATION => [
 //                'controller'        => 'xxx',

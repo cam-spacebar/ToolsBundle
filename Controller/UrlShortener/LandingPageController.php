@@ -33,7 +33,8 @@ class LandingPageController extends AbstractController
             // todo: record the hit
             // redirect user to that URL
 //            $this->redirect(?)
-
+            continue from here  -create the hit then check for it in the test.
+            die('324wfewsedc');
         } else {
             die ('asdf unknonwn');
         }

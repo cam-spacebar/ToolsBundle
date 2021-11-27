@@ -26,10 +26,10 @@ class VerifyAccountTokenTest extends CustomApiTestCase
      * Setup that is specific to this test case.
      * (this runs once prior to each test case / method())
      */
-    protected function specificSetUp()
+    protected function customSetUp()
     {
         $this->setShowDebugging(true);
-        $this->outputDebugToTerminal('running specificSetUp()');
+        $this->outputDebugToTerminal('running customSetUp()');
 
 
         $this->person = $this->createNewUser();

@@ -56,7 +56,7 @@ class ImageOverlayTest extends CustomKernelTestCase
         return true;
     }
 
-    protected function tearDown(): void
+    protected function customTearDown(): void
     {
 //        $this->outputDebugToTerminal('tearDown()');
 //        $this->removeUser($this->person);
@@ -72,8 +72,6 @@ class ImageOverlayTest extends CustomKernelTestCase
      */
     public function createQRCodeOnFlyer(): void
     {
-        self::bootKernel();
-        $this->customSetUp();
 
         // todo:
         // ShortUrl: URL, name, code, AttributionTag,

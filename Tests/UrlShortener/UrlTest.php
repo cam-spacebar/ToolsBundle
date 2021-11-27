@@ -10,7 +10,10 @@ namespace App\VisageFour\Bundle\ToolsBundle\Tests\UrlShortener;
 use App\Entity\FileManager\File;
 use App\Entity\UrlShortener\Hit;
 use App\Entity\UrlShortener\Url;
+use App\Exceptions\ApiErrorCode;
 use App\Repository\UrlShortener\UrlRepository;
+use App\Services\FrontendUrl;
+use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager;
@@ -30,7 +33,7 @@ use VisageFour\Bundle\ToolsBundle\Services\FileManager;
  *
  * (comment version: 1.02)
  */
-class UrlTest extends CustomKernelTestCase
+class UrlTest extends CustomApiTestCase
 {
     /**
      * @var UrlRepository
@@ -43,8 +46,6 @@ class UrlTest extends CustomKernelTestCase
 
         $this->urlRepo = $container->get('test.'. UrlRepository::class);
 //        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
-
-        $this->getEntityManager();
     }
 
     /**
@@ -75,18 +76,33 @@ class UrlTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UrlShortener/UrlTest.php --filter createShortenedURL
      *
-     * upload a .txt file to AWS S3 and test overwriting it with another file
+     * create a shortened URL (DB record) and then visit it (creating a HIit)
      */
     public function createShortenedURL(): void
     {
 
+        $this->setCurrentMethod(__METHOD__);
         $url = $this->urlRepo->createNewShortenedUrl('www.NewToMelbourne.org/product1?coupon=11');
 
         $this->em->flush();
         $this->testingHelper->assertNumberOfDBTableRecords(1, Url::class, $this);
 
-work from here:
-        - check for any other tests that need to be updated
-        - continue with creating apitest for name: urlShortenedLandingPage
+        $params = [
+            'code' => $url->getCode()
+        ];
+        $this->setTargetRoutePairConstant(FrontendUrl::SHORTENED_URL_LP, $params);
+        $this->setExpectedResponse(ApiErrorCode::OK);
+//        $this->buildUrlWithParams($data);
+        $crawler = $this->sendJSONRequest('GET');
+//        dump($crawler->getcontent());
+
+        $this->assertResponseHeaderSame('content-type', 'application/json');
+//        $this->assertResponseIsSuccessful();
+//        $this->assertSelectorTextContains('h1', 'Hello World');./vendor/bin/phpunit --colors
+//        $this->assertEquals(42, 42);
+
+
+
+
     }
 }

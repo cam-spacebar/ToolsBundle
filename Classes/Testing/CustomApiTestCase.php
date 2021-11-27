@@ -5,6 +5,7 @@ namespace VisageFour\Bundle\ToolsBundle\Classes\Testing;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Exceptions\BadgeAlreadyInPipelineException;
 use App\Exceptions\ApiErrorCode;
+use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\ExpectationFailedException;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\Exception\RedirectionException;
@@ -21,6 +22,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Faker\Factory;
 use VisageFour\Bundle\ToolsBundle\Services\TerminalColors;
 use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
+use VisageFour\Bundle\ToolsBundle\Services\Testing\TestingHelper;
 
 /**
  * Class CustomApiTestCase
@@ -45,6 +47,9 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     /** @var ObjectManager */
     protected $manager;
+
+    /** @var EntityManager */
+    protected $em;
 
     // the email address of the most recently created user.
     protected $userEmail;
@@ -109,6 +114,11 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected $expectedResponse;
 
     /**
+     * @var TestingHelper
+     */
+    protected $testingHelper;
+
+    /**
      * @return string
      */
     public function getRoutePairConstant(): string
@@ -116,7 +126,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         return $this->routePairConstant;
     }
 
-    abstract protected function specificSetUp ();
+    abstract protected function customSetUp ();
 
     /**
      * @param $bodyCode
@@ -161,26 +171,30 @@ abstract class CustomApiTestCase extends ApiTestCase
         $this->manager = $client->getKernel()->getContainer()
             ->get('doctrine')
             ->getManager();
+        $this->em = $this->manager;
+
         $this->client = $client;
 
         $this->faker = Factory::create();
-        $this->getServices();
+        $this->getBaseServices();
 
 //        $this->outputRedTextToTerminal('hi there!');
 //        parent::setUp();
 
-//        $this->outputDebugToTerminal('running specificSetUp()');
-        $this->specificSetUp();
+//        $this->outputDebugToTerminal('running customSetUp()');
+        $this->customSetUp();
     }
 
-    protected function getServices()
+    protected function getBaseServices()
     {
-        // to add a service alias, esarch for marker: #pferfiinw4f
-        $this->personMan        = self::$container->get('twencha.person_man');
-        $this->frontendUrl      = self::$container->get('test.'. FrontendUrl::class);
-        $this->personFactory    = self::$container->get('test.'. PersonFactory::class);
-        $this->appSecurity      = self::$container->get('test.'. AppSecurity::class);
-        $this->emailRegisterMan = self::$container->get('test.'. EmailRegisterManager::class);
+        // to add a service alias, search for marker: #pferfiinw4f
+        $container = self::$container;
+        $this->personMan        = $container->get('twencha.person_man');
+        $this->frontendUrl      = $container->get('test.'. FrontendUrl::class);
+        $this->personFactory    = $container->get('test.'. PersonFactory::class);
+        $this->appSecurity      = $container->get('test.'. AppSecurity::class);
+        $this->emailRegisterMan = $container->get('test.'. EmailRegisterManager::class);
+        $this->testingHelper    = $container->get('test.'. TestingHelper::class);
     }
 
     static public function setUpBeforeClass(): void
@@ -314,7 +328,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         }
 
         if (empty($this->url)) {
-            throw new \Exception('$this->url cannot be empty. Please set it via: specificSetUp().');
+            throw new \Exception('$this->url cannot be empty. Please set it via: customSetUp().');
         }
 
         // display useful debugging info about a request (optional)
