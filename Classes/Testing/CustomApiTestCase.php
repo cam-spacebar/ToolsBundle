@@ -1,6 +1,6 @@
 <?php
 
-namespace VisageFour\Bundle\ToolsBundle\Classes;
+namespace VisageFour\Bundle\ToolsBundle\Classes\Testing;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Exceptions\BadgeAlreadyInPipelineException;

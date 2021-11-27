@@ -11,7 +11,7 @@ use App\Entity\FileManager\File;
 use App\Entity\UrlShortener\Hit;
 use App\Entity\UrlShortener\Url;
 use App\Repository\UrlShortener\UrlRepository;
-use App\VisageFour\Bundle\ToolsBundle\Classes\CustomKernelTestCase;
+use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager;
 
@@ -55,7 +55,7 @@ class UrlTest extends CustomKernelTestCase
     {
         $this->getServices(true);
 
-        $this->truncateEntities([
+        $this->testingHelper->truncateEntities([
             Url::class,
             Hit::class
         ]);

@@ -4,7 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
-use VisageFour\Bundle\ToolsBundle\Classes\CustomApiTestCase;
+use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 
 /**
  * Class SecurityTest

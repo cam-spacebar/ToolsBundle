@@ -7,7 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Tests\FileManager;
 
 use App\Entity\FileManager\File;
-use App\VisageFour\Bundle\ToolsBundle\Classes\CustomKernelTestCase;
+use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 
@@ -49,7 +49,7 @@ class ImageOverlayTest extends CustomKernelTestCase
     {
         $this->getServices(true);
 
-        $this->truncateEntities([
+        $this->testingHelper->truncateEntities([
 //            File::class
         ]);
 

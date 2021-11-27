@@ -7,9 +7,9 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Tests\FileManager;
 
 use App\Entity\FileManager\File;
-use App\VisageFour\Bundle\ToolsBundle\Classes\CustomKernelTestCase;
+use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
-use VisageFour\Bundle\ToolsBundle\Services\FileManager;
+use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 
 /**
  * Class SecurityTest
@@ -19,7 +19,7 @@ use VisageFour\Bundle\ToolsBundle\Services\FileManager;
  * Run all tests:
  * - ./vendor/bin/phpunit
  * Run all the tests in this file:
- * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Purchase/CouponTest.php
+ * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/FileManager/FileManagerTest.php
  *
  * Create new test case [P-CB-087]
  * https://docs.google.com/presentation/d/1-AYb7xtRScoWsB3jxHnThsBJVgwY8DzEKLacGVCB28c/edit#slide=id.p
@@ -37,8 +37,6 @@ class FileManagerTest extends CustomKernelTestCase
 
         $this->fileManager = $container->get('test.'. FileManager::class);
 //        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
-
-        $this->getEntityManager();
     }
 
     /**
@@ -49,14 +47,16 @@ class FileManagerTest extends CustomKernelTestCase
     {
         $this->getServices(true);
 
-        $this->truncateEntities([
+        // Clear database records
+        $this->testingHelper->truncateEntities([
             File::class
         ]);
 
         return true;
     }
 
-    protected function tearDown(): void
+    // cleanup functions here - run every test case
+    protected function customTearDown(): void
     {
 //        $this->outputDebugToTerminal('tearDown()');
 //        $this->removeUser($this->person);
@@ -72,9 +72,6 @@ class FileManagerTest extends CustomKernelTestCase
      */
     public function uploadFileToRemoteS3AndDelete(): void
     {
-        self::bootKernel();
-        $this->customSetUp();
-
         $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/DeleteFile';
         $filepath = $this->duplicateLocalFile($basepath, 'testfile.txt');
 
@@ -85,12 +82,12 @@ class FileManagerTest extends CustomKernelTestCase
         $remoteFilepath = $file->getRemoteFilePath();
 
         $this->em->flush();
-        $this->assertNumberOfDBTableRecords(1, File::class);
+        $this->testingHelper->assertNumberOfDBTableRecords(1, File::class, $this);
 
         // delete the file (from previous test, to prevent duplicate error)
         $this->fileManager->deleteFile($file);
         $this->em->flush();
-        $this->assertNumberOfDBTableRecords(0, File::class);
+        $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
 
         $original_exists = (is_file($filepath));
         $this->assertEquals(false, $original_exists, 'the local file was not deleted during the deletion process');
@@ -107,9 +104,6 @@ class FileManagerTest extends CustomKernelTestCase
      */
     public function uploadDuplicateFilenames(): void
     {
-        self::bootKernel();
-        $this->customSetUp();
-
         $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/';
         $filepathA = $this->duplicateLocalFile($basepath .'DuplicateA', 'duplicate.txt');
         $filepathB = $this->duplicateLocalFile($basepath .'DuplicateB', 'duplicate.txt');
@@ -119,7 +113,7 @@ class FileManagerTest extends CustomKernelTestCase
         $fileB = $this->fileManager->persistFile($filepathB, $targetSubFolder);
         $this->em->flush();
 
-        $this->assertNumberOfDBTableRecords(2, File::class);
+        $this->testingHelper->assertNumberOfDBTableRecords(2, File::class, $this);
 
         $this->fileManager->getLocalFilepath($fileA);
         $this->fileManager->getLocalFilepath($fileB);
@@ -137,9 +131,6 @@ class FileManagerTest extends CustomKernelTestCase
      */
     public function testFileCache(): void
     {
-        self::bootKernel();
-        $this->customSetUp();
-
         $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/DeleteFile';
         $filepath = $this->duplicateLocalFile($basepath, 'testfile.txt');
 
@@ -172,6 +163,6 @@ class FileManagerTest extends CustomKernelTestCase
         // clean up
         $this->fileManager->deleteFile($file);
         $this->em->flush();
-        $this->assertNumberOfDBTableRecords(0, File::class);
+        $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
     }
 }

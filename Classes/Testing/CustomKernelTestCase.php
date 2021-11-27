@@ -4,14 +4,56 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Classes;
+namespace VisageFour\Bundle\ToolsBundle\Classes\Testing;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use VisageFour\Bundle\ToolsBundle\Services\FileManager;
+use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
+use VisageFour\Bundle\ToolsBundle\Services\Testing\TestingHelper;
 
-class CustomKernelTestCase extends KernelTestCase
+abstract class CustomKernelTestCase extends KernelTestCase
 {
+    /**
+     * @var TestingHelper
+     */
+    protected $testingHelper;
+
+    /**
+     * @param array $options
+     * @return \Symfony\Component\HttpKernel\KernelInterface|void
+     *
+     * override bootKernel, so we can add extra services
+     */
+    protected static function bootKernel(array $options = [])
+    {
+        parent::bootKernel($options);
+        $container = self::$kernel->getContainer();
+
+        $container->get('test.'. TestingHelper::class);
+    }
+
+    protected function getContainer () {
+        return self::$kernel->getContainer();
+    }
+
+    protected function setUp():void {
+        self::bootKernel();
+
+        $this->getEntityManager();
+        $container = $this->getContainer();
+
+        $this->testingHelper = $container->get('test.'. TestingHelper::class);
+        
+        $this->customSetUp();
+    }
+
+    protected function tearDown():void {
+        $this->customTearDown();
+    }
+
+    abstract protected function customSetup();
+    abstract protected function customTearDown();
+    
     /** @var EntityManager */
     protected $em;
 
@@ -20,10 +62,11 @@ class CustomKernelTestCase extends KernelTestCase
         $this->em = self::$kernel->getContainer()
             ->get('doctrine')
             ->getManager();
+
         return $this->em;
     }
 
-    protected function assertNumberOfDBTableRecords($expectedCount, $entityName)
+    protected function assertNumberOfDBTableRecords(int $expectedCount, string $entityName)
     {
         $count = (int) $this->em->getRepository($entityName)
             ->createQueryBuilder('s')
@@ -36,28 +79,8 @@ class CustomKernelTestCase extends KernelTestCase
             $count,
             'Failed: test expect '. $expectedCount .' DB records but instead found '. $count .' records (of entity class: '. $entityName .'). (note: remember to use truncateEntities() at the start of each test.)'
         );
-    }
 
-    /**
-     * @param array $entities
-     * Remove records from entity tables
-     */
-    protected function truncateEntities(array $entities)
-    {
-        $connection = $this->getEntityManager()->getConnection();
-        $databasePlatform = $connection->getDatabasePlatform();
-        if ($databasePlatform->supportsForeignKeyConstraints()) {
-            $connection->query('SET FOREIGN_KEY_CHECKS=0');
-        }
-        foreach ($entities as $entity) {
-            $query = $databasePlatform->getTruncateTableSQL(
-                $this->getEntityManager()->getClassMetadata($entity)->getTableName()
-            );
-            $connection->executeUpdate($query);
-        }
-        if ($databasePlatform->supportsForeignKeyConstraints()) {
-            $connection->query('SET FOREIGN_KEY_CHECKS=1');
-        }
+        return true;
     }
 
     /**
