@@ -40,8 +40,8 @@ class BaseAttributionTagRepository extends BaseRepository
             return true;
         }
         $preExistingTag = $this->findOneBy([
-            'name'          => $name,
-            'relatedParent' => $parentTag
+            'name'              => $name,
+            'relatedParentTag'  => $parentTag
         ]);
 
         if (!empty($preExistingTag)) {

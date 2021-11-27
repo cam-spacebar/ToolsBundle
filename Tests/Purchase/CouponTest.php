@@ -20,6 +20,7 @@ use App\Exceptions\ApiErrorCode;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twencha\Bundle\EventRegistrationBundle\Repository\PersonRepository;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
+use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use VisageFour\Bundle\ToolsBundle\Entity\Purchase\BaseCoupon;
 use VisageFour\Bundle\ToolsBundle\Entity\Purchase\BaseProduct;
 use VisageFour\Bundle\ToolsBundle\Repository\BasePersonRepository;
@@ -41,7 +42,7 @@ use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
  *
  * (comment version: 1.02)
  */
-class CouponTest extends KernelTestCase
+class CouponTest extends CustomKernelTestCase
 {
     /** @var Coupon */
     private $registrationCoupon100;
@@ -83,6 +84,11 @@ class CouponTest extends KernelTestCase
         $this->attributionTagRepo = $container->get('test.'. AttributionTagRepository::class);
         $this->attributionTagRepo->setOutputValuesOnCreation($debuggingOutputOn);
 //        die('asd');
+    }
+
+    protected function customTearDown()
+    {
+
     }
 
     /**
@@ -142,9 +148,6 @@ class CouponTest extends KernelTestCase
      */
     public function applyCouponToCheckout(): void
     {
-        self::bootKernel();
-        $this->customSetUp();
-
         $person = $this->personRepo->findOneByEmailCanonical('cameronrobertburns@gmail.com');
 
         $items1 = [

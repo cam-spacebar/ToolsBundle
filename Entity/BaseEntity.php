@@ -98,8 +98,12 @@ abstract class BaseEntity implements BaseEntityInterface
     // you can override this if you want to provide a custom output (ussually this is useful for larger/complex entities with relations such as: ToolsBundle::Checkout)
     public function outputContents($lineBreak = "\n")
     {
+
         $lb = $lineBreak;
         $className = get_class($this);
+        if (!method_exists($this, '__toString')) {
+            throw new \Exception('no __ToString method found for entity: '. $className .'. This is needed for outputContents().');
+        }
         print $className .' contents: '. $this . $lb;
         if (method_exists($this, 'getOutputContents')) {
             $data = $this->getOutputContents();

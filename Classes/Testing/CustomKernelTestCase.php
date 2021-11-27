@@ -43,7 +43,7 @@ abstract class CustomKernelTestCase extends KernelTestCase
         $container = $this->getContainer();
 
         $this->testingHelper = $container->get('test.'. TestingHelper::class);
-        
+
         $this->customSetUp();
     }
 
@@ -66,27 +66,11 @@ abstract class CustomKernelTestCase extends KernelTestCase
         return $this->em;
     }
 
-    protected function assertNumberOfDBTableRecords(int $expectedCount, string $entityName)
-    {
-        $count = (int) $this->em->getRepository($entityName)
-            ->createQueryBuilder('s')
-            ->select('COUNT(s.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $this->assertSame(
-            $expectedCount,
-            $count,
-            'Failed: test expect '. $expectedCount .' DB records but instead found '. $count .' records (of entity class: '. $entityName .'). (note: remember to use truncateEntities() at the start of each test.)'
-        );
-
-        return true;
-    }
-
     /**
      * @param $filepath
      * duplicates a local file and returns the new filename
      * initinially used: because the file that is used in a FileManager test is deleted (during cleanup)
+     * todo: move to testinhelper zzz1
      */
     public function duplicateLocalFile($path, $filename)
     {

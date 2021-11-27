@@ -63,7 +63,7 @@ class UrlTest extends CustomKernelTestCase
         return true;
     }
 
-    protected function tearDown(): void
+    protected function customTearDown(): void
     {
 //        $this->outputDebugToTerminal('tearDown()');
 //        $this->removeUser($this->person);
@@ -79,14 +79,14 @@ class UrlTest extends CustomKernelTestCase
      */
     public function createShortenedURL(): void
     {
-        self::bootKernel();
-        $this->customSetUp();
 
         $url = $this->urlRepo->createNewShortenedUrl('www.NewToMelbourne.org/product1?coupon=11');
 
         $this->em->flush();
-        $this->assertNumberOfDBTableRecords(1, Url::class);
+        $this->testingHelper->assertNumberOfDBTableRecords(1, Url::class, $this);
 
-
+work from here:
+        - check for any other tests that need to be updated
+        - continue with creating apitest for name: urlShortenedLandingPage
     }
 }

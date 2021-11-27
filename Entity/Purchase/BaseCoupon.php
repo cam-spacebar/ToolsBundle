@@ -401,4 +401,9 @@ class BaseCoupon extends BaseEntity
 
         return $newPrice;
     }
+
+    public function __toString()
+    {
+        return 'id: '. $this->id;
+    }
 }

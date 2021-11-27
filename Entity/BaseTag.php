@@ -39,7 +39,7 @@ class BaseTag extends BaseEntity
      * @ORM\ManyToOne(targetEntity="App\Entity\Purchase\AttributionTag", inversedBy="relatedChildTags")
      * @ORM\JoinColumn(name="related_parent_tag_id", referencedColumnName="id", nullable=true)
      *
-     * @var $relatedParent AttributionTag
+     * @var $relatedParentTag AttributionTag
      */
     protected $relatedParentTag;
 
