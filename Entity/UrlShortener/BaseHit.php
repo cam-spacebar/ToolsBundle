@@ -42,7 +42,7 @@ class BaseHit extends BaseEntity
      */
     protected $relatedUrl;
 
-    public function __construct(string $ipAddress, string $httpUserAgent, Url $relatedUrl)
+    public function __construct(Url $relatedUrl, string $ipAddress, string $httpUserAgent)
     {
         $this->ipAddress        = $ipAddress;
         $this->httpUserAgent    = $httpUserAgent;

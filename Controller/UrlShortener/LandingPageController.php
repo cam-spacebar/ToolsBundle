@@ -6,6 +6,7 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Controller\UrlShortener;
 
+use App\Repository\UrlShortener\HitRepository;
 use App\Repository\UrlShortener\UrlRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,20 +22,23 @@ class LandingPageController extends AbstractController
      *
      * The landing page for all shortened URLS
      */
-    public function LandingPageAction(Request $request, $code, UrlRepository $urlRepo)
+    public function LandingPageAction(Request $request, $code, UrlRepository $urlRepo, HitRepository $hitRepo)
     {
         // todo:
         // retrieve the Url obj
         // 301 redirect user to that URL
 
         $url = $urlRepo->getByCode($code);
+        print $request->headers->get('User-Agent');
+        print $request->getClientIp();
 
         if (!empty($url)) {
             // todo: record the hit
+//            $hitRepo->createNewHit($url);
             // redirect user to that URL
 //            $this->redirect(?)
-            continue from here  -create the hit then check for it in the test.
-            die('324wfewsedc');
+die('sadf');
+
         } else {
             die ('asdf unknonwn');
         }
