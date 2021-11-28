@@ -91,12 +91,12 @@ class UrlTest extends CustomApiTestCase
             'code' => $url->getCode()
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::SHORTENED_URL_LP, $params);
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(ApiErrorCode::REDIRECT_301);
 //        $this->buildUrlWithParams($data);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
 
-        $this->assertResponseHeaderSame('content-type', 'application/json');
+        $this->assertResponseHeaderSame('content-type', 'text/html; charset=UTF-8');
 //        $this->assertResponseIsSuccessful();
 //        $this->assertSelectorTextContains('h1', 'Hello World');./vendor/bin/phpunit --colors
 //        $this->assertEquals(42, 42);

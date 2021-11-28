@@ -4,8 +4,9 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Controller\UrlShortener;
+namespace VisageFour\Bundle\ToolsBundle\Controller\UrlShortener;
 
+use App\Entity\UrlShortener\Url;
 use App\Repository\UrlShortener\HitRepository;
 use App\Repository\UrlShortener\UrlRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,25 +23,22 @@ class LandingPageController extends AbstractController
      *
      * The landing page for all shortened URLS
      */
-    public function LandingPageAction(Request $request, $code, UrlRepository $urlRepo, HitRepository $hitRepo)
+    public function LandingPageAction(Request $request, string $code, UrlRepository $urlRepo, HitRepository $hitRepo)
     {
         // todo:
         // retrieve the Url obj
         // 301 redirect user to that URL
 
+        /** @var Url $url */
         $url = $urlRepo->getByCode($code);
-        print $request->headers->get('User-Agent');
-        print $request->getClientIp();
 
         if (!empty($url)) {
-            // todo: record the hit
-//            $hitRepo->createNewHit($url);
-            // redirect user to that URL
-//            $this->redirect(?)
-die('sadf');
+            $hitRepo->createNewHit($url, $request);
 
+            // redirect user to that URL
+            return $this->redirect($url->getUrlRedirect(), 301);
         } else {
-            die ('asdf unknonwn');
+            die ('asdf unknonwn 23234');
         }
 
 //        return $this->redirectToRoute('badgeValidation', array (

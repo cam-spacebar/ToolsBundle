@@ -30,6 +30,7 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     const INVALID_NEW_PASSWORD                  = 90;       // when a user provides a new passwords that's too short or too long (for instance).
     const ACCOUNT_NOT_VERIFIED                  = 100;
     const LOGIN_REQUIRED                        = 110;
+    const REDIRECT_301                          = 135;
 
     // purchase codes:
     const PRODUCT_REF_INVALID                   = 1110;
@@ -67,6 +68,8 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
                                                         'HTTPStatusCode'    => 401],        // message inherited from the exception class: AccountNotVerifiedException
         self::LOGIN_REQUIRED                        => ['msg'               => 'You must login first to view this page.',
                                                         'HTTPStatusCode'    => 401],
+        self::REDIRECT_301                          => ['msg'               => 'Being redirected.',
+                                                        'HTTPStatusCode'    => 301],
 
         // purchase codes:
         self::PRODUCT_REF_INVALID                   => ['msg'               => 'A product with the reference provided does not exist.',
@@ -123,10 +126,13 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     public function getHTTPStatusCode()
     {
         $stdResponse = $this->getPayload();
+        dump($stdResponse); // yyy1
+        die('asdfasdf');
 
         if (!isset($stdResponse['HTTPStatusCode'])) {
             throw new \Exception ('ApiErrorCode->statusCode: '. $this->getValue() .' does not have a corresponding HTTPStatusCode. Please configure one at marker: #oollgg55');
         }
+
         return $stdResponse ['HTTPStatusCode'];
     }
 
@@ -157,6 +163,7 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         return $stdResponse ['msg'];
     }
 
+    // build Unique Constants List
     private function buildUCL($initialValue, $additionalStatusCodes)
     {
         $this->uniqueConstantsList = new UniqueConstantsList(

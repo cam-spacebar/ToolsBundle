@@ -4,7 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Controller\AdminMenuController;
 use App\Controller\SecurityController;
-use App\VisageFour\Bundle\ToolsBundle\Controller\UrlShortener\LandingPageController;
+use VisageFour\Bundle\ToolsBundle\Controller\UrlShortener\LandingPageController;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
 

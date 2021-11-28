@@ -97,6 +97,7 @@ class UniqueConstantsList implements UniqueConstantsListInterface
      */
     public function getPayload()
     {
+        dump($this->value);
         return $this->getListItemByIndex($this->value);
     }
 
