@@ -24,7 +24,7 @@ class CodeRepository extends BaseRepository
         $this->codeGenerator    = $codeGen;
     }
 
-    public function getByCode($code) : Code
+    public function getByCode($code) : ?Code
     {
         return $this->findOneBy([
             'code' => $code

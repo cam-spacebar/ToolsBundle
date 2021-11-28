@@ -4,7 +4,6 @@
 * by: Cameron
 */
 
-
 namespace App\VisageFour\Bundle\ToolsBundle\Tests\UrlShortener;
 
 use App\Entity\FileManager\File;
@@ -95,9 +94,10 @@ class UrlTest extends CustomApiTestCase
 //        $this->buildUrlWithParams($data);
         $this->expectStatusCode = false;
         $crawler = $this->sendJSONRequest('GET');
-//        dump($crawler->getcontent());
+//        dump($crawler->getcontent(false));
 
         $this->assertResponseHeaderSame('content-type', 'text/html; charset=UTF-8');
+        $this->testingHelper->assertNumberOfDBTableRecords(1, Hit::class, $this);
 //        $this->assertResponseIsSuccessful();
 //        $this->assertSelectorTextContains('h1', 'Hello World');./vendor/bin/phpunit --colors
 //        $this->assertEquals(42, 42);

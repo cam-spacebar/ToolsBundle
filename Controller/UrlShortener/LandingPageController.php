@@ -9,9 +9,12 @@ namespace VisageFour\Bundle\ToolsBundle\Controller\UrlShortener;
 use App\Entity\UrlShortener\Url;
 use App\Repository\UrlShortener\HitRepository;
 use App\Repository\UrlShortener\UrlRepository;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
+use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 
 class LandingPageController extends AbstractController
 {
@@ -23,23 +26,24 @@ class LandingPageController extends AbstractController
      *
      * The landing page for all shortened URLS
      */
-    public function LandingPageAction(Request $request, string $code, UrlRepository $urlRepo, HitRepository $hitRepo)
+    public function LandingPageAction(Request $request, string $code, EntityManager $em, UrlShortenerHelper $urlShortenerHelper)
     {
-        // todo:
-        // retrieve the Url obj
-        // 301 redirect user to that URL
+        try {
+            $url = $urlShortenerHelper->processShortenedCode($code, $request);
+            $em->flush();
+            return $this->redirect($url, 301);
 
-        /** @var Url $url */
-        $url = $urlRepo->getByCode($code);
+        } catch (ApiErrorCodeInterface $e) {
+            work from here:
+            - handle no code found error - throw exception
+            - send back a pretty page
 
-        if (!empty($url)) {
-            $hitRepo->createNewHit($url, $request);
-
-            // redirect user to that URL
-            return $this->redirect($url->getUrlRedirect(), 301);
-        } else {
-            die ('asdf unknonwn 23234');
+//            return $ra->handleException($e);
         }
+
+
+
+
 
 //        return $this->redirectToRoute('badgeValidation', array (
 //            'id'        => $emailSignInType->getPerson()->getId()
