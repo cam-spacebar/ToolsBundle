@@ -287,7 +287,7 @@ class BaseFrontendUrl implements FrontendUrlInterface
      */
     private function populateRouteList()
     {
-        // Add new route marker: #CMDKKD00
+        // Add new route marker: #ERVE$#
         $routes = [
             self::LOGIN => [
                 'controller'        => SecurityController::class .'::loginPOSTAction',          // controller listed here for debugging (finding the controller quickly).

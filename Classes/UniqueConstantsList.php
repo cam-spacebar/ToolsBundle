@@ -40,7 +40,7 @@ class UniqueConstantsList implements UniqueConstantsListInterface
     /**
      * @var string
      *
-     * This is just a code marker that (when searched for in the IDE) will take you to the file/link so the develop/you
+     * This is a code marker that is displayed to the developer  so they
      * can quickly/easily add a new item to the UCL
      */
     private $addItemMarker;
@@ -50,12 +50,12 @@ class UniqueConstantsList implements UniqueConstantsListInterface
      */
     private $list;
 
-    public function __construct($itemPhrase, array $listItemsToMerge, $initialValue, string $addItemMarker = null)
+    public function __construct(string $itemPhrase, array $listItemsToMerge, $initialValue, string $addItemMarker = null)
     {
-        $this->mergeItemArrays($listItemsToMerge);
         $this->itemPhrase = $itemPhrase;
-        $this->setValue($initialValue);
         $this->addItemMarker = $addItemMarker;
+        $this->mergeItemArrays($listItemsToMerge);
+        $this->setValue($initialValue);
     }
 
     public function setValue($value)
@@ -97,7 +97,6 @@ class UniqueConstantsList implements UniqueConstantsListInterface
      */
     public function getPayload()
     {
-        dump($this->value);
         return $this->getListItemByIndex($this->value);
     }
 
@@ -144,9 +143,10 @@ class UniqueConstantsList implements UniqueConstantsListInterface
     private function checkIndexIsNotAlreadySet($arrIndex)
     {
         $addItemsMarker = $this->getAddItemsMarkerAsString();
-        if (isset($this->stdResponses[$arrIndex])) {
+        if (isset($this->list[$arrIndex])) {
             throw new \Exception(
-                'Cannot add an '. $this->itemPhrase .' (with index: '. $arrIndex .') to the '. $this->itemPhrase .' list, as this array index has already been set.'
+                'Cannot add a item to the "'. $this->itemPhrase .'" Unique Constants List (UCL) (with index: '. $arrIndex .'),'.
+            ' as this array index has already been used. Please update the item index to be unique (see marker: '. $this->addItemMarker .').'
                 .$addItemsMarker
             );
         }

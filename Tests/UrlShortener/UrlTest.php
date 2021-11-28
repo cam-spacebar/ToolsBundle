@@ -93,6 +93,7 @@ class UrlTest extends CustomApiTestCase
         $this->setTargetRoutePairConstant(FrontendUrl::SHORTENED_URL_LP, $params);
         $this->setExpectedResponse(ApiErrorCode::REDIRECT_301);
 //        $this->buildUrlWithParams($data);
+        $this->expectStatusCode = false;
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
 

@@ -30,7 +30,7 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     const INVALID_NEW_PASSWORD                  = 90;       // when a user provides a new passwords that's too short or too long (for instance).
     const ACCOUNT_NOT_VERIFIED                  = 100;
     const LOGIN_REQUIRED                        = 110;
-    const REDIRECT_301                          = 135;
+    const REDIRECT_301                          = 120;
 
     // purchase codes:
     const PRODUCT_REF_INVALID                   = 1110;
@@ -126,8 +126,6 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     public function getHTTPStatusCode()
     {
         $stdResponse = $this->getPayload();
-        dump($stdResponse); // yyy1
-        die('asdfasdf');
 
         if (!isset($stdResponse['HTTPStatusCode'])) {
             throw new \Exception ('ApiErrorCode->statusCode: '. $this->getValue() .' does not have a corresponding HTTPStatusCode. Please configure one at marker: #oollgg55');
@@ -163,11 +161,11 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         return $stdResponse ['msg'];
     }
 
-    // build Unique Constants List
+    // build the Unique Constants List (UCL)
     private function buildUCL($initialValue, $additionalStatusCodes)
     {
         $this->uniqueConstantsList = new UniqueConstantsList(
-            'standard-response',
+            'API status codes',
             [self::$initialStatusCodes, $additionalStatusCodes],
             $initialValue,
             'CMDKKD00'

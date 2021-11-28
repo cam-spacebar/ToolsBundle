@@ -69,6 +69,13 @@ abstract class CustomApiTestCase extends ApiTestCase
     // the current test method running. Useful for displaying in debugging messages.
     private $currentMethod;
 
+    /**
+     * @var bool
+     * when true, the test will test that the (correct / expected) status code is contained within the JSON response.
+     * However, this can be turned off - this is done for things like 301 redirects and file downloads, as they do not use json.
+     */
+    protected $expectStatusCode = true;
+
     protected $HTTPMethod;
 
     /**
@@ -305,7 +312,6 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function assertHTTPStatusCodeIsAsExpected(ResponseInterface $crawler)
     {
         $expectedHTTPStatusCode = $this->getExpectedHTTPStatusCode();
-        dump($expectedHTTPStatusCode);
 //        dump($crawler->getStatusCode());
 //
         $errorMsg = 'Custom error msg: Expected status code: '. $expectedHTTPStatusCode .', but got: '. $crawler->getStatusCode() .' instead.';
@@ -361,11 +367,10 @@ abstract class CustomApiTestCase extends ApiTestCase
         // run request
         try {
             $crawler = $this->client->request($method, $url, $json);
-            dump($crawler);
 
-//            fix this - fpor expect 301 redirect.
-            // todo: zzz uncomment this:
-//            $this->assetBodyCodesIsAsExpected($crawler);
+            if ($this->expectStatusCode) {
+                $this->assetBodyCodesIsAsExpected($crawler);
+            }
             $this->assertHTTPStatusCodeIsAsExpected($crawler);
         } catch (\Exception $e) {
 //            dump('Exception during login attempt: (#23fwesd): ', $e);
@@ -518,7 +523,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         } catch (ClientException|ServerException|RedirectionException $e) {
             print "\nERROR: error occured while attempting to login a test user. Error msg (generated when calling \$crawler->getContent()): ". $e->getMessage();
             $responseObj = $e->getResponse()->toArray(false);
-            dump($responseObj);
+//            dump($responseObj);
 
             die("\n\ndie() - please fix this problem.\n");
 //            dump($e);
