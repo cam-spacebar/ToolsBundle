@@ -10,6 +10,8 @@ use App\Entity\UrlShortener\Url;
 use App\Repository\UrlShortener\HitRepository;
 use App\Repository\UrlShortener\UrlRepository;
 use Symfony\Component\HttpFoundation\Request;
+use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\UrlShortener\InvalidUrlShortCodeException;
+
 
 class UrlShortenerHelper
 {
@@ -37,7 +39,7 @@ class UrlShortenerHelper
             // redirect user to that URL
             return $url->getUrlRedirect();
         } else {
-            die ('asdf unknonwn 23234');
+            throw new InvalidUrlShortCodeException($code);
         }
     }
 }

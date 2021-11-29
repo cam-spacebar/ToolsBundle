@@ -40,6 +40,9 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
 
     const CANNOT_CONNECT_TO_STRIPE              = 1201;
 
+    // Url shortener related
+    const INVALID_SHORTENED_URL_CODE            = 1300;
+
 
     // Add new route marker: #CMDKKD00-generic
     private static $initialStatusCodes = [
@@ -81,6 +84,8 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
         self::STRIPE_PAYMENT_ERROR                  => ['msg'               => self::USE_CLIENT_MSG,
                                                         'HTTPStatusCode'    => 400],
         self::CANNOT_CONNECT_TO_STRIPE              => ['msg'               => self::USE_CLIENT_MSG,
+                                                        'HTTPStatusCode'    => 400],
+        self::INVALID_SHORTENED_URL_CODE            => ['msg'               => self::USE_CLIENT_MSG,
                                                         'HTTPStatusCode'    => 400]
     ];
 

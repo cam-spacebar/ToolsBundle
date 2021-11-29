@@ -34,16 +34,14 @@ class LandingPageController extends AbstractController
             return $this->redirect($url, 301);
 
         } catch (ApiErrorCodeInterface $e) {
-            work from here:
-            - handle no code found error - throw exception
-            - send back a pretty page
+            $twigTemplate   = '@ToolsBundle/Resources/views/Errors/genericError.html.twig';
+            $parameters     = array (
+                'errorMsg' => $e->getMessage()
+            );
 
+            return $this->render($twigTemplate, $parameters);
 //            return $ra->handleException($e);
         }
-
-
-
-
 
 //        return $this->redirectToRoute('badgeValidation', array (
 //            'id'        => $emailSignInType->getPerson()->getId()
