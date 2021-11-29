@@ -286,7 +286,7 @@ class FileManager
      * @param $filepath
      * Recursively create directories (if they don't already exist).
      */
-    private function createLocalDirectories($filepath)
+    public function createLocalDirectories($filepath)
     {
         $parts = pathinfo($filepath);
         $dir1 = $parts['dirname'];

@@ -29,7 +29,7 @@ class LandingPageController extends AbstractController
     public function LandingPageAction(Request $request, string $code, EntityManager $em, UrlShortenerHelper $urlShortenerHelper)
     {
         try {
-            $url = $urlShortenerHelper->processShortenedCode($code, $request);
+            $url = $urlShortenerHelper->processShortenedCodeHit($code, $request);
             $em->flush();
             return $this->redirect($url, 301);
 

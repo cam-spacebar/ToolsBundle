@@ -39,11 +39,18 @@ class BaseUrl extends Code
      */
     private $relatedHits;
 
-    public function __construct(string $urlRedirect, string $shortenedCode)
+    /**
+     * @var string
+     * e.g. 'http://www..NewToMelbourne.org/short/324evdfge'
+     */
+    private $shortUrl;
+
+    public function __construct(string $urlRedirect, string $shortenedCode, string $baseShortUrl)
     {
         $this->relatedHits      = new ArrayCollection();
         $this->urlRedirect      = $urlRedirect;
         $this->code             = $shortenedCode;
+        $this->baseShortUrl     = $baseShortUrl;
     }
 
     public function getId(): ?int
@@ -117,5 +124,18 @@ class BaseUrl extends Code
             'shortened Code'        => $this->shortenedCode,
             'hit count'             => $this->getHitCount()
         ]);
+    }
+
+    public function getShortUrl()
+    {
+        if (empty($this->shortUrl)) {
+            throw new \Exception ('shortUrl has not been set. use: UrlShortenerHelper->generateShortUrl() to set this value.');
+        }
+
+        return $this->shortUrl;
+    }
+
+    public function setShortUrl(string $shortUrl) {
+        $this->shortUrl = $shortUrl;
     }
 }

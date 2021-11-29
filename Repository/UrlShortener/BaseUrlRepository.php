@@ -9,6 +9,8 @@ namespace App\VisageFour\Bundle\ToolsBundle\Repository\UrlShortener;
 use App\Entity\UrlShortener\Url;
 use App\VisageFour\Bundle\ToolsBundle\Entity\UrlShortener\BaseUrl;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
 use VisageFour\Bundle\ToolsBundle\Repository\CodeRepository;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -26,12 +28,13 @@ class BaseUrlRepository extends CodeRepository
     /**
      * @var string
      * e.g. http://api.NewToMelbourne.org (note: no trailing slash).
-     * this is ussually set via a .env var and services.yaml bind
+     * note: this is (ussually) set via a .env var and services.yaml bind
      */
     private $backendBaseUrl;
 
     public function __construct(ManagerRegistry $registry, CodeGenerator $codeGen, string $backend_base_url)
     {
+
         parent::__construct($registry, Url::class, $codeGen);
         $this->backendBaseUrl   = $backend_base_url;
     }
@@ -45,7 +48,7 @@ class BaseUrlRepository extends CodeRepository
     {
         $shortenedCode = $this->createNewUniqueCode(BaseUrl::$codeNoOfChars);
 
-        $new = new Url($destinationUrl, $shortenedCode);
+        $new = new Url($destinationUrl, $shortenedCode, $this->backendBaseUrl);
 
         $this->persistAndLogEntityCreation($new);
 
