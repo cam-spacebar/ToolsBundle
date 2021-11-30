@@ -4,7 +4,7 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Services\OverlayTemplate;
+namespace VisageFour\Bundle\ToolsBundle\Services\Image;
 
 use App\Entity\FileManager\File;
 use App\Repository\FileManager\ImageOverlayRepository;
