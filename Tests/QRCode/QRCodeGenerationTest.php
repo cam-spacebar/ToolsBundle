@@ -74,7 +74,7 @@ class QRCodeGenerationTest extends CustomKernelTestCase
      */
     public function generateQRcodeSimple(): void
     {
-//        $outputPathname = __DIR__.'/../../Tests/TestFiles/QRCode/test_output.png';;
+//        $outputPathname = __DIR__.'/../../Tests/TestFiles/QRCode/test_output.png';
         $outputPathname = 'var/test_output_QR_code.png';
         $contents = 'Custom QR code contents';
         $this->QRCodeGenerator->generateQRCode($outputPathname, $contents);
@@ -86,7 +86,7 @@ class QRCodeGenerationTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/QRCode/QRCodeGenerationTest.php --filter generateShortUrlQRcode
      *
-     * Create a QR code that contains a short UR
+     * Create a QR code that contains a short URL
      */
     public function generateShortUrlQRcode(): void
     {

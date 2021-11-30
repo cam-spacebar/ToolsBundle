@@ -4,10 +4,10 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Tests\ImageOverlay;
+namespace App\VisageFour\Bundle\ToolsBundle\Tests\Image;
 
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
-use VisageFour\Bundle\ToolsBundle\Services\FileManager\ImageOverlayManager;
+use VisageFour\Bundle\ToolsBundle\Services\Image\ImageManipulation;
 
 /**
  * Class SecurityTest
@@ -17,23 +17,23 @@ use VisageFour\Bundle\ToolsBundle\Services\FileManager\ImageOverlayManager;
  * Run all tests:
  * - ./vendor/bin/phpunit
  * Run all the tests in this file:
- * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/QRCode/QRCodeGenerationTest.php
+ * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulation.php
  *
  * Create new test case [P-CB-087]
  * https://docs.google.com/presentation/d/1-AYb7xtRScoWsB3jxHnThsBJVgwY8DzEKLacGVCB28c/edit#slide=id.p
  *
  * (comment version: 1.02)
  */
-class ImageOverlayTest extends CustomKernelTestCase
+class ImageManipulationTest extends CustomKernelTestCase
 {
-    /** @var ImageOverlayManager */
-    private $imageOverlayManager;
+    /** @var ImageManipulation */
+    private $imageManipulation;
 
     private function getServices($debuggingOutputOn)
     {
         $container = self::$kernel->getContainer();
 
-        $this->imageOverlayManager = $container->get('test.'. ImageOverlayManager::class);
+        $this->imageManipulation = $container->get('test.'. ImageManipulation::class);
 
         $this->getEntityManager();
     }
@@ -63,14 +63,14 @@ class ImageOverlayTest extends CustomKernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/ImageOverlay/ImageOverlayTest.php --filter overlayImageSimple
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulation.php --filter overlayImageSimple
      *
-     * create a simple QR code
+     * Create a simple QR code
      */
     public function overlayImageSimple(): void
     {
-        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/ImageOverlay/';
-        $this->imageOverlayManager->overlayImage(
+        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
+        $compositeImg = $this->imageManipulation->overlayImage (
             $baseDir. 'FF A4 flyer.png',
             $baseDir. 'QRCode1.png',
             350,
@@ -78,12 +78,11 @@ class ImageOverlayTest extends CustomKernelTestCase
             0,
             90
         );
-        work from here: refactor into service: ImageManipulation
-//        $outputPathname = __DIR__.'/../../Tests/TestFiles/QRCode/test_output.png';;
-//        $outputPathname = 'var/test_output_QR_code.png';
-//        $contents = 'Custom QR code contents';
-//        $this->QRCodeGenerator->generateQRCode($outputPathname, $contents);
-//        $this->assertFileExists($outputPathname);
+
+        $filePath = "var/ImageManipulation/overlayTestResult.png";
+        $this->imageManipulation->saveImage($compositeImg, $filePath);
+
+        $this->assertFileExists($filePath);
 
     }
 }

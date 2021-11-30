@@ -47,10 +47,15 @@ class BaseTemplate extends BaseEntity
      */
     protected $relatedImageOverlays;
 
-    public function __construct()
+    public function __construct(File $originalFile)
     {
         $this->relatedDerivativeFiles   = new ArrayCollection();
         $this->relatedImageOverlays     = new ArrayCollection();
+
+//        convert relatedOriginalFile to manytomany?
+
+        $this->setRelatedOriginalFile($originalFile);
+        $originalFile->setRelatedTemplate($this);
     }
 
     public function getId(): ?int

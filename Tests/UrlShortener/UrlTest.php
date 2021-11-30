@@ -75,7 +75,7 @@ class UrlTest extends CustomApiTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UrlShortener/UrlTest.php --filter createShortenedURL
      *
-     * create a shortened URL (DB record) and then visit it (creating a HIit)
+     * create a shortened URL (DB record) and then visit it (creating a Hit DB record)
      */
     public function createShortenedURL(): void
     {

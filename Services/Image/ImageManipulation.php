@@ -4,21 +4,21 @@
 * by: Cameron
 */
 
-namespace VisageFour\Bundle\ToolsBundle\Services\FileManager;
+namespace VisageFour\Bundle\ToolsBundle\Services\Image;
 
 /*
  * This class manages uploading and downloading files from services like Amazon S3
  */
 
-use App\Entity\FileManager\File;
 use App\Repository\FileManager\FileRepository;
 use Doctrine\ORM\EntityManager;
 use League\Flysystem\FilesystemInterface;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
+use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
-class ImageOverlayManager
+class ImageManipulation
 {
     use LoggerTrait;
 
@@ -67,11 +67,7 @@ class ImageOverlayManager
             $newTopImg->getheight()
         );
 
-        $filepath = "var/ImageOverlay/overlayTestResult.png";
-        $this->fileManager->createLocalDirectories($filepath);
-        $result = imagepng($canvasImg->getSrc(), $filepath);
-
-        return $result;
+        return $canvasImg;
     }
 
     // resize via height dimension or via width:
@@ -109,13 +105,19 @@ class ImageOverlayManager
         $newwidth = $w;
         $newheight = $h;
 
-//        $src = imagecreatefrompng($file);
-//        PRINT "\n\n".'new HEIGHT: '. $newheight;
-//        PRINT "\n". 'new Width: '. $newwidth;
-//        dump($newwidth, $newheight, $r);
         $dst = imagecreatetruecolor($newwidth, $newheight);
         imagecopyresampled($dst, $img->getSrc(), 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
         return new Image (null, $dst);
+    }
+
+    public function saveImage(Image $img, string $filepath, $createSubFolders = true)
+    {
+//        $filepath = "var/ImageOverlay/overlayTestResult.png";
+        if ($createSubFolders) {
+            $this->fileManager->createLocalDirectories($filepath);
+        }
+
+        return imagepng($img->getSrc(), $filepath);
     }
 }

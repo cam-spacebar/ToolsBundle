@@ -104,7 +104,7 @@ class FileManager
      * @param $filepath
      * @param null $targetSubfolder
      *
-     * Create a target path for the remote file that isn't currently used in the remote storage.
+     * Create a target path for the remote file that isn't currently used in the remote storage (i.e. a unique filepath).
      */
     private function createRemoteFilepath($filepath, $targetSubfolder = null)
     {
@@ -271,7 +271,8 @@ class FileManager
     /**
      * @param File $file
      * Returns a local filepath that's unique to this file.
-     * Because the path is unique to this file (and mirrors the remote storage path), it can reliably be assumed that if the file exists,
+     *
+     * note: because the path is unique to this file (and mirrors the remote storage path), it can reliably be assumed that if the file exists,
      * it corresponds (i.e. is) the same as the remote file (unless the remote file has been altered since it was last uploaded) - allowing us
      * to cache files locally (and not download them again). (marker: #uniqueNaming1)
      */
