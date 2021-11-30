@@ -79,24 +79,7 @@ class QRCodeGenerationTest extends CustomKernelTestCase
         $contents = 'Custom QR code contents';
         $this->QRCodeGenerator->generateQRCode($outputPathname, $contents);
         $this->assertFileExists($outputPathname);
-
-//        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/';
-//        $filepathA = $this->duplicateLocalFile($basepath .'DuplicateA', 'duplicate.txt');
-//        $filepathB = $this->duplicateLocalFile($basepath .'DuplicateB', 'duplicate.txt');
-//
-//        $targetSubFolder = 'tests';
-//        $fileA = $this->fileManager->persistFile($filepathA, $targetSubFolder);
-//        $fileB = $this->fileManager->persistFile($filepathB, $targetSubFolder);
-//        $this->em->flush();
-//
-//        $this->testingHelper->assertNumberOfDBTableRecords(2, File::class, $this);
-//
-//        $this->fileManager->getLocalFilepath($fileA);
-//        $this->fileManager->getLocalFilepath($fileB);
-
-        // clean up
-//        $this->fileManager->deleteFile($fileA);
-//        $this->fileManager->deleteFile($fileB);
+        unlink($outputPathname);
     }
 
     /**
@@ -115,23 +98,5 @@ class QRCodeGenerationTest extends CustomKernelTestCase
 
         $this->testingHelper->assertNumberOfDBTableRecords(1, Url::class, $this);
 
-
-//        $basepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/';
-//        $filepathA = $this->duplicateLocalFile($basepath .'DuplicateA', 'duplicate.txt');
-//        $filepathB = $this->duplicateLocalFile($basepath .'DuplicateB', 'duplicate.txt');
-//
-//        $targetSubFolder = 'tests';
-//        $fileA = $this->fileManager->persistFile($filepathA, $targetSubFolder);
-//        $fileB = $this->fileManager->persistFile($filepathB, $targetSubFolder);
-//        $this->em->flush();
-//
-//        $this->testingHelper->assertNumberOfDBTableRecords(2, File::class, $this);
-//
-//        $this->fileManager->getLocalFilepath($fileA);
-//        $this->fileManager->getLocalFilepath($fileB);
-
-        // clean up
-//        $this->fileManager->deleteFile($fileA);
-//        $this->fileManager->deleteFile($fileB);
     }
 }

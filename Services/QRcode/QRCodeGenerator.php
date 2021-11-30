@@ -27,9 +27,9 @@ class QRCodeGenerator
         $this->fileManager  = $fileManager;
     }
 
-    public function generateQRCode($outputPathname, $contents)
+    public function generateQRCode($outputPathname, $contents, $overwrite = false)
     {
-        if (is_file($outputPathname)) {
+        if (is_file($outputPathname) && $overwrite) {
             throw new \Exception('cannot overwrite QRcode with pathnae: '. $outputPathname);
         }
         $result = Builder::create()
