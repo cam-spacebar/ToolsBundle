@@ -4,7 +4,7 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Entity\UrlShortener;
+namespace VisageFour\Bundle\ToolsBundle\Entity\UrlShortener;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
 
 /**
  * Class BaseHit
- * @package App\VisageFour\Bundle\ToolsBundle\Entity\UrlShortener
+ * @package VisageFour\Bundle\ToolsBundle\Entity\UrlShortener
  *
  * @MappedSuperclass
  */

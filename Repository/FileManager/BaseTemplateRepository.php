@@ -18,7 +18,7 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 class BaseTemplateRepository extends BaseRepository
 {
 
-    public function createNewxxxx (string $filename)
+    public function createNewTemplate (string $filename)
     {
 //        $new = new ???();
 

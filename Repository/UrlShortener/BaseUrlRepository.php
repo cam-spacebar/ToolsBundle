@@ -7,7 +7,7 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Repository\UrlShortener;
 
 use App\Entity\UrlShortener\Url;
-use App\VisageFour\Bundle\ToolsBundle\Entity\UrlShortener\BaseUrl;
+use VisageFour\Bundle\ToolsBundle\Entity\UrlShortener\BaseUrl;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;

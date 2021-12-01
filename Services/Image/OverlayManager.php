@@ -41,7 +41,7 @@ class OverlayManager
     {
         // create template and imageOverlay
         $this->templateRepo->createNewTemplate(
-
+//            $canvasFilek
         );
 
         // populate payload

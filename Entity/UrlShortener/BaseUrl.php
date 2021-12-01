@@ -5,7 +5,7 @@
 */
 
 
-namespace App\VisageFour\Bundle\ToolsBundle\Entity\UrlShortener;
+namespace VisageFour\Bundle\ToolsBundle\Entity\UrlShortener;
 
 use App\Entity\UrlShortener\Hit;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -16,7 +16,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\Code;
 
 /**
  * Class BaseUrl
- * @package App\VisageFour\Bundle\ToolsBundle\Entity\UrlShortener
+ * @package VisageFour\Bundle\ToolsBundle\Entity\UrlShortener
  *
  * @MappedSuperclass
  */
@@ -37,20 +37,21 @@ class BaseUrl extends Code
     /**
      * @ORM\OneToMany(targetEntity=Hit::class, mappedBy="relatedUrl")
      */
-    private $relatedHits;
+    protected $relatedHits;
 
     /**
      * @var string
-     * e.g. 'http://www..NewToMelbourne.org/short/324evdfge'
+     * e.g. 'http://www.NewToMelbourne.org/short/324evdfge'
+     * Not saved to DB.
      */
     private $shortUrl;
 
-    public function __construct(string $urlRedirect, string $shortenedCode, string $baseShortUrl)
+    public function __construct(string $urlRedirect, string $shortenedCode, string $shortUrl)
     {
         $this->relatedHits      = new ArrayCollection();
         $this->urlRedirect      = $urlRedirect;
         $this->code             = $shortenedCode;
-        $this->baseShortUrl     = $baseShortUrl;
+        $this->shortUrl         = $shortUrl;
     }
 
     public function getId(): ?int

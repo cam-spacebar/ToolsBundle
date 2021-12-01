@@ -7,7 +7,7 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Tests\OverlayTemplate;
 
-use App\VisageFour\Bundle\ToolsBundle\Services\OverlayTemplate\OverlayManager;
+use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\Image\ImageManipulation;
@@ -82,7 +82,12 @@ class ImageOverlayTest
 
         // create template and overlay
         $this->overlayManager->createNewTemplateSimple(
-            $imageFile
+            $imageFile,
+            200,
+            100,
+            0,
+            100,
+            'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
 
 //        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/ImageManipulation/';
