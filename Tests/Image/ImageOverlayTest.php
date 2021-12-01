@@ -81,7 +81,7 @@ class ImageOverlayTest
         $imageFile = $this->fileManager->persistFile($filepath, $destinationFolder);
 
         // create template and overlay
-        $this->overlayManager->createNewTemplateSimple(
+        $template = $this->overlayManager->createNewTemplateAndOverlay(
             $imageFile,
             200,
             100,

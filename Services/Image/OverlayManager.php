@@ -7,6 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Services\Image;
 
 use App\Entity\FileManager\File;
+use App\Entity\FileManager\Template;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
 
@@ -37,18 +38,26 @@ class OverlayManager
         $this->overlayRepo = $overlayRepo;
     }
 
-    public function createNewTemplateSimple(File $canvasFile, $posX, $posY, $w, $h, $url)
+    public function createNewTemplateAndOverlay(File $canvasFile, int $posX, int $posY, int $w, int $h, string $labelName): Template
     {
+
         // create template and imageOverlay
-        $this->templateRepo->createNewTemplate(
-//            $canvasFilek
+        $template = $this->templateRepo->createNewTemplate(
+            $canvasFile
         );
 
-        // populate payload
-
-        // generate composite
+        // create overlay
+        $overlay = $this->overlayRepo->createNewOverlay(
+            $template,
+            $posX,
+            $posY,
+            $w,
+            $h,
+            $labelName
+        );
 
         // upload composite to AWS S3
-        
+
+        return $template;
     }
 }

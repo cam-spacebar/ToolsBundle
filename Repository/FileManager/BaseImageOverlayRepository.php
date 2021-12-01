@@ -7,6 +7,7 @@
 namespace App\VisageFour\Bundle\ToolsBundle\Repository\FileManager;
 
 use App\Entity\FileManager\ImageOverlay;
+use App\Entity\FileManager\Template;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 
 /**
@@ -17,14 +18,13 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
  */
 class BaseImageOverlayRepository extends BaseRepository
 {
-
-    public function createNewxxxx (string $filename)
+    public function createNewOverlay (Template $template, int $posX, int $posY, int $w, int $h, string $labelName)
     {
-//        $new = new ???();
+        $new = new ImageOverlay($template, $posX, $posY, $w, $h, $labelName);
 
-//        $this->persistAndLogEntityCreation($new);
+        $this->persistAndLogEntityCreation($new);
 
-//        return $new;
+        return $new;
     }
 
 

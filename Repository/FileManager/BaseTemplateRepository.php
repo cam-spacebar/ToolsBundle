@@ -6,6 +6,7 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Repository\FileManager;
 
+use App\Entity\FileManager\File;
 use App\Entity\FileManager\Template;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 
@@ -17,14 +18,13 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
  */
 class BaseTemplateRepository extends BaseRepository
 {
-
-    public function createNewTemplate (string $filename)
+    public function createNewTemplate (File $canvasFile)
     {
-//        $new = new ???();
+        $new = new Template($canvasFile);
 
-//        $this->persistAndLogEntityCreation($new);
+        $this->persistAndLogEntityCreation($new);
 
-//        return $new;
+        return $new;
     }
 
     // /**

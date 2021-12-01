@@ -40,6 +40,9 @@ class BaseImageOverlay extends BaseEntity
      */
     protected $type;
 
+    // all possible 'types' of overlays
+    const TYPE_QRCode = 'TYPE_QRCODE';
+
     /**
      * @ORM\Column(type="integer")
      *
@@ -62,6 +65,26 @@ class BaseImageOverlay extends BaseEntity
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $height;
+
+    /**
+     * @ORM\Column(type="string", nullable=false)
+     *
+     * This corresponds to the (batch entity) payload key - the batch->payload provides a such as: "coupon_QR_CODE" and a value of "http://www.xyz.com?coupon=123" for images
+     * (or a label of: "page_5_activity_QR_code" for PDFs)
+     */
+    protected $labelName;
+
+    public function __construct(Template $template, int $posX, int $posY, int $w, int $h, string $labelName, $type = self::TYPE_QRCode)
+    {
+        $this->setRelatedTemplate($template)
+            ->setXCoord($posX)
+            ->setYCoord($posY)
+            ->setWidth($w)
+            ->setHeight($h)
+            ->setLabelName($labelName)
+            ->setType($type)
+        ;
+    }
 
     public function getId(): ?int
     {
@@ -136,6 +159,13 @@ class BaseImageOverlay extends BaseEntity
     public function setHeight(?int $height): self
     {
         $this->height = $height;
+
+        return $this;
+    }
+
+    public function setLabelName(?string $labelName): self
+    {
+        $this->labelName = $labelName;
 
         return $this;
     }
