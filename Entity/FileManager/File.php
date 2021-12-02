@@ -248,13 +248,6 @@ class File extends BaseEntity
         return $this;
     }
 
-    public function setRelatedTemplate(?Template $relatedTemplate): self
-    {
-        $this->relatedTemplate = $relatedTemplate;
-
-        return $this;
-    }
-
     /**
      * @return \DateTime
      */

@@ -55,16 +55,24 @@ class BaseTemplateRepository extends BaseRepository
          * @var Template $curTemplate
          */
         foreach($templateEntities as $curI => $curTemplate) {
+//            dump($curTemplate);
+//            $curFile = $curTemplate->getRelatedOriginalFile();
+//            $curFile->removeRelatedTemplate($curTemplate);
+
+//            $curTemplate->setRelatedOriginalFile(null);
+
 //            dd($templateEntities);
             // remove template from original file
 
 
             // delete all the imageOverlay entities
             $this->overlayRepo->removeAllInArray($curTemplate->getRelatedImageOverlays());
+            $this->em->remove($curTemplate);
             $this->em->flush();
 //            $curTemplate->setRelatedOriginalFile(null);
 
 //            $this->em->remove($curTemplate);
+            // todo: delete / remove derivatives files too
         }
 //        die('asdfasdfasdf');
 

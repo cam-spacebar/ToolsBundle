@@ -35,10 +35,12 @@ class BaseImageOverlayRepository extends BaseRepository
          * @var ImageOverlay $curOverlay
          */
         foreach($overlayEntities as $curI => $curOverlay) {
-            $curOverlay->setRelatedTemplate(null);
-            $curOverlay->getRelatedTemplate()->removeRelatedImageOverlay($curOverlay);
+//            dump($curOverlay);
+//            $curOverlay->setRelatedTemplate(null);
+//            $curOverlay->getRelatedTemplate()->removeRelatedImageOverlay($curOverlay);
             $this->em->remove($curOverlay);
         }
+        $this->em->flush();
     }
 
 

@@ -69,7 +69,6 @@ class OverlayManager
      */
     public function createNewTemplateAndOverlay(File $canvasFile, int $posX, int $posY, int $w, int $h, string $labelName): Template
     {
-
         // create template and imageOverlay
         $template = $this->templateRepo->createNewTemplate(
             $canvasFile
@@ -84,6 +83,9 @@ class OverlayManager
             $h,
             $labelName
         );
+
+        $template->addRelatedImageOverlay($overlay);
+        $overlay->setRelatedTemplate($template);
 
         return $template;
     }
@@ -115,7 +117,7 @@ class OverlayManager
      */
     public function deleteFile(File $file)
     {
-        $file->setRelatedTemplate(null);
+//        $file->setRelatedTemplate(null);
 //        dd($file->getRelatedTemplates());
         $this->templateRepo->removeAllInArray($file->getRelatedTemplates());
 

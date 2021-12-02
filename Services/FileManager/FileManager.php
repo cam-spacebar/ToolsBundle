@@ -83,7 +83,8 @@ class FileManager
     {
         if (!$file->getRelatedTemplates()->isEmpty()) {
 //            dump($file->getRelatedTemplates());
-            throw new \Exception('the file: "'. $file->getOriginalFilename() .'" (id: '. $file->getId() .') has a template entity (a foreign key) so it can not be deleted directly. Please use: OverlayManager->deleteFile() to remove template, overlays and the file (image / pdf).');
+            $count = $file->getRelatedTemplates()->count();
+            throw new \Exception('the file: "'. $file->getOriginalFilename() .'" (id: '. $file->getId() .') has '. $count .' template entity/entities (a foreign key) so it can not be deleted directly. Please use: OverlayManager->deleteFile() to remove template, overlays and the file (image / pdf).');
         }
 
         $remoteFilepath = $file->getRemoteFilePath();
