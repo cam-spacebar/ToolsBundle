@@ -36,6 +36,14 @@ class FileManager
         $this->bucketname           = $env_var_bucketName;
     }
 
+    /**
+     * @param string $remoteFilepath
+     * @param bool $throwExceptionIfFileDoesNotExist
+     * @return bool
+     * @throws \League\Flysystem\FileNotFoundException
+     *
+     * Delete the remote (S3) file, but do not affect the DB record or locally cached file.
+     */
     public function deleteRemoteFile(string $remoteFilepath, $throwExceptionIfFileDoesNotExist = true)
     {
         // todo: remove this and just use the flysystem exceptions instead?
@@ -49,6 +57,12 @@ class FileManager
         }
     }
 
+    /**
+     * @param File $file
+     * @return bool
+     *
+     * delete ony the locally cached file.
+     */
     public function deleteLocalFile(File $file)
     {
         $filepath = $file->getLocalFilePath();
@@ -56,7 +70,7 @@ class FileManager
             unlink($filepath);
         }
 
-        $this->logger->info('deleted local file: '. $filepath);
+        $this->logger->info('deleted locally cached file: '. $filepath);
         return true;
     }
 
@@ -67,6 +81,11 @@ class FileManager
      */
     public function deleteFile(File $file)
     {
+        if (!$file->getRelatedTemplates()->isEmpty()) {
+//            dump($file->getRelatedTemplates());
+            throw new \Exception('the file: "'. $file->getOriginalFilename() .'" (id: '. $file->getId() .') has a template entity (a foreign key) so it can not be deleted directly. Please use: OverlayManager->deleteFile() to remove template, overlays and the file (image / pdf).');
+        }
+
         $remoteFilepath = $file->getRemoteFilePath();
         $this->deleteRemoteFile($remoteFilepath);
 

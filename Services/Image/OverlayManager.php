@@ -10,6 +10,8 @@ use App\Entity\FileManager\File;
 use App\Entity\FileManager\Template;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
+use Doctrine\ORM\EntityManager;
+use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 
 /**
  * Class OverlayManager
@@ -32,10 +34,26 @@ class OverlayManager
      */
     private $overlayRepo;
 
-    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo)
+    /**
+     * @var ImageManipulation
+     */
+    private $imageManipulation;
+    /**
+     * @var EntityManager
+     */
+    private $em;
+    /**
+     * @var FileManager
+     */
+    private $fileManager;
+
+    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager)
     {
-        $this->templateRepo = $templateRepo;
-        $this->overlayRepo = $overlayRepo;
+        $this->templateRepo         = $templateRepo;
+        $this->overlayRepo          = $overlayRepo;
+        $this->imageManipulation    = $imageManipulation;
+        $this->em                   = $em;
+        $this->fileManager = $fileManager;
     }
 
     /**
@@ -68,5 +86,43 @@ class OverlayManager
         );
 
         return $template;
+    }
+
+    /**
+     * @param File $imageFile
+     * @param Template $template
+     * @param array $payload
+     *
+     * Create a composite images that places the "overlay" (e.g. QR code) onto the $imageFile ("canvas") image
+     * and save the new image as File entity (i.e. to AWS S3)
+     */
+    public function createCompositeImage(File $imageFile, Template $template, array $payload)
+    {
+        // todo: check payload
+        $url = $payload['url'];
+
+        // generate the QR code
+
+        $pathname = $this->QRCodeGenerator->generateShortUrlQRCodeFromURL($url);
+
+//        $this->imageManipulation->overlayImage()
+    }
+
+    /**
+     * @param File $file
+     * This deletes the file entity (an image or PDF), it's template entity, overlay entities
+     *
+     */
+    public function deleteFile(File $file)
+    {
+        $file->setRelatedTemplate(null);
+//        dd($file->getRelatedTemplates());
+        $this->templateRepo->removeAllInArray($file->getRelatedTemplates());
+
+        $this->em->flush();
+        // todo: remove all TrackedFiles too
+        // todo: remove all URLs and hits?
+        // todo: delete batch entities?
+        $this->fileManager->deleteFile($file);
     }
 }

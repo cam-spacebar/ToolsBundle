@@ -65,7 +65,7 @@ class ImageManipulationTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulationTest.php --filter overlayImageSimple
      *
-     * Create a simple QR code
+     * overlay an (already existing) image ontop of another
      */
     public function overlayImageSimple(): void
     {

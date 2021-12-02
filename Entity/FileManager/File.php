@@ -125,6 +125,15 @@ class File extends BaseEntity
      */
     protected $relatedTemplates;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Template::class, inversedBy="relatedDerivativeFiles")
+     * @ORM\JoinColumn(nullable=true)
+     *
+     * The template that created this derivative file
+     * (note: the file must be a derivative if it has a "creator template")
+     */
+    protected $relatedCreatorTemplate;
+
     /*
      * @var File
      *
@@ -237,11 +246,6 @@ class File extends BaseEntity
         }
 
         return $this;
-    }
-
-    public function getRelatedTemplate(): ?Template
-    {
-        return $this->relatedTemplate;
     }
 
     public function setRelatedTemplate(?Template $relatedTemplate): self
@@ -410,5 +414,21 @@ class File extends BaseEntity
     public function setOriginalFilename(string $originalFilename): void
     {
         $this->originalFilename = $originalFilename;
+    }
+
+    /**
+     * @return ?Template
+     */
+    public function getRelatedCreatorTemplate(): ?Template
+    {
+        return $this->relatedCreatorTemplate;
+    }
+
+    /**
+     * @param Template $relatedCreatorTemplate
+     */
+    public function setRelatedCreatorTemplate(Template $relatedCreatorTemplate): void
+    {
+        $this->relatedCreatorTemplate = $relatedCreatorTemplate;
     }
 }

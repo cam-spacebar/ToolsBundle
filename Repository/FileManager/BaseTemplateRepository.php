@@ -8,7 +8,10 @@ namespace App\VisageFour\Bundle\ToolsBundle\Repository\FileManager;
 
 use App\Entity\FileManager\File;
 use App\Entity\FileManager\Template;
+use App\Repository\FileManager\ImageOverlayRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Template|null find($id, $lockMode = null, $lockVersion = null)
@@ -18,6 +21,18 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
  */
 class BaseTemplateRepository extends BaseRepository
 {
+
+
+    /**
+     * @var ImageOverlayRepository
+     */
+    private $overlayRepo;
+
+    public function __construct (ManagerRegistry $registry, $class, ImageOverlayRepository $overlayRepo) {
+        parent::__construct($registry, $class);
+        $this->overlayRepo = $overlayRepo;
+    }
+
     public function createNewTemplate (File $canvasFile)
     {
         $new = new Template($canvasFile);
@@ -25,6 +40,35 @@ class BaseTemplateRepository extends BaseRepository
         $this->persistAndLogEntityCreation($new);
 
         return $new;
+    }
+
+    /**
+     * @param File $file
+     *
+     * Remove all template entities (and their sub ImageOverlay entities) from the DB (that belong to the provide $file entity).
+     */
+    public function removeAllInArray(\Traversable $templateEntities)
+    {
+//        dump($templateEntities);
+        /**
+         * @var  $curI
+         * @var Template $curTemplate
+         */
+        foreach($templateEntities as $curI => $curTemplate) {
+//            dd($templateEntities);
+            // remove template from original file
+
+
+            // delete all the imageOverlay entities
+            $this->overlayRepo->removeAllInArray($curTemplate->getRelatedImageOverlays());
+            $this->em->flush();
+//            $curTemplate->setRelatedOriginalFile(null);
+
+//            $this->em->remove($curTemplate);
+        }
+//        die('asdfasdfasdf');
+
+        return true;
     }
 
     // /**

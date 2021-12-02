@@ -38,7 +38,8 @@ class BaseTemplate extends BaseEntity
     protected $relatedOriginalFile;
 
     /**
-     * @ORM\OneToMany(targetEntity=File::class, mappedBy="relatedTemplate")
+     * @ORM\OneToMany(targetEntity=File::class, mappedBy="relatedCreatorTemplate")
+     * these are files that are created through a template
      */
     protected $relatedDerivativeFiles;
 
@@ -55,7 +56,7 @@ class BaseTemplate extends BaseEntity
 //        convert relatedOriginalFile to manytomany?
 
         $this->setRelatedOriginalFile($originalFile);
-        $originalFile->setRelatedTemplate($this);
+        $originalFile->addRelatedTemplate($this);
     }
 
     public function getId(): ?int
@@ -87,7 +88,7 @@ class BaseTemplate extends BaseEntity
     {
         if (!$this->relatedDerivativeFiles->contains($relatedDerivativeFile)) {
             $this->relatedDerivativeFiles[] = $relatedDerivativeFile;
-            $relatedDerivativeFile->setRelatedTemplate($this);
+            $relatedDerivativeFile->addRelatedTemplate($this);
         }
 
         return $this;
@@ -98,7 +99,7 @@ class BaseTemplate extends BaseEntity
         if ($this->relatedDerivativeFiles->removeElement($relatedDerivativeFile)) {
             // set the owning side to null (unless already changed)
             if ($relatedDerivativeFile->getRelatedTemplate() === $this) {
-                $relatedDerivativeFile->setRelatedTemplate(null);
+                $relatedDerivativeFile->RelatedTemplate(null);
             }
         }
 

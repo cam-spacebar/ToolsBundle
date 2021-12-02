@@ -6,6 +6,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Tests\Image;
 
+use App\Entity\FileManager\File;
 use App\Entity\FileManager\ImageOverlay;
 use App\Entity\FileManager\Template;
 use App\Entity\UrlShortener\Url;
@@ -57,7 +58,8 @@ class ImageOverlayTest extends CustomKernelTestCase
 
         $this->testingHelper->truncateEntities([
             Template::class,
-            ImageOverlay::class
+            ImageOverlay::class,
+            File::class
         ]);
 
         return true;
@@ -72,16 +74,16 @@ class ImageOverlayTest extends CustomKernelTestCase
     }
 
     /**
-     * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter overlayImageSimple
-     *
+     * creates the entities needed for tests
      *
      */
-    public function overlayImageSimple(): void
+    public function createImageFileTemplateAndImageOverlayEntites(): Template
     {
-        $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/FF A4 flyer.png';
+        $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image';
+        $duplicateFilepath = $this->duplicateLocalFile($filepath, 'FF A4 flyer.png');
+
         $destinationFolder = 'marketing/posters';
-        $imageFile = $this->fileManager->persistFile($filepath, $destinationFolder);
+        $imageFile = $this->fileManager->persistFile($duplicateFilepath, $destinationFolder);
 
         // create template and overlay
         $template = $this->overlayManager->createNewTemplateAndOverlay(
@@ -90,15 +92,57 @@ class ImageOverlayTest extends CustomKernelTestCase
             100,
             0,
             100,
-            'http://www.NewToMelbourne.org/product8?coupon=4422asds'
+            'url'
+        );
+
+        $template->setRelatedOriginalFile($imageFile);
+        $imageFile->addRelatedTemplate($template);
+
+        $this->em->flush();
+
+        return $template;
+    }
+
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter overlayImageSimple
+     *
+     *
+     */
+    public function overlayImageSimple(): void
+    {
+        $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image';
+        $duplicateFilepath = $this->duplicateLocalFile($filepath, 'FF A4 flyer.png');
+
+        $destinationFolder = 'marketing/posters';
+        $imageFile = $this->fileManager->persistFile($duplicateFilepath, $destinationFolder);
+
+        // create template and overlay
+        $template = $this->overlayManager->createNewTemplateAndOverlay(
+            $imageFile,
+            200,
+            100,
+            0,
+            100,
+            'url'
         );
 
         $this->em->flush();
         $this->testingHelper->assertNumberOfDBTableRecords(1, Template::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(1, ImageOverlay::class, $this);
 
-        Continue from here:
-            - finish writing test: create composite?
+        $payload = array (
+            'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
+        );
+//        $compositeImg = $this->overlayManager->createCompositeImage($imageFile, $template, $payload);
+
+        dump($imageFile);
+
+        // cleanup
+        $imageFile = $this->fileManager->deleteFile($imageFile);
+        $this->em->flush();
+        $this->testingHelper->assertNumberOfDBTableRecords(1, File::class, $this);
+
 
         // manual testing
         // mysql -u root
@@ -108,5 +152,23 @@ class ImageOverlayTest extends CustomKernelTestCase
         // select * from boomerprint_template;
         // select * from boomerprint_overlay;
 
+    }
+
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter deleteImage
+     *
+     * Test the deletion of File, tempalte and imageOverlay entites.
+     */
+    public function deleteImage(): void
+    {
+        $template = $this->createImageFileTemplateAndImageOverlayEntites();
+
+        $this->overlayManager->deleteFile($template->getRelatedOriginalFile());
+
+        $this->em->flush();
+        $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(0, Template::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(0, ImageOverlay::class, $this);
     }
 }
