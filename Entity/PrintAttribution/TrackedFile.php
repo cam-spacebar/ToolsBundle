@@ -15,7 +15,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 
 /**
  * @ORM\Entity(repositoryClass=TrackedFileRepository::class)
- * @ORM\Table(name="trackedfile")
+ * @ORM\Table(name="boomerprint_trackedfile")
  *
  * This ties a File and Url/s entities together. Practically speaking it was designed to track image files (posters or flyers) that have QR codes that contain shortened URLs
  */
@@ -86,5 +86,13 @@ class TrackedFile extends BaseEntity
         $this->relatedFile = $relatedFile;
 
         return $this;
+    }
+
+    /**
+     * @param int $id
+    */
+    public function setId(int $id): void
+    {
+        $this->id = $id;
     }
 }

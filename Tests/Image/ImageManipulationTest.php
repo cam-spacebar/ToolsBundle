@@ -17,7 +17,7 @@ use VisageFour\Bundle\ToolsBundle\Services\Image\ImageManipulation;
  * Run all tests:
  * - ./vendor/bin/phpunit
  * Run all the tests in this file:
- * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulation.php
+ * - ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulationTest.php
  *
  * Create new test case [P-CB-087]
  * https://docs.google.com/presentation/d/1-AYb7xtRScoWsB3jxHnThsBJVgwY8DzEKLacGVCB28c/edit#slide=id.p
@@ -63,7 +63,7 @@ class ImageManipulationTest extends CustomKernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulation.php --filter overlayImageSimple
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulationTest.php --filter overlayImageSimple
      *
      * Create a simple QR code
      */

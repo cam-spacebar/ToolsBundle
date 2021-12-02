@@ -4,9 +4,11 @@
 * by: Cameron
 */
 
+namespace VisageFour\Bundle\ToolsBundle\Tests\Image;
 
-namespace App\VisageFour\Bundle\ToolsBundle\Tests\OverlayTemplate;
-
+use App\Entity\FileManager\ImageOverlay;
+use App\Entity\FileManager\Template;
+use App\Entity\UrlShortener\Url;
 use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
@@ -27,7 +29,7 @@ use VisageFour\Bundle\ToolsBundle\Services\Image\ImageManipulation;
  *
  * (comment version: 1.02)
  */
-class ImageOverlayTest
+class ImageOverlayTest extends CustomKernelTestCase
 {
     /** @var OverlayManager */
     private $overlayManager;
@@ -39,8 +41,8 @@ class ImageOverlayTest
     {
         $container = self::$kernel->getContainer();
 
-        $this->overlayManager = $container->get('test.'. OverlayManager::class);
-        $this->overlayManager = $container->get('test.'. FileManager::class);
+        $this->overlayManager   = $container->get('test.'. OverlayManager::class);
+        $this->fileManager      = $container->get('test.'. FileManager::class);
 
         $this->getEntityManager();
     }
@@ -54,7 +56,8 @@ class ImageOverlayTest
         $this->getServices(true);
 
         $this->testingHelper->truncateEntities([
-//            Url::class
+            Template::class,
+            ImageOverlay::class
         ]);
 
         return true;
@@ -90,18 +93,17 @@ class ImageOverlayTest
             'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
 
-//        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/ImageManipulation/';
-//        $compositeImg = $this->imageManipulation->overlayImage (
-//            $baseDir. 'FF A4 flyer.png',
-//            $baseDir. 'QRCode1.png',
-//            350,
-//            640,
-//            0,
-//            90
-//        );
-//
-//        $filePath = "var/ImageManipulation/overlayTestResult.png";
-//        $this->imageManipulation->saveImage($compositeImg, $filePath);
+        $this->em->flush();
+        $this->testingHelper->assertNumberOfDBTableRecords(1, Template::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(1, ImageOverlay::class, $this);
+
+        // manual testing
+        // mysql -u root
+        // show databases;
+        // use twencha_le_test;
+        // show tables;
+        // select * from boomerprint_template;
+        // select * from boomerprint_overlay;
 
     }
 }

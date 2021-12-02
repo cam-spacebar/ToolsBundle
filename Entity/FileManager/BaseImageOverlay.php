@@ -36,7 +36,7 @@ class BaseImageOverlay extends BaseEntity
     protected $relatedTemplate;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(type="string", length=25)
      */
     protected $type;
 

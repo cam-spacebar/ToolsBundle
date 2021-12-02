@@ -38,6 +38,17 @@ class OverlayManager
         $this->overlayRepo = $overlayRepo;
     }
 
+    /**
+     * @param File $canvasFile
+     * @param int $posX
+     * @param int $posY
+     * @param int $w
+     * @param int $h
+     * @param string $labelName
+     * @return Template
+     *
+     * Creates a template entity and an overlay entity.
+     */
     public function createNewTemplateAndOverlay(File $canvasFile, int $posX, int $posY, int $w, int $h, string $labelName): Template
     {
 
@@ -55,8 +66,6 @@ class OverlayManager
             $h,
             $labelName
         );
-
-        // upload composite to AWS S3
 
         return $template;
     }
