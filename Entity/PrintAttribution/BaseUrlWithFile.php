@@ -9,7 +9,7 @@ namespace VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution;
 use VisageFour\Bundle\ToolsBundle\Entity\UrlShortener\BaseUrl;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\PrintAttribution\TrackedFile;
+use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -24,7 +24,6 @@ use Doctrine\Common\Collections\Collection;
  */
 class BaseUrlWithFile extends BaseUrl
 {
-
     /**
      * @ORM\ManyToOne(targetEntity=TrackedFile::class, inversedBy="relatedUrls")
      * @ORM\JoinColumn(nullable=false)

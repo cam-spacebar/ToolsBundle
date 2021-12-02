@@ -97,6 +97,9 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->testingHelper->assertNumberOfDBTableRecords(1, Template::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(1, ImageOverlay::class, $this);
 
+        Continue from here:
+            - finish writing test: create composite?
+
         // manual testing
         // mysql -u root
         // show databases;
