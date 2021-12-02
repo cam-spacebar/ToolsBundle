@@ -65,12 +65,12 @@ class ImageManipulationTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageManipulationTest.php --filter overlayImageSimple
      *
-     * overlay an (already existing) image ontop of another
+     * Overlay an (already existing) image ontop of another and save it to the file system.
      */
     public function overlayImageSimple(): void
     {
         $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
-        $compositeImg = $this->imageManipulation->overlayImage (
+        $composite = $this->imageManipulation->overlayImage (
             $baseDir. 'FF A4 flyer.png',
             $baseDir. 'QRCode1.png',
             350,
@@ -80,7 +80,7 @@ class ImageManipulationTest extends CustomKernelTestCase
         );
 
         $filePath = "var/ImageManipulation/overlayTestResult.png";
-        $this->imageManipulation->saveImage($compositeImg, $filePath);
+        $this->imageManipulation->saveImage($composite, $filePath);
 
         $this->assertFileExists($filePath);
 

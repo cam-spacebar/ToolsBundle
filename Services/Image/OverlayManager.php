@@ -12,6 +12,7 @@ use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
+use VisageFour\Bundle\ToolsBundle\Services\QRcode\QRCodeGenerator;
 
 /**
  * Class OverlayManager
@@ -46,14 +47,19 @@ class OverlayManager
      * @var FileManager
      */
     private $fileManager;
+    /**
+     * @var QRCodeGenerator
+     */
+    private $QRCodeGenerator;
 
-    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager)
+    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, QRCodeGenerator $QRCodeGenerator)
     {
         $this->templateRepo         = $templateRepo;
         $this->overlayRepo          = $overlayRepo;
         $this->imageManipulation    = $imageManipulation;
         $this->em                   = $em;
-        $this->fileManager = $fileManager;
+        $this->fileManager          = $fileManager;
+        $this->QRCodeGenerator      = $QRCodeGenerator;
     }
 
     /**
@@ -95,19 +101,34 @@ class OverlayManager
      * @param Template $template
      * @param array $payload
      *
-     * Create a composite images that places the "overlay" (e.g. QR code) onto the $imageFile ("canvas") image
+     * Create a composite images/PDF that places the "overlay" (e.g. QR code) onto the provided $canvas File entity
      * and save the new image as File entity (i.e. to AWS S3)
      */
-    public function createCompositeImage(File $imageFile, Template $template, array $payload)
+    public function createCompositeImage(File $canvas, Template $template, array $payload): File
     {
         // todo: check payload
         $url = $payload['url'];
 
         // generate the QR code
 
-        $pathname = $this->QRCodeGenerator->generateShortUrlQRCodeFromURL($url);
+        $QRCodePathname = $this->QRCodeGenerator->generateShortUrlQRCodeFromURL($url);
 
-//        $this->imageManipulation->overlayImage()
+//        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
+        $composite = $this->imageManipulation->overlayImage (
+            $canvas->getLocalFilePath(),
+            $QRCodePathname,
+            350,
+            640,
+            0,
+            90
+        );
+
+        $filePath = "var/ImageManipulation/overlayTestResult.png";
+        $this->imageManipulation->saveImage($composite, $filePath);
+
+        $composite = $this->fileManager->persistFile($filePath);
+
+        return $composite;
     }
 
     /**

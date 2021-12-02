@@ -26,7 +26,7 @@ class BaseUrlWithFile extends BaseUrl
 {
     /**
      * @ORM\ManyToOne(targetEntity=TrackedFile::class, inversedBy="relatedUrls")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      *
      */
     private $trackedFile;

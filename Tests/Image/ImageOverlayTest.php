@@ -74,7 +74,7 @@ class ImageOverlayTest extends CustomKernelTestCase
     }
 
     /**
-     * creates the entities needed for tests
+     * Creates the entities needed for tests
      *
      */
     public function createImageFileTemplateAndImageOverlayEntites(): Template
@@ -105,53 +105,43 @@ class ImageOverlayTest extends CustomKernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter overlayImageSimple
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter produceTrackedFileComposite
      *
-     *
+     * create a template entity and overlay entity, use them to then overlay a poster image with a QR code. Then save the resulting composite file to S3.
      */
-    public function overlayImageSimple(): void
+    public function produceTrackedFileComposite(): void
     {
-        $filepath = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image';
-        $duplicateFilepath = $this->duplicateLocalFile($filepath, 'FF A4 flyer.png');
-
-        $destinationFolder = 'marketing/posters';
-        $imageFile = $this->fileManager->persistFile($duplicateFilepath, $destinationFolder);
-
-        // create template and overlay
-        $template = $this->overlayManager->createNewTemplateAndOverlay(
-            $imageFile,
-            200,
-            100,
-            0,
-            100,
-            'url'
-        );
+        $template = $this->createImageFileTemplateAndImageOverlayEntites();
 
         $this->em->flush();
         $this->testingHelper->assertNumberOfDBTableRecords(1, Template::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(1, ImageOverlay::class, $this);
 
+        $imageFile = $template->getRelatedOriginalFile();
         $payload = array (
             'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
-//        $compositeImg = $this->overlayManager->createCompositeImage($imageFile, $template, $payload);
+        $composite = $this->overlayManager->createCompositeImage($imageFile, $template, $payload);
 
-        dump($imageFile);
-
-        // cleanup
-        $imageFile = $this->fileManager->deleteFile($imageFile);
-        $this->em->flush();
-        $this->testingHelper->assertNumberOfDBTableRecords(1, File::class, $this);
-
+        // todo: create tracked file.
 
         // manual testing
+//        copy($composite->getLocalFilePath(), 'var/overlayTest.png');
+
+        // cleanup
+        $this->overlayManager->deleteFile($template->getRelatedOriginalFile());
+        $this->overlayManager->deleteFile($composite);
+        $this->em->flush();
+
+        $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
+
+        // == manual testing commands ==
         // mysql -u root
         // show databases;
         // use twencha_le_test;
         // show tables;
         // select * from boomerprint_template;
         // select * from boomerprint_overlay;
-
     }
 
     /**
