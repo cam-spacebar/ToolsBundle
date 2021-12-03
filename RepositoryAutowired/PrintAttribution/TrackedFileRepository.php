@@ -4,7 +4,7 @@
 * by: Cameron
 */
 
-namespace VisageFour\Bundle\ToolsBundle\Repository\PrintAttribution;
+namespace VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution;
 
 use Doctrine\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
@@ -21,6 +21,11 @@ class TrackedFileRepository extends BaseRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, TrackedFile::class);
+    }
+
+    public function createNewTrackedFile()
+    {
+        $new = new TrackedFile();
     }
 
     // /**

@@ -38,12 +38,6 @@ class BaseTemplate extends BaseEntity
     protected $relatedOriginalFile;
 
     /**
-     * @ORM\OneToMany(targetEntity=File::class, mappedBy="relatedCreatorTemplate")
-     * these are files that are created through a template
-     */
-    protected $relatedDerivativeFiles;
-
-    /**
      * @ORM\OneToMany(targetEntity=ImageOverlay::class, mappedBy="relatedTemplate", orphanRemoval=true)
      */
     protected $relatedImageOverlays;
@@ -75,37 +69,6 @@ class BaseTemplate extends BaseEntity
 
         return $this;
     }
-
-    /**
-     * @return Collection|File[]
-     */
-    public function getRelatedDerivativeFiles(): Collection
-    {
-        return $this->relatedDerivativeFiles;
-    }
-
-    public function addRelatedDerivativeFile(File $relatedDerivativeFile): self
-    {
-        if (!$this->relatedDerivativeFiles->contains($relatedDerivativeFile)) {
-            $this->relatedDerivativeFiles[] = $relatedDerivativeFile;
-            $relatedDerivativeFile->addRelatedTemplate($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRelatedDerivativeFile(File $relatedDerivativeFile): self
-    {
-        if ($this->relatedDerivativeFiles->removeElement($relatedDerivativeFile)) {
-            // set the owning side to null (unless already changed)
-            if ($relatedDerivativeFile->getRelatedTemplate() === $this) {
-                $relatedDerivativeFile->RelatedTemplate(null);
-            }
-        }
-
-        return $this;
-    }
-
 
     /**
      * @return Collection|ImageOverlay[]

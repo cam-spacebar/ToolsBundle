@@ -13,6 +13,8 @@ use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
+use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
+use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\QRcode\QRCodeGenerator;
 use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
@@ -54,8 +56,12 @@ class OverlayManager
      * @var UrlShortenerHelper
      */
     private $urlShortenerHelper;
+    /**
+     * @var TrackedFileRepository
+     */
+    private $trackedFileRepo;
 
-    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper)
+    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, TrackedFileRepository $trackedFileRepo)
     {
         $this->templateRepo         = $templateRepo;
         $this->overlayRepo          = $overlayRepo;
@@ -63,6 +69,7 @@ class OverlayManager
         $this->em                   = $em;
         $this->fileManager          = $fileManager;
         $this->urlShortenerHelper   = $urlShortenerHelper;
+        $this->trackedFileRepo      = $trackedFileRepo;
     }
 
     /**
@@ -106,10 +113,14 @@ class OverlayManager
      *
      * Use the ImageOverlay and Template entities to create a composite images/PDF that places the "overlay" (e.g. QR code) onto the provided $canvas File entity
      * and save/persist the new image to storage (i.e. AWS S3) as File entity
+     *
+     * $generateImmediately = false will simply mark the TrackedFile for creation - and not acctually create it (due to delay when creating large amounts of images).
      */
-    public function createCompositeImage(File $canvas, Template $template, array $payload): File
+    public function createCompositeImage(File $canvas, Template $template, array $payload, $generateImmediately = true): File
     {
         $canvas->hasRelatedTemplate($template);
+
+//        $trackedFile = new TrackedFile($canvas, $);
 
         // loop through ImageOverlay entities and apply them to the canvas
         $overlays = $template->getRelatedImageOverlays();
@@ -139,8 +150,17 @@ class OverlayManager
         $this->imageManipulation->saveImage($composite, $filePath);
 
         $composite = $this->fileManager->persistFile($filePath);
+//`        $composite->`
 
         return $composite;
+    }
+
+    /**
+     *
+     */
+    public function createBatch()
+    {
+        $this->trackedFileRepo->createNewTrackedFile();
     }
 
     /**

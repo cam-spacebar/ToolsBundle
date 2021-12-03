@@ -14,6 +14,7 @@ use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\Common\Collections\Collection;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
 
 /**
  * @MappedSuperclass
@@ -23,7 +24,7 @@ use Doctrine\Common\Collections\Collection;
  * this entity stores details about a file that's created/uploaded. important details like:
  * owner person, file size, original name and even alows for things like version history of a file and duplication detection (via checksum hash)
  */
-class File extends BaseEntity
+class File extends BaseEntity implements FileInterface
 {
     /**
      * @var int
@@ -127,13 +128,18 @@ class File extends BaseEntity
     protected $relatedTemplates;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Template::class, inversedBy="relatedDerivativeFiles")
+     * @ORM\ManyToOne(targetEntity="App\Entity\FileManager\File", inversedBy="relatedDerivativeFiles")
      * @ORM\JoinColumn(nullable=true)
      *
-     * The template that created this derivative file
-     * (note: the file must be a derivative if it has a "creator template")
+     * The file this entity is derived from.
      */
-    protected $relatedCreatorTemplate;
+    protected $relatedOriginalFile;
+
+    /**
+     * @ORM\OneToMany(targetEntity=File::class, mappedBy="relatedOriginalFile")
+     * Files that are created as a derivative of this file (such as composite images with a QR code).
+     */
+    protected $relatedDerivativeFiles;
 
     /*
      * @var File
@@ -435,16 +441,46 @@ class File extends BaseEntity
     /**
      * @return ?Template
      */
-    public function getRelatedCreatorTemplate(): ?Template
+    public function getRelatedOriginalFile(): ?FileInterface
     {
-        return $this->relatedCreatorTemplate;
+        return $this->relatedOriginalFile;
     }
 
     /**
-     * @param Template $relatedCreatorTemplate
+     * @param FileInterface $relatedOriginalFile
      */
-    public function setRelatedCreatorTemplate(Template $relatedCreatorTemplate): void
+    public function setRelatedOriginalFile(FileInterface $relatedOriginalFile): void
     {
-        $this->relatedCreatorTemplate = $relatedCreatorTemplate;
+        $this->relatedOriginalFile = $relatedOriginalFile;
+    }
+
+    /**
+     * @return Collection|File[]
+     */
+    public function getRelatedDerivativeFiles(): Collection
+    {
+        return $this->relatedDerivativeFiles;
+    }
+
+    public function addRelatedDerivativeFile(FileInterface $relatedDerivativeFile): self
+    {
+        if (!$this->relatedDerivativeFiles->contains($relatedDerivativeFile)) {
+            $this->relatedDerivativeFiles[] = $relatedDerivativeFile;
+            $relatedDerivativeFile->setRelatedOriginalFile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRelatedDerivativeFile(File $relatedDerivativeFile): self
+    {
+        if ($this->relatedDerivativeFiles->removeElement($relatedDerivativeFile)) {
+            // set the owning side to null (unless already changed)
+            if ($relatedDerivativeFile->getRelatedOriginalFile() === $this) {
+                $relatedDerivativeFile->setRelatedOriginalFile(null);
+            }
+        }
+
+        return $this;
     }
 }

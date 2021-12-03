@@ -8,7 +8,7 @@ namespace VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution;
 
 use App\Entity\FileManager\File;
 use App\Entity\UrlShortener\Url;
-use VisageFour\Bundle\ToolsBundle\Repository\PrintAttribution\TrackedFileRepository;
+use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;

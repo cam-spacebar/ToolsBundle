@@ -10,6 +10,8 @@ use App\Entity\FileManager\File;
 use App\Entity\FileManager\ImageOverlay;
 use App\Entity\FileManager\Template;
 use App\Entity\UrlShortener\Url;
+use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
+use VisageFour\Bundle\ToolsBundle\Services\Logging\HybridLogger;
 use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
@@ -105,6 +107,24 @@ class ImageOverlayTest extends CustomKernelTestCase
 
     /**
      * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter deleteImage
+     *
+     * Test the deletion of File, template and imageOverlay DB entites.
+     */
+    public function deleteImage(): void
+    {
+        $template = $this->createImageFileTemplateAndImageOverlayEntites();
+
+        $this->overlayManager->deleteFile($template->getRelatedOriginalFile());
+
+        $this->em->flush();
+        $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(0, Template::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(0, ImageOverlay::class, $this);
+    }
+
+    /**
+     * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter produceTrackedFileComposite
      *
      * create a template entity and overlay entity, use them to overlay a poster image with a QR code (of a shortened URL).
@@ -135,6 +155,7 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->em->flush();
 
         $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(0, TrackedFile::class, $this);
 
         // == manual testing commands ==
         // mysql -u root
@@ -147,19 +168,12 @@ class ImageOverlayTest extends CustomKernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter deleteImage
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateAllTrackedFiles
      *
-     * Test the deletion of File, tempalte and imageOverlay entites.
+     *
      */
-    public function deleteImage(): void
+    public function generateAllTrackedFiles(): void
     {
-        $template = $this->createImageFileTemplateAndImageOverlayEntites();
-
-        $this->overlayManager->deleteFile($template->getRelatedOriginalFile());
-
-        $this->em->flush();
-        $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
-        $this->testingHelper->assertNumberOfDBTableRecords(0, Template::class, $this);
-        $this->testingHelper->assertNumberOfDBTableRecords(0, ImageOverlay::class, $this);
+        $this->overlayManager->createBatch();
     }
 }
