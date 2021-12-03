@@ -172,10 +172,10 @@ class ImageOverlayTest extends CustomKernelTestCase
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateAllTrackedFiles
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateBatchOfCompositeFiles
      *
      */
-    public function generateAllTrackedFiles(): void
+    public function generateBatchOfCompositeFiles(): void
     {
         $template = $this->createImageFileTemplateAndImageOverlayEntites();
         $this->em->flush();
@@ -185,9 +185,11 @@ class ImageOverlayTest extends CustomKernelTestCase
             'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
 
-        work from here: create batch and delay creation of composite images
+//        $composite = $this->overlayManager->createCompositeImage($imageFile, $template, $payload);
 
         $count = 3;
-        $this->overlayManager->createBatch($count, $template);
+        $batch = $this->overlayManager->createNewBatch($count, $imageFile, $template, $payload);
+
+
     }
 }

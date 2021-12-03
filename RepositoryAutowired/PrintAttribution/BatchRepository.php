@@ -2,9 +2,11 @@
 
 namespace VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution;
 
+use App\Entity\FileManager\Template;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\Batch;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 
 /**
  * @method Batch|null find($id, $lockMode = null, $lockVersion = null)
@@ -12,11 +14,20 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Batch[]    findAll()
  * @method Batch[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class BatchRepository extends ServiceEntityRepository
+class BatchRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Batch::class);
+    }
+
+    public function createNewBatch(Template $template, array $payload)
+    {
+        $new = new Batch($template, $payload);
+
+        $this->persistAndLogEntityCreation($new, true);
+
+        return $new;
     }
 
     // /**

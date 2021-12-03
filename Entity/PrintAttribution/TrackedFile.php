@@ -41,9 +41,17 @@ class TrackedFile extends BaseEntity
     private $relatedFile;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Batch::class, inversedBy="TrackedFile")
+     * @ORM\Column(type="integer")
+     *
+     * Order the trackedFile has in the $relatedBatch
      */
-    private $relatedTrackedFile;
+    private $order;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Batch::class, inversedBy="TrackedFile")
+     * @var Batch
+     */
+    private $relatedBatch;
 
     public function __construct()
     {
@@ -102,15 +110,35 @@ class TrackedFile extends BaseEntity
         $this->id = $id;
     }
 
-    public function getRelatedTrackedFile(): ?Batch
+    /**
+     * @return Int
+     */
+    public function getOrder()
     {
-        return $this->relatedTrackedFile;
+        return $this->order;
     }
 
-    public function setRelatedTrackedFile(?Batch $relatedTrackedFile): self
+    /**
+     * @param Int $order
+     */
+    public function setOrder($order): Int
     {
-        $this->relatedTrackedFile = $relatedTrackedFile;
+        $this->order = $order;
+    }
 
-        return $this;
+    /**
+     * @return Batch
+     */
+    public function getRelatedBatch(): Batch
+    {
+        return $this->relatedBatch;
+    }
+
+    /**
+     * @param Batch $relatedBatch
+     */
+    public function setRelatedBatch(Batch $relatedBatch): void
+    {
+        $this->relatedBatch = $relatedBatch;
     }
 }

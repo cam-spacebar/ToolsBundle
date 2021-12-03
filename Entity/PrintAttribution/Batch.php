@@ -24,22 +24,29 @@ class Batch
     /**
      * @ORM\OneToMany(targetEntity=TrackedFile::class, mappedBy="relatedTrackedFile")
      */
-    private $TrackedFile;
+    private $trackedFiles;
 
     /**
      * @ORM\ManyToOne(targetEntity=Template::class, inversedBy="relatedBatches")
      * @ORM\JoinColumn(nullable=false)
+     *
+     * The template that will be applied to generate each of the composites
      */
     private $relatedTemplate;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * a (serialized) associative array that contains the values that are then used as the value for QR codes that are overlayed onto a canvas image / PDF
+     * the array keys represents match the ImageOverlay->labelName property and the array (value) is then used in the QR code
+     * (e.g. array key: 'url', will have array contents of e.g.: "www.NewToMelbourne.org/xyz" - which is used in the QR code.)
      */
     private $payload;
 
-    public function __construct()
+    public function __construct(Template $template, array $payload)
     {
-        $this->TrackedFile = new ArrayCollection();
+        $this->trackedFiles = new ArrayCollection();
+        $this->relatedTemplate = $template;
+        $this->setPayload($payload);
     }
 
     public function getId(): ?int
@@ -50,16 +57,16 @@ class Batch
     /**
      * @return Collection|TrackedFile[]
      */
-    public function getTrackedFile(): Collection
+    public function getTrackedFiles(): Collection
     {
-        return $this->TrackedFile;
+        return $this->trackedFiles;
     }
 
     public function addTrackedFile(TrackedFile $trackedFile): self
     {
-        if (!$this->TrackedFile->contains($trackedFile)) {
-            $this->TrackedFile[] = $trackedFile;
-            $trackedFile->setRelatedTrackedFile($this);
+        if (!$this->trackedFiles->contains($trackedFile)) {
+            $this->trackedFiles[] = $trackedFile;
+            $trackedFile->setRelatedBatch($this);
         }
 
         return $this;
@@ -67,10 +74,10 @@ class Batch
 
     public function removeTrackedFile(TrackedFile $trackedFile): self
     {
-        if ($this->TrackedFile->removeElement($trackedFile)) {
+        if ($this->trackedFiles->removeElement($trackedFile)) {
             // set the owning side to null (unless already changed)
-            if ($trackedFile->getRelatedTrackedFile() === $this) {
-                $trackedFile->setRelatedTrackedFile(null);
+            if ($trackedFile->getRelatedBatch() === $this) {
+                $trackedFile->setRelatedBatch(null);
             }
         }
 
@@ -91,12 +98,16 @@ class Batch
 
     public function getPayload(): ?string
     {
-        return $this->payload;
+        return unserialize($this->payload);
     }
 
     public function setPayload(?string $payload): self
     {
-        $this->payload = $payload;
+        if (!is_array($payload)) {
+            throw new \Exception('$payload must be an array');
+        }
+
+        $this->payload = serialize($payload);
 
         return $this;
     }
