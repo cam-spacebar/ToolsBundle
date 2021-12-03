@@ -15,6 +15,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\Common\Collections\Collection;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\PrintAttribution\TemplateInterface;
 
 /**
  * @MappedSuperclass
@@ -233,7 +234,7 @@ class File extends BaseEntity implements FileInterface
         return $this->relatedTemplates;
     }
 
-    public function addRelatedTemplate(Template $relatedTemplate): self
+    public function addRelatedTemplate(TemplateInterface $relatedTemplate): self
     {
         if (!$this->relatedTemplates->contains($relatedTemplate)) {
             $this->relatedTemplates[] = $relatedTemplate;

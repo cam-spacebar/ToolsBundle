@@ -14,6 +14,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\FileManager\File;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\PrintAttribution\TemplateInterface;
 
 /**
  * Class BaseTemplate
@@ -21,7 +23,7 @@ use App\Entity\FileManager\File;
  *
  * @MappedSuperclass
  */
-class BaseTemplate extends BaseEntity
+class BaseTemplate extends BaseEntity implements TemplateInterface
 {
 
     /**
@@ -58,12 +60,12 @@ class BaseTemplate extends BaseEntity
         return $this->id;
     }
 
-    public function getRelatedOriginalFile(): ?File
+    public function getRelatedOriginalFile(): ?FileInterface
     {
         return $this->relatedOriginalFile;
     }
 
-    public function setRelatedOriginalFile(?File $relatedOriginalFile): self
+    public function setRelatedOriginalFile(?FileInterface $relatedOriginalFile): self
     {
         $this->relatedOriginalFile = $relatedOriginalFile;
 

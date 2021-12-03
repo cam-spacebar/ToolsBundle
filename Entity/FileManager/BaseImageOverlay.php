@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\FileManager\Template;
+use VisageFour\Bundle\ToolsBundle\Interfaces\PrintAttribution\TemplateInterface;
 
 /**
  * @MappedSuperclass
@@ -96,7 +97,7 @@ class BaseImageOverlay extends BaseEntity
         return $this->relatedTemplate;
     }
 
-    public function setRelatedTemplate(?Template $relatedTemplate): self
+    public function setRelatedTemplate(?TemplateInterface $relatedTemplate): self
     {
         $this->relatedTemplate = $relatedTemplate;
 

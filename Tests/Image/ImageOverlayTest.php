@@ -148,6 +148,8 @@ class ImageOverlayTest extends CustomKernelTestCase
 
         // manual testing
 //        copy($composite->getLocalFilePath(), 'var/overlayTest.png');
+        $this->em->flush();
+        $this->testingHelper->assertNumberOfDBTableRecords(2, File::class, $this);
 
         // cleanup
         $this->overlayManager->deleteFile($template->getRelatedOriginalFile());
@@ -158,22 +160,34 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->testingHelper->assertNumberOfDBTableRecords(0, TrackedFile::class, $this);
 
         // == manual testing commands ==
+        // die('end test prematurely');
         // mysql -u root
         // show databases;
         // use twencha_le_test;
         // show tables;
         // select * from boomerprint_template;
         // select * from boomerprint_overlay;
+        // select * from boomerprint_file;
     }
 
     /**
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateAllTrackedFiles
      *
-     *
      */
     public function generateAllTrackedFiles(): void
     {
-        $this->overlayManager->createBatch();
+        $template = $this->createImageFileTemplateAndImageOverlayEntites();
+        $this->em->flush();
+
+        $imageFile = $template->getRelatedOriginalFile();
+        $payload = array (
+            'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
+        );
+
+        work from here: create batch and delay creation of composite images
+
+        $count = 3;
+        $this->overlayManager->createBatch($count, $template);
     }
 }

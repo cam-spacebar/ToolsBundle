@@ -140,17 +140,17 @@ class OverlayManager
                 $curOverlay->getWidth(),
                 $curOverlay->getHeight()
             );
+
         }
 
 //        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
 
-
-
+        // save the file to storage (AWS S3)
         $filePath = "var/QRCodeComposites/overlayTestResult.png";
         $this->imageManipulation->saveImage($composite, $filePath);
 
         $composite = $this->fileManager->persistFile($filePath);
-//`        $composite->`
+        $composite->setRelatedOriginalFile($canvas);
 
         return $composite;
     }
