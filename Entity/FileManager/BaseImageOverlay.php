@@ -165,8 +165,20 @@ class BaseImageOverlay extends BaseEntity
 
     public function setLabelName(?string $labelName): self
     {
+        if (empty($labelName)) {
+            throw new \Exception('the imageOverlay labelName cannot be empty');
+        }
+
         $this->labelName = $labelName;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLabelName()
+    {
+        return $this->labelName;
     }
 }

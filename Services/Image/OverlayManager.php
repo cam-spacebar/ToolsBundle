@@ -7,12 +7,14 @@
 namespace VisageFour\Bundle\ToolsBundle\Services\Image;
 
 use App\Entity\FileManager\File;
+use App\Entity\FileManager\ImageOverlay;
 use App\Entity\FileManager\Template;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\QRcode\QRCodeGenerator;
+use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 
 /**
  * Class OverlayManager
@@ -48,18 +50,18 @@ class OverlayManager
      */
     private $fileManager;
     /**
-     * @var QRCodeGenerator
+     * @var UrlShortenerHelper
      */
-    private $QRCodeGenerator;
+    private $urlShortenerHelper;
 
-    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, QRCodeGenerator $QRCodeGenerator)
+    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper)
     {
         $this->templateRepo         = $templateRepo;
         $this->overlayRepo          = $overlayRepo;
         $this->imageManipulation    = $imageManipulation;
         $this->em                   = $em;
         $this->fileManager          = $fileManager;
-        $this->QRCodeGenerator      = $QRCodeGenerator;
+        $this->urlShortenerHelper   = $urlShortenerHelper;
     }
 
     /**
@@ -101,34 +103,59 @@ class OverlayManager
      * @param Template $template
      * @param array $payload
      *
-     * Create a composite images/PDF that places the "overlay" (e.g. QR code) onto the provided $canvas File entity
-     * and save the new image as File entity (i.e. to AWS S3)
+     * Use the ImageOverlay and Template entities to create a composite images/PDF that places the "overlay" (e.g. QR code) onto the provided $canvas File entity
+     * and save/persist the new image to storage (i.e. AWS S3) as File entity
      */
     public function createCompositeImage(File $canvas, Template $template, array $payload): File
     {
-        // todo: check payload
-        $url = $payload['url'];
+        $canvas->hasRelatedTemplate($template);
 
-        // generate the QR code
+        $overlays = $template->getRelatedImageOverlays();
+        foreach($overlays as $curI => $curOverlay) {
+            $QRCodeContents = $this->getCurrentPayload($payload, $curOverlay);
 
-        $QRCodePathname = $this->QRCodeGenerator->generateShortUrlQRCodeFromURL($url);
+            // generate the QR code
+            $overlayPathname = $this->urlShortenerHelper->generateShortUrlQRCodeFromURL($QRCodeContents);
+
+            work from here: fix this
+            // generate the composite (with QR code).
+            $composite = $this->imageManipulation->overlayImage (
+                $canvas->getImageGD();
+                ?,
+                350,
+                640,
+                0,
+                90
+            );
+        }
 
 //        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
-        $composite = $this->imageManipulation->overlayImage (
-            $canvas->getLocalFilePath(),
-            $QRCodePathname,
-            350,
-            640,
-            0,
-            90
-        );
 
-        $filePath = "var/ImageManipulation/overlayTestResult.png";
+
+
+        $filePath = "var/QRCodeComposites/overlayTestResult.png";
         $this->imageManipulation->saveImage($composite, $filePath);
 
         $composite = $this->fileManager->persistFile($filePath);
 
         return $composite;
+    }
+
+    /**
+     * @param array $payload
+     * @param ImageOverlay $overlay
+     *
+     * Look for the $overlay->labelName in payload and return the its value.
+     * throw exception if it cannot be found.
+     */
+    private function getCurrentPayload(array $payload, ImageOverlay $overlay)
+    {
+        $name = $overlay->getLabelName();
+        if (empty($payload[$name])) {
+            throw new \Exception('there is no value in the $payload for imageOverlay with labelName: '. $name);
+        }
+
+        return $payload[$name];
     }
 
     /**

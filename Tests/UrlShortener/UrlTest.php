@@ -16,6 +16,7 @@ use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager;
+use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 
 /**
  * Class SecurityTest
@@ -39,11 +40,15 @@ class UrlTest extends CustomApiTestCase
      */
     private $urlRepo;
 
+    /** @var UrlShortenerHelper */
+    private $urlShortenerHelper;
+
     private function getServices($debuggingOutputOn)
     {
         $container = self::$kernel->getContainer();
 
-        $this->urlRepo = $container->get('test.'. UrlRepository::class);
+        $this->urlRepo              = $container->get('test.'. UrlRepository::class);
+        $this->urlShortenerHelper   = $container->get('test.'. UrlShortenerHelper::class);
 //        $this->fileManager->getFileRepo()->setOutputValuesOnCreation($debuggingOutputOn);
     }
 
@@ -75,7 +80,7 @@ class UrlTest extends CustomApiTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UrlShortener/UrlTest.php --filter createShortenedURL
      *
-     * create a shortened URL (DB record) and then visit it (creating a Hit DB record)
+     * create a shortened URL (DB record) via the API, then visit it (creating a Hit DB record)
      */
     public function createShortenedURL(): void
     {
@@ -102,8 +107,24 @@ class UrlTest extends CustomApiTestCase
 //        $this->assertSelectorTextContains('h1', 'Hello World');./vendor/bin/phpunit --colors
 //        $this->assertEquals(42, 42);
 
+    }
 
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/UrlShortener/UrlTest.php --filter generateShortUrlQRcodeImage
+     *
+     * Create a QR code that contains a short URL
+     */
+    public function generateShortUrlQRcodeImage(): void
+    {
+        $url = 'http://www.NewToMelbourne.org/product2?coupon=334AG';
+        $pathname = $this->urlShortenerHelper->generateShortUrlQRCodeFromURL($url);
+        $this->assertFileExists($pathname);
 
+        $this->em->flush();
+
+        $this->testingHelper->assertNumberOfDBTableRecords(1, Url::class, $this);
+        unlink($pathname);
 
     }
 }

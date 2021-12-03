@@ -42,21 +42,44 @@ class ImageManipulation
      * @param $filepath
      * @param null $targetSubfolder
      *
-     * resizes $topImg and overlays it ontop of $canvasImg
-     * note use 0 for either height or width - if you dont want to resize by this dimension
+     * Loads images from filepath before sending to: overlayImage()
      */
-    public function overlayImage(string $canvasFilepath, string $topImgFilepath, $posX, $posY, int $width, int $height)
+    public function overlayImageByFilePath(string $canvasFilepath, string $topImgFilepath, int $posX, int $posY, int $width, int $height)
     {
-//        $canvas = new Image($canvasFilepath);
-//        $topImg = imagecreatefrompng($topImgFilepath);
-
+        // load images (from filesystem)
         $canvasImg = new Image($canvasFilepath);
         $topImg = new Image($topImgFilepath);
 
-        $newTopImg = $this->resizeImageInProportion($topImg, $width, $height, true);
+        $compositeImg = $this->overlayImage(
+            $canvasImg,
+            $topImg,
+            $posX,
+            $posY,
+            $width,
+            $height
+        );
 
-        // overlay the topImage
-        $result = imagecopy(
+        return $compositeImg;
+    }
+
+    /**
+     * @param Image $canvasImg
+     * @param Image $topImg
+     * @param int $posX
+     * @param int $posY
+     * @param int $width
+     * @param int $height
+     * @throws \Exception
+     *
+     * resizes $topImg and overlays it ontop of $canvasImg to create $compositeImg
+     * (note: use "0" for either height or width - if you dont want to resize by this dimension)
+     */
+    public function overlayImage(Image $canvasImg, Image $topImg, int $posX, int $posY, int $width, int $height): Image
+    {
+        $newTopImg = $this->resizeImageInProportion($topImg, $width, $height);
+
+        // create the composite image
+        imagecopy(
             $canvasImg->getSrc(),
             $newTopImg->getSrc(),
             $posX,

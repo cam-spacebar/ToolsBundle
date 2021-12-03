@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
  * Class BaseFileWithUrl
  * @package App\VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution
  *
- * this adds the TrackedFile entity to the File entity.
+ * This adds the TrackedFile entity to the File entity.
  */
 class BaseFileWithUrl extends File
 {

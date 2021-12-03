@@ -17,6 +17,10 @@ class Image
     public function __construct(?string $filepath, $src = null)
     {
         if (!empty($filepath)) {
+            if (!is_file($filepath)) {
+                throw new \Exception('Cannot create file from $filepath: '. $filepath .' as this file does not exist.');
+            }
+
             $this->src = imagecreatefrompng($filepath);
         } else {
             $this->src      = $src;

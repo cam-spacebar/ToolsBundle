@@ -70,7 +70,7 @@ class ImageManipulationTest extends CustomKernelTestCase
     public function overlayImageSimple(): void
     {
         $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
-        $composite = $this->imageManipulation->overlayImage (
+        $composite = $this->imageManipulation->overlayImageByFilePath (
             $baseDir. 'FF A4 flyer.png',
             $baseDir. 'QRCode1.png',
             350,

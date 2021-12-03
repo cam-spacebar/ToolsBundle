@@ -65,7 +65,6 @@ class QRCodeGenerationTest extends CustomKernelTestCase
 //        $this->manager->flush();
     }
 
-
     /**
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/QRCode/QRCodeGenerationTest.php --filter generateQRcodeSimple
@@ -80,23 +79,5 @@ class QRCodeGenerationTest extends CustomKernelTestCase
         $this->QRCodeGenerator->generateQRCode($outputPathname, $contents);
         $this->assertFileExists($outputPathname);
         unlink($outputPathname);
-    }
-
-    /**
-     * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/QRCode/QRCodeGenerationTest.php --filter generateShortUrlQRcode
-     *
-     * Create a QR code that contains a short URL
-     */
-    public function generateShortUrlQRcode(): void
-    {
-        $url = 'http://www.NewToMelbourne.org/product2?coupon=334AG';
-        $pathname = $this->QRCodeGenerator->generateShortUrlQRCodeFromURL($url);
-        $this->assertFileExists($pathname);
-
-        $this->em->flush();
-
-        $this->testingHelper->assertNumberOfDBTableRecords(1, Url::class, $this);
-
     }
 }

@@ -10,6 +10,7 @@ use App\Entity\FileManager\Template;
 use App\Entity\Person;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\Common\Collections\Collection;
@@ -236,6 +237,17 @@ class File extends BaseEntity
         return $this;
     }
 
+    // check the $template belongs to this file.
+    public function hasRelatedTemplate(Template $template, $throwExceptionOnError = true)
+    {
+        $result = $this->relatedTemplates->contains($template);
+        if (!$result && $throwExceptionOnError) {
+            throw new \Exception('this file does not contain this template');
+        }
+
+        return $throwExceptionOnError;
+    }
+
     public function removeRelatedTemplate(Template $relatedTemplate): self
     {
         if ($this->relatedTemplates->removeElement($relatedTemplate)) {
@@ -362,6 +374,17 @@ class File extends BaseEntity
             'originalFilename'  => $this->originalFilename,
             'ownerPerson'       => $this->relatedOwnerPerson->getEmail()
         ];
+    }
+
+    public function getImageGD()
+    {
+        // todo: check it's an image somehow
+        return new Image($this->getLocalFilePath());
+    }
+
+    public function isImage()
+    {
+//        if ($this->fileExtension == 'png') {}
     }
 
     public function __toString()

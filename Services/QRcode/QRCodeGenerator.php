@@ -18,19 +18,18 @@ use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 
 class QRCodeGenerator
 {
-    /** @var UrlShortenerHelper */
-    private $urlShortener;
+    /** @var FileManager */
+    private $fileManager;
 
-    public function __construct(UrlShortenerHelper $urlShortener, FileManager $fileManager  )
+    public function __construct(FileManager $fileManager  )
     {
-        $this->urlShortener = $urlShortener;
         $this->fileManager  = $fileManager;
     }
 
     public function generateQRCode($outputPathname, $contents, $overwrite = false)
     {
-        if (is_file($outputPathname) && $overwrite) {
-            throw new \Exception('cannot overwrite QRcode with pathnae: '. $outputPathname);
+        if (is_file($outputPathname) && !$overwrite) {
+            throw new \Exception('cannot overwrite QRcode with pathname: '. $outputPathname);
         }
         $result = Builder::create()
             ->writer(new PngWriter())
@@ -38,7 +37,7 @@ class QRCodeGenerator
             ->data($contents)
             ->encoding(new Encoding('UTF-8'))
             ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-            ->size(300)
+            ->size(1000)         // todo: increase this?
             ->margin(10)
             ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
 //            ->logoPath(__DIR__.'/../../Tests/TestFiles/QRCode/symfony.png')
@@ -47,28 +46,7 @@ class QRCodeGenerator
 //            ->labelAlignment(new LabelAlignmentCenter())
             ->build();
 
-
         $this->fileManager->createLocalDirectories($outputPathname);
         $result->saveToFile($outputPathname);
-    }
-
-    /**
-     * @param $url
-     * @return string
-     * @throws \Exception
-     *
-     * create a Url object from $url, get it's "shortUrl", then create a QR code from the $hortUrl
-     */
-    public function generateShortUrlQRCodeFromURL($destinationUrl)
-    {
-        // generate a short Url
-        $url = $this->urlShortener->createNewShortenedUrl($destinationUrl);
-
-        // create the QR code
-        $pathname = 'var/QRCodes/shortUrls/' . $url->getCode() .'.png';
-        $this->generateQRCode($pathname, $url->getShortUrl());
-
-        return $pathname;
-
     }
 }
