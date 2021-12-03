@@ -12,6 +12,7 @@ use App\Entity\FileManager\Template;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
 use Doctrine\ORM\EntityManager;
+use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\QRcode\QRCodeGenerator;
 use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
@@ -110,22 +111,23 @@ class OverlayManager
     {
         $canvas->hasRelatedTemplate($template);
 
+        // loop through ImageOverlay entities and apply them to the canvas
         $overlays = $template->getRelatedImageOverlays();
         foreach($overlays as $curI => $curOverlay) {
             $QRCodeContents = $this->getCurrentPayload($payload, $curOverlay);
 
             // generate the QR code
             $overlayPathname = $this->urlShortenerHelper->generateShortUrlQRCodeFromURL($QRCodeContents);
+            $overlayImg = new Image($overlayPathname);
 
-            work from here: fix this
             // generate the composite (with QR code).
             $composite = $this->imageManipulation->overlayImage (
-                $canvas->getImageGD();
-                ?,
-                350,
-                640,
-                0,
-                90
+                $canvas->getImageGD(),
+                $overlayImg,
+                $curOverlay->getXCoord(),
+                $curOverlay->getYCoord(),
+                $curOverlay->getWidth(),
+                $curOverlay->getHeight()
             );
         }
 

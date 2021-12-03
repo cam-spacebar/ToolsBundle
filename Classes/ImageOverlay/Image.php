@@ -6,6 +6,7 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay;
 
+// todo: research Image\Gd class - can this be used instead?
 class Image
 {
     // the image resource

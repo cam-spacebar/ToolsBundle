@@ -78,6 +78,8 @@ class ImageManipulation
     {
         $newTopImg = $this->resizeImageInProportion($topImg, $width, $height);
 
+        $this->logger->info("creating composite image with: \$posX: $posX, \$posY: $posY, \$width: $width, \$height: $height");
+
         // create the composite image
         imagecopy(
             $canvasImg->getSrc(),

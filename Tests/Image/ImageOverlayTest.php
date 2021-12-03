@@ -107,7 +107,8 @@ class ImageOverlayTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter produceTrackedFileComposite
      *
-     * create a template entity and overlay entity, use them to then overlay a poster image with a QR code. Then save the resulting composite file to S3.
+     * create a template entity and overlay entity, use them to overlay a poster image with a QR code (of a shortened URL).
+     * Then save the resulting composite image file to S3 as a File entity.
      */
     public function produceTrackedFileComposite(): void
     {
