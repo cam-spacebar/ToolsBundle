@@ -41,7 +41,7 @@ class File extends BaseEntity implements FileInterface
      *
      * @ORM\Column(name="remoteFilePath", type="string", length=255)
      *
-     * the remoteFilePath, wherever it's stored (e.g. AWS S3)
+     * The remoteFilePath, wherever it's stored (e.g. AWS S3)
      */
     private $remoteFilePath;
 

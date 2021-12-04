@@ -21,6 +21,7 @@ use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFi
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\QRcode\QRCodeGenerator;
 use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
+use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 /**
  * Class OverlayManager
@@ -33,6 +34,8 @@ use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
  */
 class OverlayManager
 {
+    use LoggerTrait;
+
     /**
      * @var TemplateRepository
      */
@@ -124,14 +127,14 @@ class OverlayManager
      * @param Template $template
      * @param array $payload
      *
-     * Use the ImageOverlay and Template entities to create a composite images/PDF that places the "overlay" (e.g. QR code) onto the provided $canvas File entity
-     * and save/persist the new image to storage (i.e. AWS S3) as File entity
+     * Use the ImageOverlay and Template entities to create a composite image/PDF that places the "overlay" (e.g. QR code with short URL) onto the provided $canvas File entity
+     * then save/persist the new composite image to storage (i.e. AWS S3) as a File entity
      *
-     * $generateImmediately = false will simply mark the TrackedFile for creation - and not acctually create it (due to delay when creating large amounts of images).
      */
-    public function createCompositeImage(File $canvas, Template $template, array $payload): File
+    public function createCompositeImage(Template $template, array $payload): File
     {
-        $canvas->hasRelatedTemplate($template);
+        $this->logger->info('Creating composite image from template.', [$template, $payload]);
+        $canvas = $template->getRelatedOriginalFile();
 
 //        $trackedFile = new TrackedFile($canvas, $);
 
@@ -153,18 +156,43 @@ class OverlayManager
                 $curOverlay->getWidth(),
                 $curOverlay->getHeight()
             );
-
         }
 
 //        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
 
-        // save the file to storage (AWS S3)
-        $filePath = "var/QRCodeComposites/overlayTestResult.png";
+        // save composite to local filesystem
+        $filePath = "var/QRCodeComposites/temporary_composite.png";
         $this->imageManipulation->saveImage($composite, $filePath);
 
+        // save the file to storage (AWS S3)
         $composite = $this->fileManager->persistFile($filePath);
         $composite->setRelatedOriginalFile($canvas);
         $canvas->addRelatedDerivativeFile($composite);
+
+        return $composite;
+    }
+
+    /**
+     * @param TrackedFile $trackedFile
+     */
+    public function createCompositeImageByTrackedFile (TrackedFile $trackedFile): FileInterface
+    {
+        if ($trackedFile->getStatus() == TrackedFile::STATUS_GENERATED) {
+            throw new \Exception('TrackedFile (with id: '. $trackedFile->getId() .') has already been generated. It does not need to be generated again.');
+        }
+
+        $batch = $trackedFile->getRelatedBatch();
+        $template = $batch->getRelatedTemplate();
+
+        // create the composite and store it.
+        $composite = $this->createCompositeImage($template, $batch->getPayload());
+
+        $trackedFile->setRelatedFile($composite);
+        $composite->setRelatedTrackedFile($trackedFile);
+
+        $trackedFile->setStatus(TrackedFile::STATUS_GENERATED);
+
+        $this->em->flush();
 
         return $composite;
     }
@@ -176,8 +204,8 @@ class OverlayManager
      * @param array $payload
      * @param bool $generateImmediately
      *
-     * create a Batch entity and TrackedFile entities for each composite that is to be created.
-     * $generateImmediately = false will delay the creation (and upload to storage) of composites for a later stage
+     * Create a new Batch entity and TrackedFile entities (for each composite that is to be created).
+     * note: $generateImmediately = false will delay the creation (and upload to storage) of composites for a later stage
      */
     public function createNewBatch(int $count, FileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
     {
@@ -187,9 +215,13 @@ class OverlayManager
 //        work from here: create each of the trackedfile - ready for rendering.
         for($i = 1; $i <= $count; $i++) {
 //            print "\n$i";
-            $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i);
+            $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i, TrackedFile::STATUS_IN_QUEUE);
             $batch->addTrackedFile($curTrackedFile);
             $this->em->persist($curTrackedFile);
+        }
+
+        if ($generateImmediately) {
+            $this->createCompositeImageByTrackedFile($curTrackedFile);
         }
 
         return $batch;

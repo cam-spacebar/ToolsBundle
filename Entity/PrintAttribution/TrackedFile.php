@@ -9,6 +9,7 @@ namespace VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution;
 use App\Entity\FileManager\File;
 use App\Entity\UrlShortener\Url;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\Batch;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -48,16 +49,26 @@ class TrackedFile extends BaseEntity
     private $orderNo;
 
     /**
+     * @ORM\Column(name="generation_status", type="string", length=20)
+     * the status of the file generation (if it's being generated).
+     */
+    private $status;
+
+    const STATUS_IN_QUEUE   = 'STATUS_IN_QUEUE';
+    const STATUS_GENERATED  = 'GENERATED';
+
+    /**
      * @ORM\ManyToOne(targetEntity=Batch::class, inversedBy="TrackedFile")
      * @var Batch
      */
     private $relatedBatch;
 
-    public function __construct(Batch $batch, int $order)
+    public function __construct(Batch $batch, int $order, string $status)
     {
         $this->relatedUrls  = new ArrayCollection();
         $this->relatedBatch = $batch;
         $this->orderNo      = $order;
+        $this->status       = $status;
     }
 
     public function getId(): ?int
@@ -92,12 +103,12 @@ class TrackedFile extends BaseEntity
         return $this;
     }
 
-    public function getRelatedFile(): ?File
+    public function getRelatedFile(): ?FileInterface
     {
         return $this->relatedFile;
     }
 
-    public function setRelatedFile(File $relatedFile): self
+    public function setRelatedFile(FileInterface $relatedFile): self
     {
         $this->relatedFile = $relatedFile;
 
@@ -142,5 +153,21 @@ class TrackedFile extends BaseEntity
     public function setRelatedBatch(Batch $relatedBatch): void
     {
         $this->relatedBatch = $relatedBatch;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     */
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
     }
 }

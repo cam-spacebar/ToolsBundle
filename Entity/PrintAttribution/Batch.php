@@ -97,7 +97,7 @@ class Batch extends BaseEntity
         return $this;
     }
 
-    public function getPayload(): ?string
+    public function getPayload(): ?array
     {
         return unserialize($this->payload);
     }

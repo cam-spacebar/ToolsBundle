@@ -24,9 +24,9 @@ class TrackedFileRepository extends BaseRepository
         parent::__construct($registry, TrackedFile::class);
     }
 
-    public function createNewTrackedFile(Batch $batch, int $order): TrackedFile
+    public function createNewTrackedFile(Batch $batch, int $order, $status): TrackedFile
     {
-        $new = new TrackedFile($batch, $order);
+        $new = new TrackedFile($batch, $order, $status);
 
         $this->persistAndLogEntityCreation($new);
 

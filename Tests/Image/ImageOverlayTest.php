@@ -130,7 +130,7 @@ class ImageOverlayTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter produceTrackedFileComposite
      *
-     * create a template entity and overlay entity, use them to overlay a poster image with a QR code (of a shortened URL).
+     * Create a template entity and overlay entity, use them to overlay a poster image with a QR code (of a shortened URL).
      * Then save the resulting composite image file to S3 as a File entity.
      */
     public function produceTrackedFileComposite(): void
@@ -145,7 +145,7 @@ class ImageOverlayTest extends CustomKernelTestCase
         $payload = array (
             'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
-        $composite = $this->overlayManager->createCompositeImage($imageFile, $template, $payload);
+        $composite = $this->overlayManager->createCompositeImage($template, $payload);
 
         // todo: create tracked file.
 
@@ -196,5 +196,6 @@ class ImageOverlayTest extends CustomKernelTestCase
 
         $this->testingHelper->assertNumberOfDBTableRecords($count, TrackedFile::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(1, Batch::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords($count, File::class, $this);
     }
 }

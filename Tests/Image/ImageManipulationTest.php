@@ -84,5 +84,6 @@ class ImageManipulationTest extends CustomKernelTestCase
 
         $this->assertFileExists($filePath);
 
+        unlink($filePath);
     }
 }
