@@ -26,6 +26,7 @@ class BatchRepository extends BaseRepository
         $new = new Batch($template, $payload);
 
         $this->persistAndLogEntityCreation($new, true);
+        $new->setPayload($payload);
 
         return $new;
     }

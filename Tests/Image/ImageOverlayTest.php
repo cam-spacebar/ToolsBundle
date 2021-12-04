@@ -10,6 +10,7 @@ use App\Entity\FileManager\File;
 use App\Entity\FileManager\ImageOverlay;
 use App\Entity\FileManager\Template;
 use App\Entity\UrlShortener\Url;
+use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\Batch;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 use VisageFour\Bundle\ToolsBundle\Services\Logging\HybridLogger;
 use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
@@ -61,7 +62,9 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->testingHelper->truncateEntities([
             Template::class,
             ImageOverlay::class,
-            File::class
+            File::class,
+            Batch::class,
+            TrackedFile::class
         ]);
 
         return true;
@@ -189,7 +192,9 @@ class ImageOverlayTest extends CustomKernelTestCase
 
         $count = 3;
         $batch = $this->overlayManager->createNewBatch($count, $imageFile, $template, $payload);
+        $this->em->flush();
 
-
+        $this->testingHelper->assertNumberOfDBTableRecords($count, TrackedFile::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(1, Batch::class, $this);
     }
 }

@@ -9,11 +9,13 @@ namespace VisageFour\Bundle\ToolsBundle\Services\Image;
 use App\Entity\FileManager\File;
 use App\Entity\FileManager\ImageOverlay;
 use App\Entity\FileManager\Template;
+use App\Repository\FileManager\FileRepository;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\BatchRepository;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
@@ -65,8 +67,12 @@ class OverlayManager
      * @var BatchRepository
      */
     private $batchRepository;
+    /**
+     * @var FileRepository
+     */
+    private $fileRepo;
 
-    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, TrackedFileRepository $trackedFileRepo, BatchRepository $batchRepository)
+    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, TrackedFileRepository $trackedFileRepo, BatchRepository $batchRepository, FileRepository $fileRepo)
     {
         $this->templateRepo         = $templateRepo;
         $this->overlayRepo          = $overlayRepo;
@@ -76,6 +82,7 @@ class OverlayManager
         $this->urlShortenerHelper   = $urlShortenerHelper;
         $this->trackedFileRepo      = $trackedFileRepo;
         $this->batchRepository      = $batchRepository;
+        $this->fileRepo = $fileRepo;
     }
 
     /**
@@ -157,6 +164,7 @@ class OverlayManager
 
         $composite = $this->fileManager->persistFile($filePath);
         $composite->setRelatedOriginalFile($canvas);
+        $canvas->addRelatedDerivativeFile($composite);
 
         return $composite;
     }
@@ -171,14 +179,20 @@ class OverlayManager
      * create a Batch entity and TrackedFile entities for each composite that is to be created.
      * $generateImmediately = false will delay the creation (and upload to storage) of composites for a later stage
      */
-    public function createNewBatch(int $count, Image $canvas, Template $template, array $payload, $generateImmediately = true)
+    public function createNewBatch(int $count, FileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
     {
-        $this->batchRepository->createNewBatch($template);
+        $batch = $this->batchRepository->createNewBatch($template, $payload);
+        $this->em->persist($batch);
 
 //        work from here: create each of the trackedfile - ready for rendering.
+        for($i = 1; $i <= $count; $i++) {
+//            print "\n$i";
+            $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i);
+            $batch->addTrackedFile($curTrackedFile);
+            $this->em->persist($curTrackedFile);
+        }
 
-        $this->trackedFileRepo->createNewTrackedFile();
-
+        return $batch;
     }
 
     /**
@@ -213,6 +227,7 @@ class OverlayManager
         // todo: remove all TrackedFiles too
         // todo: remove all URLs and hits?
         // todo: delete batch entities?
+        $this->fileRepo->removeAllInArray($file->getRelatedDerivativeFiles());
         $this->fileManager->deleteFile($file);
     }
 }

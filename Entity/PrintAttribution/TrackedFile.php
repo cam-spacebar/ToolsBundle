@@ -36,16 +36,16 @@ class TrackedFile extends BaseEntity
 
     /**
      * @ORM\OneToOne(targetEntity=File::class, inversedBy="relatedTrackedFile", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      */
     private $relatedFile;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="order_no", type="integer")
      *
      * Order the trackedFile has in the $relatedBatch
      */
-    private $order;
+    private $orderNo;
 
     /**
      * @ORM\ManyToOne(targetEntity=Batch::class, inversedBy="TrackedFile")
@@ -53,9 +53,11 @@ class TrackedFile extends BaseEntity
      */
     private $relatedBatch;
 
-    public function __construct()
+    public function __construct(Batch $batch, int $order)
     {
-        $this->relatedUrls = new ArrayCollection();
+        $this->relatedUrls  = new ArrayCollection();
+        $this->relatedBatch = $batch;
+        $this->orderNo      = $order;
     }
 
     public function getId(): ?int
@@ -113,15 +115,15 @@ class TrackedFile extends BaseEntity
     /**
      * @return Int
      */
-    public function getOrder()
+    public function getOrderNo()
     {
-        return $this->order;
+        return $this->orderNo;
     }
 
     /**
      * @param Int $order
      */
-    public function setOrder($order): Int
+    public function setOrderNo($order): Int
     {
         $this->order = $order;
     }

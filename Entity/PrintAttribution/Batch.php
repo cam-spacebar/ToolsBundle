@@ -3,6 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution;
 
 use App\Entity\FileManager\Template;
+use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\BatchRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,7 +13,7 @@ use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 /**
  * @ORM\Entity(repositoryClass=BatchRepository::class)
  */
-class Batch
+class Batch extends BaseEntity
 {
     /**
      * @ORM\Id
@@ -101,7 +102,7 @@ class Batch
         return unserialize($this->payload);
     }
 
-    public function setPayload(?string $payload): self
+    public function setPayload(array $payload): self
     {
         if (!is_array($payload)) {
             throw new \Exception('$payload must be an array');

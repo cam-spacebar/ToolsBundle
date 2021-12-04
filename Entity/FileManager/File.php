@@ -223,7 +223,8 @@ class File extends BaseEntity implements FileInterface
         $this->flaggedForDelete     = $flaggedForDelete;
         $this->isDeleted            = $isDeleted;
 
-        $this->relatedTemplates     = new ArrayCollection();
+        $this->relatedTemplates         = new ArrayCollection();
+        $this->relatedDerivativeFiles   = new ArrayCollection();
     }
 
     /**
@@ -458,7 +459,7 @@ class File extends BaseEntity implements FileInterface
     /**
      * @return Collection|File[]
      */
-    public function getRelatedDerivativeFiles(): Collection
+    public function getRelatedDerivativeFiles(): ?Collection
     {
         return $this->relatedDerivativeFiles;
     }
