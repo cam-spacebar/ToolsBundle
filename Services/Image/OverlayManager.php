@@ -140,7 +140,12 @@ class OverlayManager
 
         // loop through ImageOverlay entities and apply them to the canvas
         $overlays = $template->getRelatedImageOverlays();
+        $i = 0;
         foreach($overlays as $curI => $curOverlay) {
+            $i++;
+            if ($i > 1) {
+                throw new \Exception('this code cant yet handle more than 1 overlay, please update. see: ->overlayImage() needs ouput feedback in.');
+            }
             $QRCodeContents = $this->getCurrentPayload($payload, $curOverlay);
 
             // generate the QR code
@@ -161,13 +166,19 @@ class OverlayManager
 //        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
 
         // save composite to local filesystem
-        $filePath = "var/QRCodeComposites/temporary_composite.png";
+        $tempFilename = 'composite.png';
+        $filePath = "var/composites/temp/". $tempFilename;
         $this->imageManipulation->saveImage($composite, $filePath);
 
-        // save the file to storage (AWS S3)
-        $composite = $this->fileManager->persistFile($filePath);
+        // save the file to remote storage (AWS S3)
+        $remoteSubFolder = 'composites/QRcoded';
+        $composite = $this->fileManager->persistFile($filePath, $remoteSubFolder);
         $composite->setRelatedOriginalFile($canvas);
         $canvas->addRelatedDerivativeFile($composite);
+
+        // even though server filename is basic, if downloaded, this filename makes more sense.
+        $newFilename = 'composite_of_'. $canvas->getOriginalFilename();
+        $composite->setOriginalFilename($newFilename);
 
         return $composite;
     }

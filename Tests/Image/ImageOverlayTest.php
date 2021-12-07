@@ -141,7 +141,7 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->testingHelper->assertNumberOfDBTableRecords(1, Template::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(1, ImageOverlay::class, $this);
 
-        $imageFile = $template->getRelatedOriginalFile();
+//        $imageFile = $template->getRelatedOriginalFile();
         $payload = array (
             'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
@@ -149,8 +149,6 @@ class ImageOverlayTest extends CustomKernelTestCase
 
         // todo: create tracked file.
 
-        // manual testing
-//        copy($composite->getLocalFilePath(), 'var/overlayTest.png');
         $this->em->flush();
         $this->testingHelper->assertNumberOfDBTableRecords(2, File::class, $this);
 
@@ -161,6 +159,10 @@ class ImageOverlayTest extends CustomKernelTestCase
 
         $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(0, TrackedFile::class, $this);
+
+        // manual testing
+        // prevent cleanup (i.e. deleteFile()) so you can inspect the files
+//        copy($composite->getLocalFilePath(), 'var/overlayTest.png');
 
         // == manual testing commands ==
         // die('end test prematurely');

@@ -164,7 +164,7 @@ class FileManager
      * Uploads the file to remote storage (AWS S3), create a DB record: File (And persists it to the DB)
      * then copy the file to the local cache folder.
      */
-    public function persistFile ($filePath, $targetSubfolder = null):File {
+    public function persistFile (string $filePath, $targetSubfolder = null):File {
         if (!is_file($filePath)) {
             // todo: don't throw exception for worker processes, use log instead
             $errMsg = 'Cannot find file with path: '. $filePath;
@@ -176,10 +176,10 @@ class FileManager
 
         $this->writeRemoteFile($filePath, $targetFilepath);
 
-        Work from here:
-         - give derivative files an appropriate file name
-         - check the files are being stord in cache.
-         - delete remote files at the end of the test - and check that all files have been deleted (remote, original and cache)?
+//        Work from here:
+//         - give derivative files an appropriate file name (see console output)
+//         - check the files are being stored in cache.
+//         - delete remote files at the end of the test - and check that all files have been deleted (remote, original and cache)?
 
         $infoMsg = "File Persisted to remote storage. Local filename: ". $filePath .' Target (remote storage) filename: '. $targetFilepath ."\n";
         //$this->consoleOutput ($consoleMsg);
