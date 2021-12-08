@@ -84,7 +84,7 @@ class FileManager
         if (!$file->getRelatedTemplates()->isEmpty()) {
 //            dump($file->getRelatedTemplates());
             $count = $file->getRelatedTemplates()->count();
-            throw new \Exception('the file: "'. $file->getOriginalFilename() .'" (id: '. $file->getId() .') has '. $count .' template entity/entities (a foreign key) so it can not be deleted directly. Please use: OverlayManager->deleteFile() to remove template, overlays and the file (image / pdf).');
+            throw new \Exception('the file: "'. $file->getOriginalBasename() .'" (id: '. $file->getId() .') has '. $count .' template entity/entities (a foreign key) so it can not be deleted directly. Please use: OverlayManager->deleteFile() to remove template, overlays and the file (image / pdf).');
         }
 
         $remoteFilepath = $file->getRemoteFilePath();
@@ -95,7 +95,7 @@ class FileManager
 
         $this->em->remove($file);
 
-        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalFilename());
+        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalBasename());
     }
 
     public function doesRemoteFileExist($filepath)
@@ -183,7 +183,7 @@ class FileManager
 
         $infoMsg = "File Persisted to remote storage. Local filename: ". $filePath .' Target (remote storage) filename: '. $targetFilepath ."";
         //$this->consoleOutput ($consoleMsg);
-        $this->logger->info($infoMsg, [], 'yellow');
+        $this->logger->info($infoMsg, [], 'orange');
 
         $newFile = $this->fileRepo->createNewByFilepath($filePath, $targetFilepath);
 
@@ -222,7 +222,7 @@ class FileManager
         $cacheFilepath = $this->generateUniqueLocalFilepath($file);
 
         $logMsg = "caching file to local filesystem. \$originalFilepath: ". $originalFilepath . ", \$cacheFilepath:". $cacheFilepath;
-        $this->logger->info($logMsg, [], 'yellow');
+        $this->logger->info($logMsg, [], 'orange');
 
         $this->createLocalDirectories($cacheFilepath);
         copy( $originalFilepath, $cacheFilepath );

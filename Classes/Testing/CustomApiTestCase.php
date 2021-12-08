@@ -361,7 +361,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         $url = (empty($urlOverride)) ? $this->url : $urlOverride;
         $urlPart = $this->frontendUrl->getSymfonyURL($this->routePairConstant, $this->urlParams, UrlGeneratorInterface::RELATIVE_PATH);
         $msg = 'requesting url: '. $this->url;
-        $this->outputColoredTextToTerminal($msg, 'yellow');
+        $this->outputColoredTextToTerminal($msg, 'orange');
 
         $displayPayload = false;
         $this->outputPayload($displayPayload, $url, $json);

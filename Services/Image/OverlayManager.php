@@ -176,10 +176,6 @@ class OverlayManager
         $composite->setRelatedOriginalFile($canvas);
         $canvas->addRelatedDerivativeFile($composite);
 
-        // even though server filename is basic, if downloaded, this filename makes more sense.
-        $newFilename = 'composite_of_'. $canvas->getOriginalFilename();
-        $composite->setOriginalFilename($newFilename);
-
         return $composite;
     }
 
@@ -220,12 +216,13 @@ class OverlayManager
      */
     public function createNewBatch(int $count, FileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
     {
-
         $batch = $this->batchRepository->createNewBatch($template, $payload);
         $this->em->persist($batch);
 
 //        work from here: create each of the trackedfile - ready for rendering.
-        for($i = 1; $i <= $count; $i++) {
+        $startNo = 144;
+        $endNo = ($count+$startNo);
+        for($i = $startNo; $i < $endNo; $i++) {
             $this->logger->sectionHeader('New Tracked File: '. $i);
             $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i, TrackedFile::STATUS_IN_QUEUE);
 //            dump($curTrackedFile);
@@ -233,10 +230,35 @@ class OverlayManager
 
             if ($generateImmediately) {
                 $this->createCompositeImageByTrackedFile($curTrackedFile);
+                $this->updateCompositeOriginalbasename($curTrackedFile->getRelatedFile(), $i);
             }
         }
 
         return $batch;
+    }
+
+    /**
+     * @param FileInterface $composite
+     * @param $itemNo
+     *
+     * renames composite originalBasename to format: "FF A4 Flyer_[batch_G-014].png"
+     */
+    private function updateCompositeOriginalBasename(FileInterface $composite, $itemNo)
+    {
+        // update originalFilename
+//        $newFilename = 'composite_of_'. $canvas->getOriginalBasename();
+
+        $canvas = $composite->getRelatedOriginalFile();
+        $canvasFilename = $canvas->getOriginalFilename();
+        $canvasExt = $canvas->getFileExtension();
+
+        $batchId = '4';
+        $itemNo = sprintf('%03d', $itemNo);
+        $newBasename = $canvasFilename. ' [batch_'. $batchId .'-'. $itemNo .'].'. $canvasExt;
+        $composite->setOriginalFilename($newBasename);
+
+        $logMsg = 'updated composite "originalFilename" to: "'. $newBasename .'"';
+        $this->logger->info($logMsg, [], 'orange');
     }
 
     /**

@@ -58,14 +58,15 @@ class File extends BaseEntity implements FileInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="originalFilename", type="string", length=255, nullable=false)
+     * @ORM\Column(name="originalBasename", type="string", length=255, nullable=false)
      */
-    private $originalFilename;
+    private $originalBasename;
 
     /**
      * @var string
      *
      * @ORM\Column(name="fileExtension", type="string", length=10, nullable=true)
+     * the *actual* file's extension (not originalBasename)
      */
     private $fileExtension;
 
@@ -178,12 +179,6 @@ class File extends BaseEntity implements FileInterface
         return $this->localFilePath;
     }
 
-    public function getLocalFilename()
-    {
-        $parts = pathinfo($this->localFilePath);
-        return $parts['basename'];
-    }
-
     /**
      * @param string $localFilePath
      */
@@ -208,8 +203,7 @@ class File extends BaseEntity implements FileInterface
 
         $this->localFilePath        = $filepath;
         $parts                      = pathinfo($filepath);
-        $originalFilename           = $parts['basename'];
-        $this->originalFilename     = $originalFilename;
+        $this->originalBasename     = $parts['basename'];
 
         $ext                        = pathinfo($filepath, PATHINFO_EXTENSION);
         $this->fileExtension        = $ext;
@@ -379,7 +373,7 @@ class File extends BaseEntity implements FileInterface
     {
         return [
             'remoteFilePath'    => $this->remoteFilePath,
-            'originalFilename'  => $this->originalFilename,
+            'originalBasename'  => $this->originalBasename,
             'ownerPerson'       => $this->relatedOwnerPerson->getEmail()
         ];
     }
@@ -397,7 +391,7 @@ class File extends BaseEntity implements FileInterface
 
     public function __toString()
     {
-        return $this->originalFilename;
+        return $this->originalbasename;
     }
 
     /**
@@ -429,7 +423,9 @@ class File extends BaseEntity implements FileInterface
      */
     public function getOriginalFilename(): string
     {
-        return $this->originalFilename;
+        $path_parts = pathinfo($this->originalBasename);
+
+        return $path_parts['filename'];
     }
 
     /**
@@ -437,11 +433,18 @@ class File extends BaseEntity implements FileInterface
      */
     public function setOriginalFilename(string $originalFilename): void
     {
-        $this->originalFilename = $originalFilename;
+        $this->originalBasename = $originalFilename;
+    }
+
+    public function getOriginalBasename()
+    {
+        $path_parts = pathinfo($this->originalBasename);
+
+        return $path_parts['basename'];
     }
 
     /**
-     * @return ?Template
+     * @return FileInterface
      */
     public function getRelatedOriginalFile(): ?FileInterface
     {
