@@ -23,12 +23,28 @@ class BatchRepository extends BaseRepository
 
     public function createNewBatch(Template $template, array $payload)
     {
-        $new = new Batch($template, $payload);
+        // get next "batchNo" in the series
+        $batchNo = $this->getNextBatchNo($template);
+
+        $new = new Batch($template, $payload, $batchNo);
 
         $this->persistAndLogEntityCreation($new, true);
         $new->setPayload($payload);
 
         return $new;
+    }
+
+    public function getNextBatchNo(Template $template)
+    {
+        $highest = $this->em->createQueryBuilder()
+            ->select('MAX(e.id)')
+            ->from('YourBundle:Entity', 'e')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        dump($highest);
+        return $highest;
+
     }
 
     // /**

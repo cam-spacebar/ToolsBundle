@@ -43,11 +43,22 @@ class Batch extends BaseEntity
      */
     private $payload;
 
-    public function __construct(Template $template, array $payload)
+    /**
+     * @ORM\Column(type="text", nullable=false)
+     *
+     * @var int
+     *
+     * this indicates the batchNo for the template.
+     * it is used in the originalBase (AKA "download filename") for each img/pdf composite.
+     */
+    private $batchNo;
+
+    public function __construct(Template $template, array $payload, int $batchNo)
     {
         $this->trackedFiles = new ArrayCollection();
         $this->relatedTemplate = $template;
         $this->setPayload($payload);
+        $this->batchNo = $batchNo;
     }
 
     public function getId(): ?int
@@ -111,5 +122,21 @@ class Batch extends BaseEntity
         $this->payload = serialize($payload);
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getBatchNo(): int
+    {
+        return $this->batchNo;
+    }
+
+    /**
+     * @param int $batchNo
+     */
+    public function setBatchNo(int $batchNo): void
+    {
+        $this->batchNo = $batchNo;
     }
 }

@@ -112,7 +112,7 @@ class ImageOverlayTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter deleteImage
      *
-     * Test the deletion of File, template and imageOverlay DB entites.
+     * Test the deletion of File, template and imageOverlay DB entities.
      */
     public function deleteImage(): void
     {
@@ -178,6 +178,7 @@ class ImageOverlayTest extends CustomKernelTestCase
     /**
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateBatchOfCompositeFiles
+     * todo: add delete files and batch
      *
      */
     public function generateBatchOfCompositeFiles(): void
@@ -189,13 +190,6 @@ class ImageOverlayTest extends CustomKernelTestCase
         $payload = array (
             'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
-
-//        $composite = $this->overlayManager->createCompositeImage($imageFile, $template, $payload);
-
-//        todo: work from here:
-//        - create batches of files
-//        - fix print output in logger
-//        - add filename shim for composite images
 
         $count = 3;
         $batch = $this->overlayManager->createNewBatch($count, $imageFile, $template, $payload);
