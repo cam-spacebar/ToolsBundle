@@ -7,11 +7,12 @@
 namespace VisageFour\Bundle\ToolsBundle\Traits;
 
 use Psr\Log\LoggerInterface;
+use VisageFour\Bundle\ToolsBundle\Services\Logging\HybridLogger;
 
 trait LoggerTrait
 {
     /**
-     * @var LoggerInterface|null
+     * @var HybridLogger
      */
     protected $logger;
 
@@ -19,7 +20,7 @@ trait LoggerTrait
      * @required
      * note: required is what tells symfony to call this and inject $logger
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(HybridLogger $logger)
     {
         $this->logger = $logger;
     }

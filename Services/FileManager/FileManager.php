@@ -145,7 +145,7 @@ class FileManager
 
                 $fullPath = $subfolder. $curName .'_'. $i .'.'. $curExt;
 //                print "\n". $fullPath ."\n";
-                $this->logger->info($curName .'_'. $curExt);
+//                $this->logger->info('candidate filename: '. $curName .'.'. $curExt);
 
                 $isApproved = !$this->fileSystem->has($fullPath);
                 if ($isApproved) {
@@ -181,10 +181,9 @@ class FileManager
 //         - check the files are being stored in cache.
 //         - delete remote files at the end of the test - and check that all files have been deleted (remote, original and cache)?
 
-        $infoMsg = "File Persisted to remote storage. Local filename: ". $filePath .' Target (remote storage) filename: '. $targetFilepath ."\n";
+        $infoMsg = "File Persisted to remote storage. Local filename: ". $filePath .' Target (remote storage) filename: '. $targetFilepath ."";
         //$this->consoleOutput ($consoleMsg);
-        $this->logger->info($infoMsg);
-        print "\n ". $infoMsg ."\n";
+        $this->logger->info($infoMsg, [], 'yellow');
 
         $newFile = $this->fileRepo->createNewByFilepath($filePath, $targetFilepath);
 
@@ -220,12 +219,10 @@ class FileManager
      */
     private function copyFileToCache($originalFilepath, File $file)
     {
-
         $cacheFilepath = $this->generateUniqueLocalFilepath($file);
 
         $logMsg = "caching file to local filesystem. \$originalFilepath: ". $originalFilepath . ", \$cacheFilepath:". $cacheFilepath;
-        $this->logger->info($logMsg);
-        print "\n" . $logMsg  ."\n";
+        $this->logger->info($logMsg, [], 'yellow');
 
         $this->createLocalDirectories($cacheFilepath);
         copy( $originalFilepath, $cacheFilepath );
@@ -311,7 +308,7 @@ class FileManager
     private function generateUniqueLocalFilepath(File $file)
     {
         // note: it looks like flysystem adds a "../" silently (to get out of /public)
-        $baseLocalFolder = 'var/awsS3Downloads/'. $this->bucketname;
+        $baseLocalFolder = 'var/awsS3/'. $this->bucketname;
         return $baseLocalFolder .'/'. $file->getRemoteFilePath();
     }
 

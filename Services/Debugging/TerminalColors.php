@@ -1,7 +1,7 @@
 <?php
 
 
-namespace VisageFour\Bundle\ToolsBundle\Services;
+namespace VisageFour\Bundle\ToolsBundle\Services\Debugging;
 
 // provides a way to easily add colors to terminal output,
 // great for phpunit output
@@ -12,6 +12,7 @@ class TerminalColors
     private $background_colors = array();
 
     public function __construct() {
+        // [marker: #consoleColors-332]
         // Set up shell colors
         $this->foreground_colors['black'] = '0;30';
         $this->foreground_colors['dark_gray'] = '1;30';
@@ -26,7 +27,7 @@ class TerminalColors
         $this->foreground_colors['purple'] = '0;35';
         $this->foreground_colors['light_purple'] = '1;35';
         $this->foreground_colors['brown'] = '0;33';
-        $this->foreground_colors['yellow'] = '1;33';
+        $this->foreground_colors['yellow'] = '0;33';
         $this->foreground_colors['light_gray'] = '0;37';
         $this->foreground_colors['white'] = '1;37';
 
@@ -47,10 +48,15 @@ class TerminalColors
         // Check if given foreground color found
         if (isset($this->foreground_colors[$foreground_color])) {
             $colored_string .= "\033[" . $this->foreground_colors[$foreground_color] . "m";
+        } else {
+            throw new \Exception('$foreground_color of: "'. $foreground_color .'" does not exist - use options at marker: #consoleColors-332');
         }
+
         // Check if given background color found
         if (isset($this->background_colors[$background_color])) {
             $colored_string .= "\033[" . $this->background_colors[$background_color] . "m";
+        } else {
+            throw new \Exception('$background_color of: "'. $background_color .'" does not exist - use options at marker: #consoleColors-332');
         }
 
         // Add string and end coloring

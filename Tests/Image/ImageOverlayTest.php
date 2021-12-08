@@ -192,12 +192,19 @@ class ImageOverlayTest extends CustomKernelTestCase
 
 //        $composite = $this->overlayManager->createCompositeImage($imageFile, $template, $payload);
 
+//        todo: work from here:
+//        - create batches of files
+//        - fix print output in logger
+//        - add filename shim for composite images
+
         $count = 3;
         $batch = $this->overlayManager->createNewBatch($count, $imageFile, $template, $payload);
         $this->em->flush();
 
         $this->testingHelper->assertNumberOfDBTableRecords($count, TrackedFile::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(1, Batch::class, $this);
-        $this->testingHelper->assertNumberOfDBTableRecords($count, File::class, $this);
+        $expectedFileCount = $count +1;
+        $this->testingHelper->assertNumberOfDBTableRecords($expectedFileCount, File::class, $this);
+
     }
 }

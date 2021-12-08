@@ -22,7 +22,7 @@ abstract class CustomKernelTestCase extends KernelTestCase
      * @param array $options
      * @return \Symfony\Component\HttpKernel\KernelInterface|void
      *
-     * override bootKernel, so we can add extra services
+     * Override bootKernel, so we can add extra services
      */
     protected static function bootKernel(array $options = [])
     {

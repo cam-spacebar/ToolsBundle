@@ -220,19 +220,20 @@ class OverlayManager
      */
     public function createNewBatch(int $count, FileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
     {
+
         $batch = $this->batchRepository->createNewBatch($template, $payload);
         $this->em->persist($batch);
 
 //        work from here: create each of the trackedfile - ready for rendering.
         for($i = 1; $i <= $count; $i++) {
-//            print "\n$i";
+            $this->logger->sectionHeader('New Tracked File: '. $i);
             $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i, TrackedFile::STATUS_IN_QUEUE);
+//            dump($curTrackedFile);
             $batch->addTrackedFile($curTrackedFile);
-            $this->em->persist($curTrackedFile);
-        }
 
-        if ($generateImmediately) {
-            $this->createCompositeImageByTrackedFile($curTrackedFile);
+            if ($generateImmediately) {
+                $this->createCompositeImageByTrackedFile($curTrackedFile);
+            }
         }
 
         return $batch;

@@ -7,6 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Services\Logging;
 
 use Psr\Log\LoggerInterface;
+use VisageFour\Bundle\ToolsBundle\Services\Debugging\ConsoleOutput;
 
 /**
  * Class HybridLogger
@@ -20,40 +21,56 @@ class HybridLogger
      * @var LoggerInterface
      */
     private $logger;
+    private $kernelEnv;
 
-    public function __construct(LoggerInterface $logger, LoggerInterface $console_logger)
+    /**
+     * @var ConsoleOutput
+     */
+    private $consoleOutput;
+
+    public function __construct(LoggerInterface $logger, ConsoleOutput $consoleOutput, $kernelEnv)
     {
-        die('incomplete! 34werfsdfwed');
-//        dd($consoleLogger);
-        $console_logger->info('asdf-zz');
-//        die('333');
-
-//        dd($consolelogger);
-
         $this->logger = $logger;
+        $this->kernelEnv = $kernelEnv;
+        $this->consoleOutput = $consoleOutput;
     }
 
-    //
-    public function __call($methodName, $args) {
-//        dd($name, $arguments);
-        if (method_exists ( $this->logger,  $methodName)) {
-            call_user_func_array(array($this->logger, $methodName), $args);
-        } else {
-            $trace = debug_backtrace();
-            trigger_error(
-                'Undefined property via __call(): ' . $methodName .
-                ' in ' . $trace[0]['file'] .
-                ' on line ' . $trace[0]['line'],
-                E_USER_NOTICE);
-        }
+//    public function __call($methodName, $args) {
+////        dd($name, $arguments);
+//        if (method_exists ( $this->logger,  $methodName)) {
+//            call_user_func_array(array($this->logger, $methodName), $args);
+//        } else {
+//            $trace = debug_backtrace();
+//            trigger_error(
+//                'Undefined property via __call(): ' . $methodName .
+//                ' in ' . $trace[0]['file'] .
+//                ' on line ' . $trace[0]['line'],
+//                E_USER_NOTICE);
+//        }
+//
+//    }
 
-    }
-
-    public function info($msg, $context)
+    public function info($msg, $context = [], $color = 'white')
     {
-        $args = func_get_args();
-        $methodName = __FUNCTION__;
+        if ($this->kernelEnv == 'test') {
+//           print $lb . $msg;
+           $this->consoleOutput->outputColoredTextToTerminal($msg, $color);
+           if ($context != []) {
+//               dump($context);
+           }
+        } else {        // prod or dev env
+            $this->logger->info($msg, $context);
+        }
+//        $args = func_get_args();
+//        $methodName = __FUNCTION__;
 //        dd($methodName);
-        call_user_func_array(array($this->logger, $methodName), $args);
+//        call_user_func_array(array($this->logger, $methodName), $args);
+    }
+
+    // prints: "==== $header ===="
+    // useful for loops - to indicate new section
+    public function sectionHeader ($header) {
+        $text = "==== ". $header ." ====";
+        $this->info($text, [], 'purple');
     }
 }

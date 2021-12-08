@@ -12,6 +12,7 @@ use Symfony\Component\HttpClient\Exception\RedirectionException;
 use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use VisageFour\Bundle\ToolsBundle\Services\Debugging\ConsoleOutput;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Services\AppSecurity;
 use App\Services\EmailRegisterManager;
@@ -20,7 +21,6 @@ use App\Entity\Person;
 use App\Services\Factories\PersonFactory;
 use Doctrine\Common\Persistence\ObjectManager;
 use Faker\Factory;
-use VisageFour\Bundle\ToolsBundle\Services\TerminalColors;
 use Twencha\Bundle\EventRegistrationBundle\Services\PersonManager;
 use VisageFour\Bundle\ToolsBundle\Services\Testing\TestingHelper;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
@@ -83,8 +83,6 @@ abstract class CustomApiTestCase extends ApiTestCase
      */
     protected $faker;
 
-    static protected $terminalColors;
-
     // setup that is specific to the test case that subclasses this class.
     /**
      * @var FrontendUrl
@@ -114,6 +112,11 @@ abstract class CustomApiTestCase extends ApiTestCase
      */
     private $routePairConstant;
     private $urlParams;
+
+    /**
+     * @var ConsoleOutput
+     */
+    private $consoleOutput;
 
     /**
      * @var ApiErrorCode
@@ -191,6 +194,8 @@ abstract class CustomApiTestCase extends ApiTestCase
 //        parent::setUp();
 
 //        $this->outputDebugToTerminal('running customSetUp()');
+        /** @var consoleOutput */
+        $this->consoleOutput = self::$container->get('test.'. ConsoleOutput::class);
         $this->customSetUp();
     }
 
@@ -214,9 +219,6 @@ abstract class CustomApiTestCase extends ApiTestCase
 
         // get the DI container
         self::$container = $kernel->getContainer();
-
-//        self::$terminalColors = self::$container->get('TerminalColors');
-        self::$terminalColors = new TerminalColors();
 
         return;
     }
@@ -454,17 +456,12 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     protected function outputRedTextToTerminal($msg)
     {
-        $text = self::$terminalColors->getColoredString($msg, 'red', 'black');
-        print "\n";
-        print $text;
+        $this->consoleOutput->outputRedTextToTerminal($msg);
     }
 
     protected function outputColoredTextToTerminal($msg, $fgColor = 'red', $bgColor = 'black')
     {
-        $msg = 'DEBUG: '.$msg;
-        $text = self::$terminalColors->getColoredString($msg, $fgColor, $bgColor);
-        print "\n";
-        print $text;
+        $this->outputColoredTextToTerminal($msg, $fgColor, $bgColor);
     }
 
     /**
@@ -564,6 +561,5 @@ abstract class CustomApiTestCase extends ApiTestCase
 
         $this->outputColoredTextToTerminal('Currently in test: '. $shortened .'()', 'blue');
 
-//        zself::$terminalColors->getColoredString($msg, 'red', 'black');
     }
 }
