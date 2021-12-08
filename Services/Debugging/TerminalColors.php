@@ -1,6 +1,5 @@
 <?php
 
-
 namespace VisageFour\Bundle\ToolsBundle\Services\Debugging;
 
 // provides a way to easily add colors to terminal output,
