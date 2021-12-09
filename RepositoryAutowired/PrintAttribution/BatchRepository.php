@@ -16,6 +16,12 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
  */
 class BatchRepository extends BaseRepository
 {
+    /**
+     *  @var int
+     * this records the last batchNo. If get BatchNo used again and produces the same result, we know that we have a duplicate batch no
+     * (likely because ->flush() wasn't called).
+     */
+    private $lastUsedBatchNo;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Batch::class);
@@ -36,15 +42,36 @@ class BatchRepository extends BaseRepository
 
     public function getNextBatchNo(Template $template)
     {
-        $highest = $this->em->createQueryBuilder()
-            ->select('MAX(e.id)')
-            ->from('YourBundle:Entity', 'e')
+        $query = $this->createQueryBuilder('b')
+            ->select('MAX(b.batchNo)')
+            ->join('b.relatedTemplate', 't')
+//            ->join('EventRegistrationBundle:QuestionOption', 'qo', 'WITH', 'a.relatedQuestionOption = qo.id')
+//            ->where('qo.id = :langQOId')
+            ->where('t.id = :templateId')
+            ->setParameter('templateId', $template->getId())
             ->getQuery()
-            ->getSingleScalarResult();
+//            ->getSQL()
+        ;
 
-        dump($highest);
-        return $highest;
+//        dump('highest: ', $highest);
+        $highest = $query->getSingleScalarResult();
 
+        if (empty($highest)) {
+            $newBatchNo = 1;
+        } else {
+            $newBatchNo = $highest + 1;
+        }
+
+        if ($newBatchNo == $this->lastUsedBatchNo) {
+            throw new \Exception ('new batchNo: '. $newBatchNo .' has already been returned. You need to call flush() between batchNo generations.');
+        }
+        $this->lastUsedBatchNo = $newBatchNo;
+
+
+        $this->logger->info('new BatchNo: '. $newBatchNo, [], 'red' );
+
+
+        return $newBatchNo;
     }
 
     // /**

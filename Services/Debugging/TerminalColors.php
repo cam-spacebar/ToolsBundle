@@ -14,7 +14,7 @@ class TerminalColors
         // [marker: #consoleColors-332]
         // Set up shell colors
         $this->foreground_colors['black'] = '0;30';
-        $this->foreground_colors['dark_gray'] = '1;30';
+        $this->foreground_colors['grey_bold'] = '1;30';
         $this->foreground_colors['blue'] = '0;34';
         $this->foreground_colors['light_blue'] = '1;34';
         $this->foreground_colors['green'] = '0;32';
@@ -27,8 +27,8 @@ class TerminalColors
         $this->foreground_colors['light_purple'] = '1;35';
         $this->foreground_colors['brown'] = '0;33';
         $this->foreground_colors['orange'] = '0;33';
-        $this->foreground_colors['light_gray'] = '0;37';
-        $this->foreground_colors['white'] = '1;37';
+        $this->foreground_colors['white_normal'] = '0;37';
+        $this->foreground_colors['white_bold'] = '1;37';
 
         $this->background_colors['black'] = '40';
         $this->background_colors['red'] = '41';

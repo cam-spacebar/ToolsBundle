@@ -50,7 +50,7 @@ class HybridLogger
 //
 //    }
 
-    public function info($msg, $context = [], $color = 'white')
+    public function info($msg, $context = [], $color = 'white_bold')
     {
         if ($this->kernelEnv == 'test') {
 //           print $lb . $msg;

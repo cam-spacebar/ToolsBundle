@@ -50,7 +50,8 @@ class BaseRepository extends ServiceEntityRepository
         $className = $newObj->getShortName();
         $this->logger->info(
             'New entity created: '. $className,
-            [$newObj]
+            [$newObj],
+            'grey_bold'
         );
 
         if ($persist) {

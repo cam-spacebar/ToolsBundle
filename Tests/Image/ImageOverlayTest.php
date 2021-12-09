@@ -179,6 +179,8 @@ class ImageOverlayTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateBatchOfCompositeFiles
      * todo: add delete files and batch
+     * todo: update composite name - it's too many calls (reduce threshold to 100? To detect too many API calls?)
+     * todo: update composite original basename: [batch_A-004]
      *
      */
     public function generateBatchOfCompositeFiles(): void
@@ -200,5 +202,51 @@ class ImageOverlayTest extends CustomKernelTestCase
         $expectedFileCount = $count +1;
         $this->testingHelper->assertNumberOfDBTableRecords($expectedFileCount, File::class, $this);
 
+    }
+
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter testBatchNoGeneration
+     *
+     */
+    public function testBatchNoGeneration(): void
+    {
+        $template1 = $this->createImageFileTemplateAndImageOverlayEntites();
+        $this->em->flush();
+
+        $imageFile = $template1->getRelatedOriginalFile();
+        $payload = array (
+            'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
+        );
+
+        $count = 1;
+        $A_batch = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload, false);
+        $A_batch2 = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload, false);
+        $A_batch3 = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload, false);
+        $this->assertBatchNoEquals($A_batch3, 3);
+        $this->em->flush();
+
+        $template2 = $this->createImageFileTemplateAndImageOverlayEntites();
+        $this->em->flush();
+        $B_batch = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
+        $this->assertBatchNoEquals($B_batch, 1);
+        $B_batch2 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
+        $B_batch3 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
+        $B_batch4 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
+        $this->em->flush();
+        $this->assertBatchNoEquals($B_batch4, 4);
+
+
+//        $this->testingHelper->assertNumberOfDBTableRecords($count, TrackedFile::class, $this);
+//        $this->testingHelper->assertNumberOfDBTableRecords(1, Batch::class, $this);
+//        $expectedFileCount = $count +1;
+//        $this->testingHelper->assertNumberOfDBTableRecords($expectedFileCount, File::class, $this);
+
+    }
+
+    private function assertBatchNoEquals(Batch $batch, $no)
+    {
+        $batchNo = $batch->getBatchNo();
+        $this->assertEquals($batchNo, $no, 'the batch->batchNo is incorrect. It should be: '. $no .', instead it is: '. $batchNo);
     }
 }

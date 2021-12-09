@@ -166,7 +166,7 @@ class OverlayManager
 //        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
 
         // save composite to local filesystem
-        $tempFilename = 'composite.png';
+        $tempFilename = 'composite_'. uniqid() .'.png';     // use uniqid() here to prevent wasted ->has() call to AWS S3.
         $filePath = "var/composites/temp/". $tempFilename;
         $this->imageManipulation->saveImage($composite, $filePath);
 
@@ -217,13 +217,15 @@ class OverlayManager
     public function createNewBatch(int $count, FileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
     {
         $batch = $this->batchRepository->createNewBatch($template, $payload);
+
         $this->em->persist($batch);
+        $this->em->flush();         // save batch to DB here, because if new batch created, it will throw exception due to duplicate batchNo
 
 //        work from here: create each of the trackedfile - ready for rendering.
-        $startNo = 144;
+        $startNo = 1;
         $endNo = ($count+$startNo);
         for($i = $startNo; $i < $endNo; $i++) {
-            $this->logger->sectionHeader('New Tracked File: '. $i);
+            $this->logger->sectionHeader('New Tracked File: '. $i .' [Batch: '. $batch->getBatchNo() .']');
             $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i, TrackedFile::STATUS_IN_QUEUE);
 //            dump($curTrackedFile);
             $batch->addTrackedFile($curTrackedFile);

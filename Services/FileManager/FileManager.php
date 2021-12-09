@@ -129,21 +129,24 @@ class FileManager
     private function createRemoteFilepath($filepath, $targetSubfolder = null)
     {
         $parts = pathinfo($filepath);
-        $filename = $parts['basename'];
+        $basename = $parts['basename'];
 
         $subfolder = (empty($targetSubfolder)) ? '' : $targetSubfolder .'/';
 
-        $fullPath = $subfolder . $filename;
-        $this->logger->info('Candidate remote $fullPath: '. $fullPath);
+        $fullPath = $subfolder . $basename;
+        $this->logger->info('Candidate remote $fullPath: '. $fullPath, []);
 
         // check if the filepath already exists on the remote server
-        if ($this->fileSystem->has($fullPath)) {
+        if (!$this->fileSystem->has($fullPath)) {
+            return $fullPath;
+        } else {
+            $this->logger->info('unable to use: "'. $fullPath .'" for the remote path name (it already exists). Generating a random one.');
             $curExt = pathinfo($fullPath, PATHINFO_EXTENSION);
             $curName = pathinfo($fullPath, PATHINFO_FILENAME);
-            $maxLoops = 1000;
+            $maxLoops = 50;
             for ($i = 1; $i <= $maxLoops; $i++) {
 
-                $fullPath = $subfolder. $curName .'_'. $i .'.'. $curExt;
+                $fullPath = $subfolder . $curName .'_'. uniqid() .'.'. $curExt;
 //                print "\n". $fullPath ."\n";
 //                $this->logger->info('candidate filename: '. $curName .'.'. $curExt);
 
@@ -154,10 +157,16 @@ class FileManager
                 }
 //                print ($isApproved) ? 'yes' : 'no';
             }
-            throw new \Exception('exceeded '. $maxLoops .' loops - trying to find a filename.');
-        }
 
-        return $fullPath;
+            // if can't use the original filename (or similar) name after 2-3 tries, just randomize it.
+//            return uniqid() .'.'. $curExt;
+            throw new \Exception('exceeded '. $maxLoops .' loops - trying to randomize a basename for: "'. $basename .'".');
+        }
+    }
+
+    private function generateAndTestNewBasename(string $curName, string $curExt, int $i)
+    {
+
     }
 
     /**
