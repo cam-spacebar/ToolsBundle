@@ -7,7 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Repository\FileManager;
 
 use Doctrine\Persistence\ManagerRegistry;
-use VisageFour\Bundle\ToolsBundle\Entity\FileManager\File;
+use VisageFour\Bundle\ToolsBundle\Entity\FileManager\BaseFile;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 
 class FileRepository extends BaseRepository
@@ -18,7 +18,7 @@ class FileRepository extends BaseRepository
 
     public function createNewFromRealFile (string $filename)
     {
-        $new = new File($filename);
+        $new = new BaseFile($filename);
 
         $this->persistAndLogEntityCreation($new);
 

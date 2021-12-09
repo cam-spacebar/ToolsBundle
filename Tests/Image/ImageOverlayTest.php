@@ -76,6 +76,8 @@ class ImageOverlayTest extends CustomKernelTestCase
 //        $this->removeUser($this->person);
 //        $this->manager->persist($this->person);
 //        $this->manager->flush();
+
+        $this->overlayManager->deleteAllFiles(true);
     }
 
     /**
@@ -178,7 +180,7 @@ class ImageOverlayTest extends CustomKernelTestCase
     /**
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateBatchOfCompositeFiles
-     * todo: add delete files and batch
+     * todo: add delete files and delete batch
      * todo: update composite name - it's too many calls (reduce threshold to 100? To detect too many API calls?)
      * todo: update composite original basename: [batch_A-004]
      *

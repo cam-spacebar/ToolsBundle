@@ -9,7 +9,7 @@ namespace VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution;
 use App\Entity\FileManager\File;
 use App\Entity\UrlShortener\Url;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\Batch;
-use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\BaseFileInterface;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -67,6 +67,7 @@ class TrackedFile extends BaseEntity
     {
         $this->relatedUrls  = new ArrayCollection();
         $this->relatedBatch = $batch;
+        $batch->addTrackedFile($this);
         $this->orderNo      = $order;
         $this->status       = $status;
     }
@@ -103,12 +104,12 @@ class TrackedFile extends BaseEntity
         return $this;
     }
 
-    public function getRelatedFile(): ?FileInterface
+    public function getRelatedFile(): ?BaseFileInterface
     {
         return $this->relatedFile;
     }
 
-    public function setRelatedFile(FileInterface $relatedFile): self
+    public function setRelatedFile(BaseFileInterface $relatedFile): self
     {
         $this->relatedFile = $relatedFile;
 

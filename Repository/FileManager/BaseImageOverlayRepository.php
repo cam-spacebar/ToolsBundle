@@ -28,22 +28,6 @@ class BaseImageOverlayRepository extends BaseRepository
     }
 
 
-    public function removeAllInArray(\Traversable $overlayEntities)
-    {
-        /**
-         * @var  $curI
-         * @var ImageOverlay $curOverlay
-         */
-        foreach($overlayEntities as $curI => $curOverlay) {
-//            dump($curOverlay);
-//            $curOverlay->setRelatedTemplate(null);
-//            $curOverlay->getRelatedTemplate()->removeRelatedImageOverlay($curOverlay);
-            $this->em->remove($curOverlay);
-        }
-        $this->em->flush();
-    }
-
-
     // /**
     //  * @return ImageOverlay[] Returns an array of ImageOverlay objects
     //  */

@@ -22,9 +22,15 @@ class BatchRepository extends BaseRepository
      * (likely because ->flush() wasn't called).
      */
     private $lastUsedBatchNo;
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * @var TrackedFileRepository
+     */
+    private $trackedFileRepo;
+
+    public function __construct(ManagerRegistry $registry, TrackedFileRepository $trackedFileRepo)
     {
         parent::__construct($registry, Batch::class);
+        $this->trackedFileRepo = $trackedFileRepo;
     }
 
     public function createNewBatch(Template $template, array $payload)
@@ -74,32 +80,28 @@ class BatchRepository extends BaseRepository
         return $newBatchNo;
     }
 
-    // /**
-    //  * @return Batch[] Returns an array of Batch objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function removeAllInArray(\Traversable $entities)
     {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('b.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        /**
+         * @var  $curI
+         * @var Batch $curEntity
+         */
+        foreach($entities as $curI => $curEntity) {
+//            dump($curOverlay);
+//            $curOverlay->setRelatedTemplate(null);
+//            $curOverlay->getRelatedTemplate()->removeRelatedImageOverlay($curOverlay);
+            $this->delete($curEntity);
+        }
+        $this->em->flush();
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Batch
+    public function delete(Batch $batch)
     {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $this->logger->info('deleting Batch with id: '. $batch->getId());
+
+        $trackedFiles = $batch->getTrackedFiles();
+        $this->trackedFileRepo->removeAllInArray($trackedFiles);
+
+        $this->em->remove($batch);
     }
-    */
 }

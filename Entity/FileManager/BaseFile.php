@@ -14,7 +14,7 @@ use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Entity\BaseEntity;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\Common\Collections\Collection;
-use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\BaseFileInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\PrintAttribution\TemplateInterface;
 
 /**
@@ -25,7 +25,7 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\PrintAttribution\TemplateInterface;
  * this entity stores details about a file that's created/uploaded. important details like:
  * owner person, file size, original name and even alows for things like version history of a file and duplication detection (via checksum hash)
  */
-class File extends BaseEntity implements FileInterface
+class BaseFile extends BaseEntity implements BaseFileInterface
 {
     /**
      * @var int
@@ -397,7 +397,7 @@ class File extends BaseEntity implements FileInterface
     /**
      * @return int
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -444,30 +444,30 @@ class File extends BaseEntity implements FileInterface
     }
 
     /**
-     * @return FileInterface
+     * @return BaseFileInterface
      */
-    public function getRelatedOriginalFile(): ?FileInterface
+    public function getRelatedOriginalFile(): ?BaseFileInterface
     {
         return $this->relatedOriginalFile;
     }
 
     /**
-     * @param FileInterface $relatedOriginalFile
+     * @param BaseFileInterface $relatedOriginalFile
      */
-    public function setRelatedOriginalFile(FileInterface $relatedOriginalFile): void
+    public function setRelatedOriginalFile(BaseFileInterface $relatedOriginalFile): void
     {
         $this->relatedOriginalFile = $relatedOriginalFile;
     }
 
     /**
-     * @return Collection|File[]
+     * @return Collection|BaseFile[]
      */
     public function getRelatedDerivativeFiles(): ?Collection
     {
         return $this->relatedDerivativeFiles;
     }
 
-    public function addRelatedDerivativeFile(FileInterface $relatedDerivativeFile): self
+    public function addRelatedDerivativeFile(BaseFileInterface $relatedDerivativeFile): self
     {
         if (!$this->relatedDerivativeFiles->contains($relatedDerivativeFile)) {
             $this->relatedDerivativeFiles[] = $relatedDerivativeFile;
@@ -477,7 +477,7 @@ class File extends BaseEntity implements FileInterface
         return $this;
     }
 
-    public function removeRelatedDerivativeFile(File $relatedDerivativeFile): self
+    public function removeRelatedDerivativeFile(BaseFile $relatedDerivativeFile): self
     {
         if ($this->relatedDerivativeFiles->removeElement($relatedDerivativeFile)) {
             // set the owning side to null (unless already changed)

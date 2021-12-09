@@ -57,6 +57,7 @@ class Batch extends BaseEntity
     {
         $this->trackedFiles = new ArrayCollection();
         $this->relatedTemplate = $template;
+        $template->addRelatedBatch($this);
         $this->setPayload($payload);
         $this->batchNo = $batchNo;
     }

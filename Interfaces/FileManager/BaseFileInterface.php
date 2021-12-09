@@ -2,7 +2,9 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Interfaces\FileManager;
 
-interface FileInterface
+use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
+
+interface BaseFileInterface
 {
     public function getOriginalFilename();
     public function getFileExtension();

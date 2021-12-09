@@ -14,6 +14,7 @@ use App\Entity\FileManager\File;
 use App\Repository\FileManager\FileRepository;
 use Doctrine\ORM\EntityManager;
 use League\Flysystem\FilesystemInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\BaseFileInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 class FileManager
@@ -79,8 +80,9 @@ class FileManager
      * @throws \League\Flysystem\FileNotFoundException
      * Delete the remote and local file and the File DB record
      */
-    public function deleteFile(File $file)
+    public function deleteFile(BaseFileInterface $file)
     {
+        $this->logger->info('deleting file (from remote, local and DB record) with localFilepath: '. $file->getLocalFilePath() .' (original basename: '. $file->getOriginalBasename() .')');
         if (!$file->getRelatedTemplates()->isEmpty()) {
 //            dump($file->getRelatedTemplates());
             $count = $file->getRelatedTemplates()->count();
@@ -88,14 +90,20 @@ class FileManager
         }
 
         $remoteFilepath = $file->getRemoteFilePath();
-        $this->deleteRemoteFile($remoteFilepath);
+        try {
+            $this->deleteRemoteFile($remoteFilepath);
+        } catch (\Exception $e) {
+            // throw an  with a more specific msg
+            $msg = 'File (id: '. $file->getId() .') does not exist. (filepath: "'. $remoteFilepath .'", originalFilename: "'. $file->getOriginalFilename() .'")';
+            throw new \Exception($msg);
+        }
 
         $this->deleteLocalFile($file);
         $this->fileRepo->deleteFile($file);
 
         $this->em->remove($file);
 
-        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalBasename());
+//        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalBasename());
     }
 
     public function doesRemoteFileExist($filepath)
@@ -190,7 +198,7 @@ class FileManager
 //         - check the files are being stored in cache.
 //         - delete remote files at the end of the test - and check that all files have been deleted (remote, original and cache)?
 
-        $infoMsg = "File Persisted to remote storage. Local filename: ". $filePath .' Target (remote storage) filename: '. $targetFilepath ."";
+        $infoMsg = "File Persisted to remote storage. Local filepath: ". $filePath .' Target (remote storage) filepath: "'. $targetFilepath .'"';
         //$this->consoleOutput ($consoleMsg);
         $this->logger->info($infoMsg, [], 'orange');
 
@@ -352,5 +360,22 @@ class FileManager
     public function getIsLastCacheHitSuccessful(): bool
     {
         return $this->isLastCacheHitSuccessful;
+    }
+
+    /**
+     * delete all files in the DB: DB record, local and remote files - used for cleanup
+     */
+    public function deleteAllFiles($areYouSure = false)
+    {
+        if ($areYouSure) {
+            $files = $this->fileRepo->findAll();
+        }
+
+        foreach ($files as $curI => $curFile) {
+//            $this->logger->info($msg, [], )
+            $this->deleteFile($curFile);
+        }
+
+        return true;
     }
 }

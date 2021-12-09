@@ -63,4 +63,20 @@ class BaseRepository extends ServiceEntityRepository
             $newObj->outputContents();
         }
     }
+
+
+    public function removeAllInArray(\Traversable $entities)
+    {
+        /**
+         * @var  $curI
+         * @var  $curEntity
+         */
+        foreach($entities as $curI => $curEntity) {
+//            dump($curOverlay);
+//            $curOverlay->setRelatedTemplate(null);
+//            $curOverlay->getRelatedTemplate()->removeRelatedImageOverlay($curOverlay);
+            $this->em->remove($curEntity);
+        }
+        $this->em->flush();
+    }
 }

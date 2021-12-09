@@ -12,6 +12,7 @@ use App\Repository\FileManager\ImageOverlayRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\BatchRepository;
 
 /**
  * @method Template|null find($id, $lockMode = null, $lockVersion = null)
@@ -21,16 +22,20 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class BaseTemplateRepository extends BaseRepository
 {
-
-
     /**
      * @var ImageOverlayRepository
      */
     private $overlayRepo;
 
-    public function __construct (ManagerRegistry $registry, $class, ImageOverlayRepository $overlayRepo) {
+    /**
+     * @var BatchRepository
+     */
+    private $batchRepo;
+
+    public function __construct (ManagerRegistry $registry, $class, ImageOverlayRepository $overlayRepo, BatchRepository $batchRepo) {
         parent::__construct($registry, $class);
         $this->overlayRepo = $overlayRepo;
+        $this->batchRepo = $batchRepo;
     }
 
     public function createNewTemplate (File $canvasFile)
@@ -64,14 +69,8 @@ class BaseTemplateRepository extends BaseRepository
 //            dd($templateEntities);
             // remove template from original file
 
-
             // delete all the imageOverlay entities
-            $this->overlayRepo->removeAllInArray($curTemplate->getRelatedImageOverlays());
-            $this->em->remove($curTemplate);
-            $this->em->flush();
-//            $curTemplate->setRelatedOriginalFile(null);
-
-//            $this->em->remove($curTemplate);
+            $this->delete($curTemplate);
             // todo: delete / remove derivatives files too
         }
 //        die('asdfasdfasdf');
@@ -79,32 +78,16 @@ class BaseTemplateRepository extends BaseRepository
         return true;
     }
 
-    // /**
-    //  * @return Template[] Returns an array of Template objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function delete(Template $template)
     {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('t.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $this->em->flush();
+        $this->overlayRepo->removeAllInArray($template->getRelatedImageOverlays());
 
-    /*
-    public function findOneBySomeField($value): ?Template
-    {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+//        dump($template->getRelatedBatches());
+        $this->batchRepo->removeAllInArray($template->getRelatedBatches());
+
+        $this->em->remove($template);
+        $this->em->flush();
+
     }
-    */
 }

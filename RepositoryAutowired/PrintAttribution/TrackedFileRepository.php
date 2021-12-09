@@ -10,6 +10,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\Batch;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
+use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 
 /**
  * @method TrackedFile|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,9 +20,15 @@ use VisageFour\Bundle\ToolsBundle\Repository\NoAutowire\BaseRepository;
  */
 class TrackedFileRepository extends BaseRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * @var FileManager
+     */
+    private $fileManager;
+
+    public function __construct(ManagerRegistry $registry, FileManager $fileManager)
     {
         parent::__construct($registry, TrackedFile::class);
+        $this->fileManager = $fileManager;
     }
 
     public function createNewTrackedFile(Batch $batch, int $order, $status): TrackedFile
@@ -33,32 +40,23 @@ class TrackedFileRepository extends BaseRepository
         return $new;
     }
 
-    // /**
-    //  * @return TrackedFile[] Returns an array of TrackedFile objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function removeAllInArray(\Traversable $entities)
     {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('t.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        /**
+         * @var TrackedFile $curEntity
+         */
+        foreach($entities as $curI => $curEntity) {
+            $this->delete($curEntity);
+        }
+        $this->em->flush();
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?TrackedFile
+    public function delete(TrackedFile $trackedFile)
     {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        // delete file entity too - local, remote and DB record:
+        $file = $trackedFile->getRelatedFile();
+        $this->fileManager->deleteFile($file);
+
+        $this->em->remove($trackedFile);
     }
-    */
 }

@@ -15,7 +15,7 @@ use App\Repository\FileManager\TemplateRepository;
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
-use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\FileInterface;
+use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\BaseFileInterface;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\BatchRepository;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
@@ -182,7 +182,7 @@ class OverlayManager
     /**
      * @param TrackedFile $trackedFile
      */
-    public function createCompositeImageByTrackedFile (TrackedFile $trackedFile): FileInterface
+    public function createCompositeImageByTrackedFile (TrackedFile $trackedFile): BaseFileInterface
     {
         if ($trackedFile->getStatus() == TrackedFile::STATUS_GENERATED) {
             throw new \Exception('TrackedFile (with id: '. $trackedFile->getId() .') has already been generated. It does not need to be generated again.');
@@ -214,7 +214,7 @@ class OverlayManager
      * Create a new Batch entity and TrackedFile entities (for each composite that is to be created).
      * note: $generateImmediately = false will delay the creation (and upload to storage) of composites for a later stage
      */
-    public function createNewBatch(int $count, FileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
+    public function createNewBatch(int $count, BaseFileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
     {
         $batch = $this->batchRepository->createNewBatch($template, $payload);
 
@@ -240,12 +240,12 @@ class OverlayManager
     }
 
     /**
-     * @param FileInterface $composite
+     * @param BaseFileInterface $composite
      * @param $itemNo
      *
      * renames composite originalBasename to format: "FF A4 Flyer_[batch_G-014].png"
      */
-    private function updateCompositeOriginalBasename(FileInterface $composite, $itemNo)
+    private function updateCompositeOriginalBasename(BaseFileInterface $composite, $itemNo)
     {
         // update originalFilename
 //        $newFilename = 'composite_of_'. $canvas->getOriginalBasename();
@@ -254,7 +254,7 @@ class OverlayManager
         $canvasFilename = $canvas->getOriginalFilename();
         $canvasExt = $canvas->getFileExtension();
 
-        $batchId = '4';
+        $batchId = $composite->getRelatedTrackedFile()->getRelatedBatch()->getBatchNo();
         $itemNo = sprintf('%03d', $itemNo);
         $newBasename = $canvasFilename. ' [batch_'. $batchId .'-'. $itemNo .'].'. $canvasExt;
         $composite->setOriginalFilename($newBasename);
@@ -292,10 +292,35 @@ class OverlayManager
         $this->templateRepo->removeAllInArray($file->getRelatedTemplates());
 
         $this->em->flush();
-        // todo: remove all TrackedFiles too
+
         // todo: remove all URLs and hits?
-        // todo: delete batch entities?
         $this->fileRepo->removeAllInArray($file->getRelatedDerivativeFiles());
         $this->fileManager->deleteFile($file);
+    }
+
+    /**
+     * delete all files in the DB: DB record, local and remote files - used for cleanup
+     */
+    public function deleteAllFiles($areYouSure = false)
+    {
+        if (!$areYouSure) {
+            throw new \Exception ('please set $areYouSure = true to deleteAllFiles()');
+        }
+
+        $files = $this->fileRepo->findAll();
+        /**
+         * @var File $curFile
+         */
+        foreach ($files as $curI => $curFile) {
+            // composites will be deleted as a chain-delete event when deleting templates / batch entities for the "master" canvas file.
+            // in this case, don't try to "re-delete" the same file.
+            $alreadyDeleted = !$this->em->contains($curFile);
+            if (!$alreadyDeleted) {
+
+                $this->deleteFile($curFile);
+            }
+        }
+
+        return true;
     }
 }
