@@ -47,9 +47,8 @@ class FileManager
      */
     public function deleteRemoteFile(string $remoteFilepath, $throwExceptionIfFileDoesNotExist = true)
     {
-        // todo: remove this and just use the flysystem exceptions instead?
-
         if ($this->fileSystem->has($remoteFilepath)) {
+            $this->logger->info('Removing remote file (from AWS S3), filepath: '. $remoteFilepath, [], 'grey_bold');
             return $this->fileSystem->delete($remoteFilepath);
         } else {
             if ($throwExceptionIfFileDoesNotExist) {
@@ -71,7 +70,7 @@ class FileManager
             unlink($filepath);
         }
 
-        $this->logger->info('deleted locally cached file: '. $filepath);
+        $this->logger->info('deleted local cached file: '. $filepath, [], 'grey_bold');
         return true;
     }
 
@@ -82,7 +81,7 @@ class FileManager
      */
     public function deleteFile(BaseFileInterface $file)
     {
-        $this->logger->info('deleting file (from remote, local and DB record) with localFilepath: '. $file->getLocalFilePath() .' (original basename: '. $file->getOriginalBasename() .')');
+        $this->logger->info('deleting file (from remote, local and DB record) with id: '. $file->getId() .', (original basename: '. $file->getOriginalBasename() .')', [], 'grey_bold');
         if (!$file->getRelatedTemplates()->isEmpty()) {
 //            dump($file->getRelatedTemplates());
             $count = $file->getRelatedTemplates()->count();
@@ -363,7 +362,7 @@ class FileManager
     }
 
     /**
-     * delete all files in the DB: DB record, local and remote files - used for cleanup
+     * Delete all files in the DB: DB record, local and remote files - used for cleanup
      */
     public function deleteAllFiles($areYouSure = false)
     {

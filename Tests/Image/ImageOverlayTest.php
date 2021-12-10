@@ -180,8 +180,6 @@ class ImageOverlayTest extends CustomKernelTestCase
     /**
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateBatchOfCompositeFiles
-     * todo: add delete files and delete batch
-     * todo: update composite name - it's too many calls (reduce threshold to 100? To detect too many API calls?)
      * todo: update composite original basename: [batch_A-004]
      *
      */
@@ -237,7 +235,6 @@ class ImageOverlayTest extends CustomKernelTestCase
         $B_batch4 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
         $this->em->flush();
         $this->assertBatchNoEquals($B_batch4, 4);
-
 
 //        $this->testingHelper->assertNumberOfDBTableRecords($count, TrackedFile::class, $this);
 //        $this->testingHelper->assertNumberOfDBTableRecords(1, Batch::class, $this);

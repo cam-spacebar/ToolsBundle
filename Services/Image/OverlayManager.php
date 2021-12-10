@@ -225,7 +225,7 @@ class OverlayManager
         $startNo = 1;
         $endNo = ($count+$startNo);
         for($i = $startNo; $i < $endNo; $i++) {
-            $this->logger->sectionHeader('New Tracked File: '. $i .' [Batch: '. $batch->getBatchNo() .']');
+            $this->logger->sectionHeader('New tracked File: '. $i .' [Batch: '. $batch->getBatchNo() .']');
             $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i, TrackedFile::STATUS_IN_QUEUE);
 //            dump($curTrackedFile);
             $batch->addTrackedFile($curTrackedFile);
