@@ -56,7 +56,7 @@ class TrackedFileRepository extends BaseRepository
         // delete file entity too - local, remote and DB record:
         $file = $trackedFile->getRelatedFile();
         if (empty($file)) {
-            $this->logger->info('trackedFile (id: '. $trackedFile->getId() .') doesnt contain a file to delete. (delete command skipped)');
+            $this->logger->info('trackedFile (id: '. $trackedFile->getId() .') doesnt contain a file to delete. (delete command skipped)', [], 'grey_bold');
 
         } else {
             $this->fileManager->deleteFile($file);

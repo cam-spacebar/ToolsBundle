@@ -29,11 +29,24 @@ class ConsoleOutput
         print $this->lb . $output;
     }
 
-    public function outputColoredTextToTerminal($msg, $fgColor = 'red', $bgColor = 'black')
+    public function outputColoredTextToTerminal($msg, $prefixText = '', $fgColor = 'red', $bgColor = 'black')
     {
-        $msg = 'DEBUG: '.$msg;
-        $output = $this->terminalColors->getColoredString($msg, $fgColor, $bgColor);
+        $maxPrefixLength = 12;
 
-        print $this->lb . $output;
+        $output = $this->terminalColors->getColoredString($msg, $fgColor, $bgColor);
+        $prefix = '';
+        if (!empty($prefixText)) {
+            $prefixText = substr($prefixText, 0, $maxPrefixLength);
+            $prefix = $this->terminalColors->getColoredString($prefixText, 'grey_bold', 'black');
+        } else {
+            $noOfSpaces = 4;
+            for ($i=0; $i<$noOfSpaces; $i++) {
+                $prefix = $prefix . ' ';
+            }
+        }
+        $prefix = $prefix .': ';
+
+
+        print $this->lb . $prefix . $output;
     }
 }

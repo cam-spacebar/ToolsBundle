@@ -52,14 +52,15 @@ class HybridLogger
 
     public function info($msg, $context = [], $color = 'white_bold')
     {
+        $prefix = $this->getPrefix();
         if ($this->kernelEnv == 'test') {
 //           print $lb . $msg;
-           $this->consoleOutput->outputColoredTextToTerminal($msg, $color);
+           $this->consoleOutput->outputColoredTextToTerminal($msg, $prefix, $color);
            if ($context != []) {
 //               dump($context);
            }
         } else {        // prod or dev env
-            $this->logger->info($msg, $context);
+            $this->logger->info($prefix . $msg, $context);
         }
 //        $args = func_get_args();
 //        $methodName = __FUNCTION__;
@@ -72,5 +73,25 @@ class HybridLogger
     public function sectionHeader ($header) {
         $text = "==== ". $header ." ====";
         $this->info($text, [], 'purple');
+    }
+
+    public function addLogPrefix($prefix)
+    {
+        if (!empty($this->prefix)) {
+            throw new \Exception('you must clear the prefix first before adding a new one.');
+        }
+        $this->prefix = $prefix;
+    }
+
+    public function clearLogPrefix()
+    {
+        $this->prefix = '';
+    }
+
+    private function getPrefix()
+    {
+        if (!empty($this->prefix)) {
+            return '['. $this->prefix .'] ';
+        }
     }
 }

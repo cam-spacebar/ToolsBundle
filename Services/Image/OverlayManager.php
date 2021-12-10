@@ -12,14 +12,16 @@ use App\Entity\FileManager\Template;
 use App\Repository\FileManager\FileRepository;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
+use VisageFour\Bundle\ToolsBundle\Services\Message\LoggedMessageBus;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\Messenger\MessageBusInterface;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\BaseFileInterface;
+use VisageFour\Bundle\ToolsBundle\Message\GenerateGraphicalComposite;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\BatchRepository;
 use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
-use VisageFour\Bundle\ToolsBundle\Services\QRcode\QRCodeGenerator;
 use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
@@ -74,8 +76,12 @@ class OverlayManager
      * @var FileRepository
      */
     private $fileRepo;
+    /**
+     * @var LoggedMessageBus
+     */
+    private $messageBus;
 
-    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, TrackedFileRepository $trackedFileRepo, BatchRepository $batchRepository, FileRepository $fileRepo)
+    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, TrackedFileRepository $trackedFileRepo, BatchRepository $batchRepository, FileRepository $fileRepo, LoggedMessageBus $messageBus)
     {
         $this->templateRepo         = $templateRepo;
         $this->overlayRepo          = $overlayRepo;
@@ -85,7 +91,8 @@ class OverlayManager
         $this->urlShortenerHelper   = $urlShortenerHelper;
         $this->trackedFileRepo      = $trackedFileRepo;
         $this->batchRepository      = $batchRepository;
-        $this->fileRepo = $fileRepo;
+        $this->fileRepo             = $fileRepo;
+        $this->messageBus           = $messageBus;
     }
 
     /**
@@ -133,6 +140,7 @@ class OverlayManager
      */
     public function createCompositeImage(Template $template, array $payload): File
     {
+        DIE('TODO: DELETE THIS METHOD');
         $this->logger->info('Creating composite image from template.', [$template, $payload]);
         $canvas = $template->getRelatedOriginalFile();
 
@@ -182,7 +190,7 @@ class OverlayManager
     /**
      * @param TrackedFile $trackedFile
      */
-    public function createCompositeImageByTrackedFile (TrackedFile $trackedFile): BaseFileInterface
+    public function createCompositeImageByTrackedFile (TrackedFile $trackedFile): bool
     {
         if ($trackedFile->getStatus() == TrackedFile::STATUS_GENERATED) {
             throw new \Exception('TrackedFile (with id: '. $trackedFile->getId() .') has already been generated. It does not need to be generated again.');
@@ -191,17 +199,21 @@ class OverlayManager
         $batch = $trackedFile->getRelatedBatch();
         $template = $batch->getRelatedTemplate();
 
-        // create the composite and store it.
-        $composite = $this->createCompositeImage($template, $batch->getPayload());
+        // Create the composite and store it in AWS S3
+        $message = new GenerateGraphicalComposite($template, $batch->getPayload(), $trackedFile);
+        $this->messageBus->dispatch($message);
 
-        $trackedFile->setRelatedFile($composite);
-        $composite->setRelatedTrackedFile($trackedFile);
-
-        $trackedFile->setStatus(TrackedFile::STATUS_GENERATED);
+        //todo: move this to message class
+//        $composite = $this->createCompositeImage($template, $batch->getPayload());
+//
+//        $trackedFile->setRelatedFile($composite);
+//        $composite->setRelatedTrackedFile($trackedFile);
+//
+//        $trackedFile->setStatus(TrackedFile::STATUS_GENERATED);
 
         $this->em->flush();
-
-        return $composite;
+        return true;
+//        return $composite;
     }
 
     /**
@@ -232,7 +244,8 @@ class OverlayManager
 
             if ($generateImmediately) {
                 $this->createCompositeImageByTrackedFile($curTrackedFile);
-                $this->updateCompositeOriginalbasename($curTrackedFile->getRelatedFile(), $i);
+                // todo: fix this - argument 1 no longer valid.
+//                $this->updateCompositeOriginalbasename($curTrackedFile->getRelatedFile(), $i);
             }
         }
 
