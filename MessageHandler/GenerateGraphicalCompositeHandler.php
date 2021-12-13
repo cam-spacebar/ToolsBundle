@@ -55,11 +55,27 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
         $this->overlayManager       = $overlayManager;
     }
 
+    /**
+     * @param GenerateGraphicalComposite $msg
+     * @return \App\Entity\FileManager\File
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * behaviour:
+     * generate a new composite image.
+     * if the AWS File entity is marked as "to delete" or "deleted" - do nothing.
+     * todo: add $force - to allow replacement of composite (as payload may change? ).
+     */
     public function __invoke(GenerateGraphicalComposite $msg)
     {
         $template = $msg->getTemplate();
         $payload = $msg->getPayload();
         $trackedFile = $msg->getTrackedFile();
+
+        if (!$this->checkStatusIsAcceptable($trackedFile)) {
+            // if status is not acceptable, do not generate a composite
+            return true;
+        }
 
         $this->logger->info('Creating composite image from template.', [$template, $payload]);
         $canvas = $template->getRelatedOriginalFile();
@@ -107,12 +123,10 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
         // update TrackedFile
         $trackedFile->setRelatedFile($composite);
         $composite->setRelatedTrackedFile($trackedFile);
-
-        update this test to not generate composites if they are marked for deletion - alert instead.
-        delete files that are generated asynronosely
-        - use "flagged for delete" flags.
-        - setup transports for prod (and sync for dev).
-
+        
+//        delete files that are generated asynronosely
+//        - use "flagged for delete" flags.
+//        - setup transports for prod (and sync for dev).
 
         $trackedFile->setStatus(TrackedFile::STATUS_GENERATED);
 
@@ -123,7 +137,25 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
 
         $this->em->flush();
 
-        return $composite;
+        return true;
+    }
+
+    // check the composite hasn't been generated already, or has (or will be) deleted.
+    private function checkStatusIsAcceptable (TrackedFile $trackedFile) {
+        $status = $trackedFile->getStatus();
+        if ($status == TrackedFile::MARKED_FOR_DELETION || $status == TrackedFile::DELETED) {
+            // do nothing.
+            $this->logger->info('Not generating composite for tracked file: {id} as its status is: {status}.', $trackedFile);
+            return false;
+        }
+
+        if ($status == TrackedFile::STATUS_GENERATED) {
+            $msg = 'Tracked file with id {id} has already been generated. Will not generate again.';
+            $this->logger->alert($msg, $trackedFile);
+            return false;
+        }
+
+        return true;
     }
 
     /**

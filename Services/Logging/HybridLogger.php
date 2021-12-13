@@ -54,11 +54,10 @@ class HybridLogger
     {
         $prefix = $this->getPrefix();
         if ($this->kernelEnv == 'test') {
-//           print $lb . $msg;
-           $this->consoleOutput->outputColoredTextToTerminal($msg, $prefix, $color);
-           if ($context != []) {
+            $this->consoleOutput->outputColoredTextToTerminal($msg, $prefix, $color);
+            if ($context != []) {
 //               dump($context);
-           }
+            }
         } else {        // prod or dev env
             $this->logger->info($prefix . $msg, $context);
         }
@@ -68,8 +67,28 @@ class HybridLogger
 //        call_user_func_array(array($this->logger, $methodName), $args);
     }
 
-    // prints: "==== $header ===="
-    // useful for loops - to indicate new section
+    // if env is test, output $msg to console. This is mainly for writing automated tests and fixtures.
+    private function outputToConsole ($msg, $context = [], $color = 'white_bold', $prefixOverride = null) {
+
+        if ($this->kernelEnv == 'test') {
+            $prefix = $this->getPrefix($prefixOverride);
+            $this->consoleOutput->outputColoredTextToTerminal($msg, $prefix, $color);
+
+            if ($context != []) {
+//               dump($context);
+            }
+        }
+    }
+
+    public function alert($msg, $context = [], $color = 'white_bold')
+    {
+        $this->outputToConsole($msg, $context, $color, 'alert');
+        $prefix = $this->getPrefix();
+        if (!$this->kernelEnv == 'test') {
+            $this->logger->alert($prefix . $msg, $context);
+        }
+    }
+
     public function sectionHeader ($header) {
         $text = "==== ". $header ." ====";
         $this->info($text, [], 'purple');
@@ -88,8 +107,15 @@ class HybridLogger
         $this->prefix = '';
     }
 
-    private function getPrefix()
+    /*
+     * a $prefixOverride can be used to replace an existing prefix string in the console.
+     * This is used to signal the log type (when it's not info) e.g. "alert"
+     */
+    private function getPrefix($prefixOverride = null)
     {
+        if (!empty($prefixOverride)) {
+            return $prefixOverride;
+        }
         if (!empty($this->prefix)) {
             return '['. $this->prefix .'] ';
         }
