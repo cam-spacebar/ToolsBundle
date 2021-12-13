@@ -31,9 +31,9 @@ class TrackedFileRepository extends BaseRepository
         $this->fileManager = $fileManager;
     }
 
-    public function createNewTrackedFile(Batch $batch, int $order, $status): TrackedFile
+    public function createNewTrackedFile(Batch $batch, int $orderNo, $status): TrackedFile
     {
-        $new = new TrackedFile($batch, $order, $status);
+        $new = new TrackedFile($batch, $orderNo, $status);
 
         $this->persistAndLogEntityCreation($new);
 

@@ -31,9 +31,9 @@ class LoggedMessageBus
         $this->logger->info('Message dispatched. (class: '. $shortName .')', $message, 'cyan');
 
         $this->logger->addLogPrefix('MessageQue');
-        $this->messageBus->dispatch($message, $stamps);
+        $result = $this->messageBus->dispatch($message, $stamps);
         $this->logger->clearLogPrefix('MessageQue');
 
-        return $this->messageBus->dispatch($message, $stamps);
+        return $result;
     }
 }

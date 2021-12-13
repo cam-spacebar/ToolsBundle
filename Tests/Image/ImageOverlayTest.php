@@ -208,6 +208,7 @@ class ImageOverlayTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter testBatchNoGeneration
      *
+     * checks that batch nos are correct (when they're generated), for instance, that numbering restarts for a different template (even on the same image).
      */
     public function testBatchNoGeneration(): void
     {
@@ -220,19 +221,19 @@ class ImageOverlayTest extends CustomKernelTestCase
         );
 
         $count = 1;
-        $A_batch = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload, false);
-        $A_batch2 = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload, false);
-        $A_batch3 = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload, false);
+        $A_batch = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload);
+        $A_batch2 = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload);
+        $A_batch3 = $this->overlayManager->createNewBatch($count, $imageFile, $template1, $payload);
         $this->assertBatchNoEquals($A_batch3, 3);
         $this->em->flush();
 
         $template2 = $this->createImageFileTemplateAndImageOverlayEntites();
         $this->em->flush();
-        $B_batch = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
+        $B_batch = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload);
         $this->assertBatchNoEquals($B_batch, 1);
-        $B_batch2 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
-        $B_batch3 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
-        $B_batch4 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload, false);
+        $B_batch2 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload);
+        $B_batch3 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload);
+        $B_batch4 = $this->overlayManager->createNewBatch($count, $imageFile, $template2, $payload);
         $this->em->flush();
         $this->assertBatchNoEquals($B_batch4, 4);
 

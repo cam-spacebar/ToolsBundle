@@ -36,7 +36,7 @@ class TestingHelper
         $testCase->assertSame(
             $expectedCount,
             $count,
-            'Failed: test expect '. $expectedCount .' DB records but instead found '. $count .' records (of entity class: '. $entityName .'). (note: remember to use truncateEntities() at the start of each test.)'
+            'Failed: test expect '. $expectedCount .' DB records but instead found '. $count .' records (of entity class: '. $entityName .'). (note: remember to use truncateEntities() at the start of each test - in customSetUp().)'
         );
 
         return true;

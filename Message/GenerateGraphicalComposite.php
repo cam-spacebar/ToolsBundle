@@ -28,6 +28,7 @@ class GenerateGraphicalComposite
      */
     private $trackedFile;
 
+    // Handler:
     public function __construct(Template $template, $payload, TrackedFile $trackedFile)
     {
         $this->template = $template;

@@ -189,6 +189,7 @@ class OverlayManager
 
     /**
      * @param TrackedFile $trackedFile
+     * creates a message to handle the async creation of the "composite"
      */
     public function createCompositeImageByTrackedFile (TrackedFile $trackedFile): bool
     {
@@ -203,17 +204,8 @@ class OverlayManager
         $message = new GenerateGraphicalComposite($template, $batch->getPayload(), $trackedFile);
         $this->messageBus->dispatch($message);
 
-        //todo: move this to message class
-//        $composite = $this->createCompositeImage($template, $batch->getPayload());
-//
-//        $trackedFile->setRelatedFile($composite);
-//        $composite->setRelatedTrackedFile($trackedFile);
-//
-//        $trackedFile->setStatus(TrackedFile::STATUS_GENERATED);
-
         $this->em->flush();
         return true;
-//        return $composite;
     }
 
     /**
@@ -226,7 +218,7 @@ class OverlayManager
      * Create a new Batch entity and TrackedFile entities (for each composite that is to be created).
      * note: $generateImmediately = false will delay the creation (and upload to storage) of composites for a later stage
      */
-    public function createNewBatch(int $count, BaseFileInterface $canvas, Template $template, array $payload, $generateImmediately = true)
+    public function createNewBatch(int $count, BaseFileInterface $canvas, Template $template, array $payload)
     {
         $batch = $this->batchRepository->createNewBatch($template, $payload);
 
@@ -242,11 +234,8 @@ class OverlayManager
 //            dump($curTrackedFile);
             $batch->addTrackedFile($curTrackedFile);
 
-            if ($generateImmediately) {
-                $this->createCompositeImageByTrackedFile($curTrackedFile);
-                // todo: fix this - argument 1 no longer valid.
-//                $this->updateCompositeOriginalbasename($curTrackedFile->getRelatedFile(), $i);
-            }
+            $this->createCompositeImageByTrackedFile($curTrackedFile);
+
         }
 
         return $batch;
@@ -258,7 +247,7 @@ class OverlayManager
      *
      * renames composite originalBasename to format: "FF A4 Flyer_[batch_G-014].png"
      */
-    private function updateCompositeOriginalBasename(BaseFileInterface $composite, $itemNo)
+    public function updateCompositeOriginalBasename(BaseFileInterface $composite, $itemNo)
     {
         // update originalFilename
 //        $newFilename = 'composite_of_'. $canvas->getOriginalBasename();

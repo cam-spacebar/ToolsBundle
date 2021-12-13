@@ -7,11 +7,14 @@
 namespace VisageFour\Bundle\ToolsBundle\MessageHandler;
 
 use App\Entity\FileManager\ImageOverlay;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
+use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 use VisageFour\Bundle\ToolsBundle\Message\GenerateGraphicalComposite;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\Image\ImageManipulation;
+use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
 use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
@@ -23,26 +26,40 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
      * @var ImageManipulation
      */
     private $imageManipulation;
+
     /**
      * @var FileManager
      */
     private $fileManager;
+
     /**
      * @var UrlShortenerHelper
      */
     private $urlShortenerHelper;
 
-    public function __construct(ImageManipulation $imageManipulation, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper)
+    /**
+     * @var EntityManager
+     */
+    private $em;
+    /**
+     * @var OverlayManager
+     */
+    private $overlayManager;
+
+    public function __construct(ImageManipulation $imageManipulation, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, EntityManager $em, OverlayManager $overlayManager)
     {
-        $this->imageManipulation = $imageManipulation;
-        $this->fileManager = $fileManager;
-        $this->urlShortenerHelper = $urlShortenerHelper;
+        $this->imageManipulation    = $imageManipulation;
+        $this->fileManager          = $fileManager;
+        $this->urlShortenerHelper   = $urlShortenerHelper;
+        $this->em                   = $em;
+        $this->overlayManager       = $overlayManager;
     }
 
     public function __invoke(GenerateGraphicalComposite $msg)
     {
         $template = $msg->getTemplate();
         $payload = $msg->getPayload();
+        $trackedFile = $msg->getTrackedFile();
 
         $this->logger->info('Creating composite image from template.', [$template, $payload]);
         $canvas = $template->getRelatedOriginalFile();
@@ -86,6 +103,25 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
         $composite = $this->fileManager->persistFile($filePath, $remoteSubFolder);
         $composite->setRelatedOriginalFile($canvas);
         $canvas->addRelatedDerivativeFile($composite);
+
+        // update TrackedFile
+        $trackedFile->setRelatedFile($composite);
+        $composite->setRelatedTrackedFile($trackedFile);
+
+        update this test to not generate composites if they are marked for deletion - alert instead.
+        delete files that are generated asynronosely
+        - use "flagged for delete" flags.
+        - setup transports for prod (and sync for dev).
+
+
+        $trackedFile->setStatus(TrackedFile::STATUS_GENERATED);
+
+        $this->overlayManager->updateCompositeOriginalbasename(
+            $trackedFile->getRelatedFile(),
+            $trackedFile->getOrderNo()
+        );
+
+        $this->em->flush();
 
         return $composite;
     }
