@@ -42,8 +42,13 @@ class DeleteFileHandler implements MessageHandlerInterface
     {
         /** @var File $file */
         $file = $this->fileRepository->findOneByIdOrException($msg->getFileId());
-//        dump($file);
-//        die('rrrr');
+
+
+// todo:
+//        if (!$this->checkStatusIsAcceptable($trackedFile)) {
+//            // if status is not acceptable, do not generate a composite
+//            return true;
+//        }
 
 //throw new \Exception ('423wecasfas');
 
