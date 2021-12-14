@@ -15,7 +15,10 @@ use App\Repository\FileManager\FileRepository;
 use Doctrine\ORM\EntityManager;
 use League\Flysystem\FilesystemInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\BaseFileInterface;
+use VisageFour\Bundle\ToolsBundle\Message\FileManager\DeleteFile;
+use VisageFour\Bundle\ToolsBundle\Services\Message\LoggedMessageBus;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class FileManager
 {
@@ -26,83 +29,35 @@ class FileManager
     private $fileRepo;
     private $bucketname;
 
-    // returns true if the file exists in cache (used for aserts in testing).
+    // returns true if the file exists in cache (used for asserts in testing).
     private $isLastCacheHitSuccessful;
 
-    public function __construct(EntityManager $em, FilesystemInterface $publicUploadsFilesystem, FileRepository $fileRepo, string $env_var_bucketName)
+    /**
+     * @var LoggedMessageBus
+     */
+    private $messageBus;
+
+    public function __construct(EntityManager $em, FilesystemInterface $publicUploadsFilesystem, FileRepository $fileRepo, string $env_var_bucketName, LoggedMessageBus $messageBus)
     {
         $this->em                   = $em;
         $this->fileSystem           = $publicUploadsFilesystem;
         $this->fileRepo             = $fileRepo;
         $this->bucketname           = $env_var_bucketName;
-    }
-
-    /**
-     * @param string $remoteFilepath
-     * @param bool $throwExceptionIfFileDoesNotExist
-     * @return bool
-     * @throws \League\Flysystem\FileNotFoundException
-     *
-     * Delete the remote (S3) file, but do not affect the DB record or locally cached file.
-     */
-    public function deleteRemoteFile(string $remoteFilepath, $throwExceptionIfFileDoesNotExist = true)
-    {
-        if ($this->fileSystem->has($remoteFilepath)) {
-            $this->logger->info('Removing remote file (from AWS S3), filepath: '. $remoteFilepath, [], 'grey_bold');
-            return $this->fileSystem->delete($remoteFilepath);
-        } else {
-            if ($throwExceptionIfFileDoesNotExist) {
-                throw new \Exception('File does not exist. (filepath: "'. $remoteFilepath .'")');
-            }
-        }
-    }
-
-    /**
-     * @param File $file
-     * @return bool
-     *
-     * delete ony the locally cached file.
-     */
-    public function deleteLocalFile(File $file)
-    {
-        $filepath = $file->getLocalFilePath();
-        if (is_file($filepath)) {
-            unlink($filepath);
-        }
-
-        $this->logger->info('deleted local cached file: '. $filepath, [], 'grey_bold');
-        return true;
+        $this->messageBus           = $messageBus;
     }
 
     /**
      * @param File $file
      * @throws \League\Flysystem\FileNotFoundException
-     * Delete the remote and local file and the File DB record
+     *
+     * Dispatch a message to delete the file (delete remote file, locally cached file and mark DB record as deleted).
+     * handler class: DeleteFileHandler
      */
     public function deleteFile(BaseFileInterface $file)
     {
-        $this->logger->info('deleting file (from remote, local and DB record) with id: '. $file->getId() .', (original basename: '. $file->getOriginalBasename() .')', [], 'grey_bold');
-        if (!$file->getRelatedTemplates()->isEmpty()) {
-//            dump($file->getRelatedTemplates());
-            $count = $file->getRelatedTemplates()->count();
-            throw new \Exception('the file: "'. $file->getOriginalBasename() .'" (id: '. $file->getId() .') has '. $count .' template entity/entities (a foreign key) so it can not be deleted directly. Please use: OverlayManager->deleteFile() to remove template, overlays and the file (image / pdf).');
-        }
+        $message = new DeleteFile($file);
+        $this->messageBus->dispatch($message);
 
-        $remoteFilepath = $file->getRemoteFilePath();
-        try {
-            $this->deleteRemoteFile($remoteFilepath);
-        } catch (\Exception $e) {
-            // throw an  with a more specific msg
-            $msg = 'File (id: '. $file->getId() .') does not exist. (filepath: "'. $remoteFilepath .'", originalFilename: "'. $file->getOriginalFilename() .'")';
-            throw new \Exception($msg);
-        }
-
-        $this->deleteLocalFile($file);
-        $this->fileRepo->deleteFile($file);
-
-        $this->em->remove($file);
-
-//        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalBasename());
     }
 
     public function doesRemoteFileExist($filepath)

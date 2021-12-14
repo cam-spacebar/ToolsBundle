@@ -57,7 +57,7 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
 
     /**
      * @param GenerateGraphicalComposite $msg
-     * @return \App\Entity\FileManager\File
+     * @return bool
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      *
@@ -123,7 +123,7 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
         // update TrackedFile
         $trackedFile->setRelatedFile($composite);
         $composite->setRelatedTrackedFile($trackedFile);
-        
+
 //        delete files that are generated asynronosely
 //        - use "flagged for delete" flags.
 //        - setup transports for prod (and sync for dev).

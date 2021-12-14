@@ -64,7 +64,6 @@ class BaseRepository extends ServiceEntityRepository
         }
     }
 
-
     public function removeAllInArray(\Traversable $entities)
     {
         /**
@@ -78,5 +77,19 @@ class BaseRepository extends ServiceEntityRepository
             $this->em->remove($curEntity);
         }
         $this->em->flush();
+    }
+
+    public function findOneByIdOrException(int $id)
+    {
+        $entity = $this->findOneBy(
+          ['id' => $id]
+        );
+//        dump($entity);
+//        print "\nsd12w\n";
+        if (empty($entity)) {
+            throw new \Exception('Could not find '. $this->_entityName);
+        }
+
+        return $entity;
     }
 }

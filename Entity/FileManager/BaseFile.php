@@ -391,7 +391,7 @@ class BaseFile extends BaseEntity implements BaseFileInterface
 
     public function __toString()
     {
-        return $this->originalbasename;
+        return $this->getOriginalBasename();
     }
 
     /**

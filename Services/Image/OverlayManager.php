@@ -12,6 +12,7 @@ use App\Entity\FileManager\Template;
 use App\Repository\FileManager\FileRepository;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
+use VisageFour\Bundle\ToolsBundle\Interfaces\PrintAttribution\FileInterface;
 use VisageFour\Bundle\ToolsBundle\Services\Message\LoggedMessageBus;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -134,57 +135,15 @@ class OverlayManager
      * @param Template $template
      * @param array $payload
      *
-     * Use the ImageOverlay and Template entities to create a composite image/PDF that places the "overlay" (e.g. QR code with short URL) onto the provided $canvas File entity
-     * then save/persist the new composite image to storage (i.e. AWS S3) as a File entity
+     * Create a command message for GenerateGraphicalComposite() handler
      *
      */
-    public function createCompositeImage(Template $template, array $payload): File
+    public function createCompositeImage(Template $template, array $payload, TrackedFile $trackedFile): Bool
     {
-        DIE('TODO: DELETE THIS METHOD');
-        $this->logger->info('Creating composite image from template.', [$template, $payload]);
-        $canvas = $template->getRelatedOriginalFile();
+        $message = new GenerateGraphicalComposite($template, $payload, $trackedFile);
+        $this->messageBus->dispatch($message);
 
-//        $trackedFile = new TrackedFile($canvas, $);
-
-        // loop through ImageOverlay entities and apply them to the canvas
-        $overlays = $template->getRelatedImageOverlays();
-        $i = 0;
-        foreach($overlays as $curI => $curOverlay) {
-            $i++;
-            if ($i > 1) {
-                throw new \Exception('this code cant yet handle more than 1 overlay, please update. see: ->overlayImage() needs ouput feedback in.');
-            }
-            $QRCodeContents = $this->getCurrentPayload($payload, $curOverlay);
-
-            // generate the QR code
-            $overlayPathname = $this->urlShortenerHelper->generateShortUrlQRCodeFromURL($QRCodeContents);
-            $overlayImg = new Image($overlayPathname);
-
-            // generate the composite (with QR code).
-            $composite = $this->imageManipulation->overlayImage (
-                $canvas->getImageGD(),
-                $overlayImg,
-                $curOverlay->getXCoord(),
-                $curOverlay->getYCoord(),
-                $curOverlay->getWidth(),
-                $curOverlay->getHeight()
-            );
-        }
-
-//        $baseDir = 'src/VisageFour/Bundle/ToolsBundle/Tests/TestFiles/Image/';
-
-        // save composite to local filesystem
-        $tempFilename = 'composite_'. uniqid() .'.png';     // use uniqid() here to prevent wasted ->has() call to AWS S3.
-        $filePath = "var/composites/temp/". $tempFilename;
-        $this->imageManipulation->saveImage($composite, $filePath);
-
-        // save the file to remote storage (AWS S3)
-        $remoteSubFolder = 'composites/QRcoded';
-        $composite = $this->fileManager->persistFile($filePath, $remoteSubFolder);
-        $composite->setRelatedOriginalFile($canvas);
-        $canvas->addRelatedDerivativeFile($composite);
-
-        return $composite;
+        return true;
     }
 
     /**
@@ -200,9 +159,8 @@ class OverlayManager
         $batch = $trackedFile->getRelatedBatch();
         $template = $batch->getRelatedTemplate();
 
-        // Create the composite and store it in AWS S3
-        $message = new GenerateGraphicalComposite($template, $batch->getPayload(), $trackedFile);
-        $this->messageBus->dispatch($message);
+        // Create the composite and store it in AWS S3 (using a 'command message')
+        $this->createCompositeImage($template, $batch->getPayload(), $trackedFile);
 
         $this->em->flush();
         return true;
@@ -216,7 +174,6 @@ class OverlayManager
      * @param bool $generateImmediately
      *
      * Create a new Batch entity and TrackedFile entities (for each composite that is to be created).
-     * note: $generateImmediately = false will delay the creation (and upload to storage) of composites for a later stage
      */
     public function createNewBatch(int $count, BaseFileInterface $canvas, Template $template, array $payload)
     {
@@ -287,7 +244,7 @@ class OverlayManager
      * This deletes the file entity (an image or PDF), it's template entity, overlay entities
      *
      */
-    public function deleteFile(File $file)
+    public function deleteFile(FileInterface $file)
     {
 //        $file->setRelatedTemplate(null);
 //        dd($file->getRelatedTemplates());
@@ -297,6 +254,7 @@ class OverlayManager
 
         // todo: remove all URLs and hits?
         $this->fileRepo->removeAllInArray($file->getRelatedDerivativeFiles());
+
         $this->fileManager->deleteFile($file);
     }
 

@@ -114,7 +114,7 @@ class ImageOverlayTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter deleteImage
      *
-     * Test the deletion of File, template and imageOverlay DB entities.
+     * Test the deletion of a File entity (it's remote, local files and handling of DB record), template and imageOverlay DB entities.
      */
     public function deleteImage(): void
     {
@@ -126,41 +126,34 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(0, Template::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(0, ImageOverlay::class, $this);
+
     }
 
     /**
      * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter produceTrackedFileComposite
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateBatchOfCompositeFiles
      *
-     * Create a template entity and overlay entity, use them to overlay a poster image with a QR code (of a shortened URL).
-     * Then save the resulting composite image file to S3 as a File entity.
      */
-    public function produceTrackedFileComposite(): void
+    public function generateBatchOfCompositeFiles(): void
     {
+        $numberOfCompositesToCreate = 3;
+
         $template = $this->createImageFileTemplateAndImageOverlayEntites();
-
         $this->em->flush();
-        $this->testingHelper->assertNumberOfDBTableRecords(1, Template::class, $this);
-        $this->testingHelper->assertNumberOfDBTableRecords(1, ImageOverlay::class, $this);
 
-//        $imageFile = $template->getRelatedOriginalFile();
+        $imageFile = $template->getRelatedOriginalFile();
         $payload = array (
             'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
         );
-        $composite = $this->overlayManager->createCompositeImage($template, $payload);
 
-        // todo: create tracked file.
-
-        $this->em->flush();
-        $this->testingHelper->assertNumberOfDBTableRecords(2, File::class, $this);
-
-        // cleanup
-        $this->overlayManager->deleteFile($template->getRelatedOriginalFile());
-        $this->overlayManager->deleteFile($composite);
+        $batch = $this->overlayManager->createNewBatch($numberOfCompositesToCreate, $imageFile, $template, $payload);
         $this->em->flush();
 
-        $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
-        $this->testingHelper->assertNumberOfDBTableRecords(0, TrackedFile::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords($numberOfCompositesToCreate, TrackedFile::class, $this);
+        $this->testingHelper->assertNumberOfDBTableRecords(1, Batch::class, $this);
+
+        $expectedFileCount = $numberOfCompositesToCreate +1;
+        $this->testingHelper->assertNumberOfDBTableRecords($expectedFileCount, File::class, $this);
 
         // manual testing
         // prevent cleanup (i.e. deleteFile()) so you can inspect the files
@@ -175,32 +168,6 @@ class ImageOverlayTest extends CustomKernelTestCase
         // select * from boomerprint_template;
         // select * from boomerprint_overlay;
         // select * from boomerprint_file;
-    }
-
-    /**
-     * @test
-     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter generateBatchOfCompositeFiles
-     * todo: update composite original basename: [batch_A-004]
-     *
-     */
-    public function generateBatchOfCompositeFiles(): void
-    {
-        $template = $this->createImageFileTemplateAndImageOverlayEntites();
-        $this->em->flush();
-
-        $imageFile = $template->getRelatedOriginalFile();
-        $payload = array (
-            'url'   => 'http://www.NewToMelbourne.org/product8?coupon=4422asds'
-        );
-
-        $count = 3;
-        $batch = $this->overlayManager->createNewBatch($count, $imageFile, $template, $payload);
-        $this->em->flush();
-
-        $this->testingHelper->assertNumberOfDBTableRecords($count, TrackedFile::class, $this);
-        $this->testingHelper->assertNumberOfDBTableRecords(1, Batch::class, $this);
-        $expectedFileCount = $count +1;
-        $this->testingHelper->assertNumberOfDBTableRecords($expectedFileCount, File::class, $this);
 
     }
 
@@ -208,7 +175,7 @@ class ImageOverlayTest extends CustomKernelTestCase
      * @test
      * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter testBatchNoGeneration
      *
-     * checks that batch nos are correct (when they're generated), for instance, that numbering restarts for a different template (even on the same image).
+     * checks that batch nos are correct (when they're generated i.e. 1,2,3 etc), and that numbering restarts when for a different template (even on the same image).
      */
     public function testBatchNoGeneration(): void
     {

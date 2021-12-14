@@ -59,6 +59,7 @@ class HybridLogger
 //               dump($context);
             }
         } else {        // prod or dev env
+//            print $msg."\n";
             $this->logger->info($prefix . $msg, $context);
         }
 //        $args = func_get_args();
