@@ -4,7 +4,7 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Services\QRcode;
+namespace VisageFour\Bundle\ToolsBundle\Services\QRcode;
 
 use Doctrine\ORM\EntityManager;
 use VisageFour\Bundle\ToolsBundle\Services\QRcode\QRCodeGenerator;
