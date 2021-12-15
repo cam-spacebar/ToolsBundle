@@ -54,7 +54,7 @@ class TrackedFile extends BaseEntity
      */
     private $status;
 
-    const STATUS_IN_QUEUE       = 'STATUS_IN_QUEUE';
+    const STATUS_IN_QUEUE       = 'STATUS_IN_QUEUE';            // i.e. in queue for composite generation (image or PDF)
     const STATUS_GENERATED      = 'GENERATED';
     const MARKED_FOR_DELETION   = 'MARKED_FOR_DELETION';
     const DELETED               = 'DELETED';

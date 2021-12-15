@@ -104,18 +104,16 @@ class BaseFile extends BaseEntity implements BaseFileInterface
     private $relatedOwnerPerson;
 
     /**
-     * @var boolean
+     * @var int
      *
-     * @ORM\Column(name="flaggedForDelete", type="boolean", nullable=false)
+     * @ORM\Column(name="status", type="integer", nullable=false)
      */
-    private $flaggedForDelete;
+    private $status;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="isDeleted", type="boolean", nullable=false)
-     */
-    private $isDeleted;
+    const STATUS_NOT_UPLOADED           = 100;      // i.e. not uploaded to remote storage: AWS S3
+    const STATUS_FILE_PERSISTED         = 200;      // i.e. exists on remote storage: AWS S3
+    const STATUS_MARKED_FOR_DELETION    = 300;
+    const STATUS_DELETED                = 400;
 
     /**
      * @var \DateTime
@@ -195,7 +193,7 @@ class BaseFile extends BaseEntity implements BaseFileInterface
         $this->remoteFilePath = $remoteFilePath;
     }
 
-    public function __construct($filepath, $isDeleted = false, $flaggedForDelete = false)
+    public function __construct($filepath)
     {
         if (!is_file($filepath)) {
             throw new \Exception('the file with filepath: "'. $filepath .'" does not exist');
@@ -214,8 +212,7 @@ class BaseFile extends BaseEntity implements BaseFileInterface
         $checksum = md5_file($filepath);
         $this->contentsCheckSum     = $checksum;
 
-        $this->flaggedForDelete     = $flaggedForDelete;
-        $this->isDeleted            = $isDeleted;
+        $this->status               = self::STATUS_NOT_UPLOADED;
 
         $this->relatedTemplates         = new ArrayCollection();
         $this->relatedDerivativeFiles   = new ArrayCollection();
@@ -380,7 +377,7 @@ class BaseFile extends BaseEntity implements BaseFileInterface
 
     public function getImageGD()
     {
-        // todo: check it's an image somehow
+        // todo: check it's an image somehow (throw error if not?)
         return new Image($this->getLocalFilePath());
     }
 
@@ -403,19 +400,19 @@ class BaseFile extends BaseEntity implements BaseFileInterface
     }
 
     /**
-     * @return bool
+     * @return int
      */
-    public function isDeleted(): bool
+    public function getStatus(): int
     {
-        return $this->isDeleted;
+        return $this->status;
     }
 
     /**
-     * @param bool $isDeleted
+     * @param int $status
      */
-    public function setIsDeleted(bool $isDeleted): void
+    public function setStatus(int $status): void
     {
-        $this->isDeleted = $isDeleted;
+        $this->status = $status;
     }
 
     /**

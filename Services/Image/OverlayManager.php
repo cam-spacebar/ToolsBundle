@@ -12,6 +12,7 @@ use App\Entity\FileManager\Template;
 use App\Repository\FileManager\FileRepository;
 use App\Repository\FileManager\ImageOverlayRepository;
 use App\Repository\FileManager\TemplateRepository;
+use VisageFour\Bundle\ToolsBundle\Services\Message\MessageDispatcher;
 use VisageFour\Bundle\ToolsBundle\Interfaces\PrintAttribution\FileInterface;
 use VisageFour\Bundle\ToolsBundle\Services\Message\LoggedMessageBus;
 use Doctrine\ORM\EntityManager;
@@ -78,11 +79,11 @@ class OverlayManager
      */
     private $fileRepo;
     /**
-     * @var LoggedMessageBus
+     * @var MessageDispatcher
      */
-    private $messageBus;
+    private $messageDispatcher;
 
-    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, TrackedFileRepository $trackedFileRepo, BatchRepository $batchRepository, FileRepository $fileRepo, LoggedMessageBus $messageBus)
+    public function __construct(TemplateRepository $templateRepo, ImageOverlayRepository $overlayRepo, ImageManipulation $imageManipulation, EntityManager $em, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, TrackedFileRepository $trackedFileRepo, BatchRepository $batchRepository, FileRepository $fileRepo, MessageDispatcher $messageDispatcher)
     {
         $this->templateRepo         = $templateRepo;
         $this->overlayRepo          = $overlayRepo;
@@ -93,7 +94,7 @@ class OverlayManager
         $this->trackedFileRepo      = $trackedFileRepo;
         $this->batchRepository      = $batchRepository;
         $this->fileRepo             = $fileRepo;
-        $this->messageBus           = $messageBus;
+        $this->messageDispatcher    = $messageDispatcher;
     }
 
     /**
@@ -131,42 +132,6 @@ class OverlayManager
     }
 
     /**
-     * @param File $imageFile
-     * @param Template $template
-     * @param array $payload
-     *
-     * Create a command message for GenerateGraphicalComposite() handler
-     *
-     */
-    public function createCompositeImage(Template $template, array $payload, TrackedFile $trackedFile): Bool
-    {
-        $message = new GenerateGraphicalComposite($template, $payload, $trackedFile);
-        $this->messageBus->dispatch($message);
-
-        return true;
-    }
-
-    /**
-     * @param TrackedFile $trackedFile
-     * creates a message to handle the async creation of the "composite"
-     */
-    public function createCompositeImageByTrackedFile (TrackedFile $trackedFile): bool
-    {
-        if ($trackedFile->getStatus() == TrackedFile::STATUS_GENERATED) {
-            throw new \Exception('TrackedFile (with id: '. $trackedFile->getId() .') has already been generated. It does not need to be generated again.');
-        }
-
-        $batch = $trackedFile->getRelatedBatch();
-        $template = $batch->getRelatedTemplate();
-
-        // Create the composite and store it in AWS S3 (using a 'command message')
-        $this->createCompositeImage($template, $batch->getPayload(), $trackedFile);
-
-        $this->em->flush();
-        return true;
-    }
-
-    /**
      * @param int $count
      * @param Image $canvas
      * @param Template $template
@@ -191,8 +156,7 @@ class OverlayManager
 //            dump($curTrackedFile);
             $batch->addTrackedFile($curTrackedFile);
 
-            $this->createCompositeImageByTrackedFile($curTrackedFile);
-
+            $this->messageDispatcher->dispatchGenerateGraphicalComposite($curTrackedFile);
         }
 
         return $batch;

@@ -12,6 +12,7 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 use VisageFour\Bundle\ToolsBundle\Message\GenerateGraphicalComposite;
+use VisageFour\Bundle\ToolsBundle\RepositoryAutowired\PrintAttribution\TrackedFileRepository;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\Image\ImageManipulation;
 use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
@@ -41,18 +42,25 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
      * @var EntityManager
      */
     private $em;
+
     /**
      * @var OverlayManager
      */
     private $overlayManager;
 
-    public function __construct(ImageManipulation $imageManipulation, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, EntityManager $em, OverlayManager $overlayManager)
+    /**
+     * @var TrackedFileRepository
+     */
+    private $trackedFileRepository;
+
+    public function __construct(ImageManipulation $imageManipulation, FileManager $fileManager, UrlShortenerHelper $urlShortenerHelper, EntityManager $em, OverlayManager $overlayManager, TrackedFileRepository $trackedFileRepository)
     {
         $this->imageManipulation    = $imageManipulation;
         $this->fileManager          = $fileManager;
         $this->urlShortenerHelper   = $urlShortenerHelper;
         $this->em                   = $em;
-        $this->overlayManager       = $overlayManager;
+        $this->overlayManager           = $overlayManager;
+        $this->trackedFileRepository    = $trackedFileRepository;
     }
 
     /**
@@ -68,9 +76,12 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
      */
     public function __invoke(GenerateGraphicalComposite $msg)
     {
-        $template = $msg->getTemplate();
-        $payload = $msg->getPayload();
-        $trackedFile = $msg->getTrackedFile();
+        /** @var TrackedFile $trackedFile */
+        $trackedFile = $this->trackedFileRepository->findOneByIdOrException($msg->getFileId());
+
+        $batch = $trackedFile->getRelatedBatch();
+        $template = $batch->getRelatedTemplate();
+        $payload = $batch->getPayload();
 
         if (!$this->checkStatusIsAcceptable($trackedFile)) {
             // if status is not acceptable, do not generate a composite

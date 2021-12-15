@@ -23,6 +23,7 @@ class DeleteFileHandler implements MessageHandlerInterface
      * @var EntityManager
      */
     private $em;
+
     /**
      * @var FileRepository
      */
@@ -40,15 +41,18 @@ class DeleteFileHandler implements MessageHandlerInterface
 
     public function __invoke(DeleteFile $msg)
     {
+//        create loggable outcome for cmd-message.
+
+        $id = $msg->getFileId();
+        $this->logger->sectionHeader('Start handling DeleteFile CMD-MSG. File Entity id: '. $id);
+
         /** @var File $file */
-        $file = $this->fileRepository->findOneByIdOrException($msg->getFileId());
+        $file = $this->fileRepository->findOneByIdOrException($id);
 
-
-// todo:
-//        if (!$this->checkStatusIsAcceptable($trackedFile)) {
-//            // if status is not acceptable, do not generate a composite
-//            return true;
-//        }
+        if (!$this->checkStatusIsAcceptable($file)) {
+            // if status is not acceptable ??
+            return true;
+        }
 
 //throw new \Exception ('423wecasfas');
 
@@ -76,6 +80,30 @@ class DeleteFileHandler implements MessageHandlerInterface
         $this->em->remove($file);
 
 //        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalBasename());
+
+        $this->logger->sectionHeader('Finished handling DeleteFile CMD-MSG');
+
+        return true;
+    }
+
+    // check the composite hasn't been generated already, or has (or will be) deleted.
+    private function checkStatusIsAcceptable (File $file) {
+//        update with $file and check statuses
+
+        $msgSuffix = 'Cannot delete File entity (with: {id})';
+        $status = $file->getStatus();
+        if ($status == File::STATUS_DELETED) {
+            // do nothing.
+            $this->logger->alert($msgSuffix. ', it is marked as already been deleted.', $file);
+            return false;
+        }
+
+        if (!($status == File::STATUS_MARKED_FOR_DELETION)) {
+            $this->logger->alert($msgSuffix .', it must be marked as File::STATUS_MARKED_FOR_DELETION to be deleted.', $file);
+            return false;
+        }
+
+        return true;
     }
 
     /**

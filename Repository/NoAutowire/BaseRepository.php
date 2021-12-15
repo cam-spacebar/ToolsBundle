@@ -76,6 +76,7 @@ class BaseRepository extends ServiceEntityRepository
 //            $curOverlay->getRelatedTemplate()->removeRelatedImageOverlay($curOverlay);
             $this->em->remove($curEntity);
         }
+
         $this->em->flush();
     }
 

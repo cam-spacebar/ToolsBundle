@@ -6,7 +6,6 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Message;
 
-use App\Entity\FileManager\Template;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 
 /**
@@ -19,45 +18,22 @@ use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 class GenerateGraphicalComposite
 {
     /**
-     * @var Template
-     */
-    private $template;
-    private $payload;
-    /**
      * @var TrackedFile
      */
-    private $trackedFile;
+    private $trackedFileId;
 
     // Handler:
-    public function __construct(Template $template, $payload, TrackedFile $trackedFile)
+    public function __construct(TrackedFile $trackedFile)
     {
-        $this->template = $template;
-        $this->payload = $payload;
-        $this->trackedFile = $trackedFile;
-    }
-
-    /**
-     * @return Template
-     */
-    public function getTemplate(): Template
-    {
-        return $this->template;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPayload()
-    {
-        return $this->payload;
+        $this->trackedFileId = $trackedFile->getId();
     }
 
     /**
      * @return TrackedFile
      */
-    public function getTrackedFile(): TrackedFile
+    public function getTrackedFileId(): Int
     {
-        return $this->trackedFile;
+        return $this->trackedFileId;
     }
 
 }

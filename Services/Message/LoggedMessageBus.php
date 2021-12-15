@@ -28,7 +28,7 @@ class LoggedMessageBus
     public function dispatch($message, array $stamps = []): Envelope
     {
         $shortName = (new \ReflectionClass($message))->getShortName();
-        $this->logger->info('Message dispatched. (class: '. $shortName .')', $message, 'cyan');
+        $this->logger->info('Message dispatched. (Message class: '. $shortName .')', $message, 'cyan');
 
         $this->logger->addLogPrefix('MessageQue');
         $result = $this->messageBus->dispatch($message, $stamps);

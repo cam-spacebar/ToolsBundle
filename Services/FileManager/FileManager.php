@@ -17,6 +17,7 @@ use League\Flysystem\FilesystemInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FileManager\BaseFileInterface;
 use VisageFour\Bundle\ToolsBundle\Message\FileManager\DeleteFile;
 use VisageFour\Bundle\ToolsBundle\Services\Message\LoggedMessageBus;
+use VisageFour\Bundle\ToolsBundle\Services\Message\MessageDispatcher;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -32,18 +33,19 @@ class FileManager
     // returns true if the file exists in cache (used for asserts in testing).
     private $isLastCacheHitSuccessful;
 
-    /**
-     * @var LoggedMessageBus
-     */
-    private $messageBus;
 
-    public function __construct(EntityManager $em, FilesystemInterface $publicUploadsFilesystem, FileRepository $fileRepo, string $env_var_bucketName, LoggedMessageBus $messageBus)
+    /**
+     * @var MessageDispatcher
+     */
+    private $messageDispatcher;
+
+    public function __construct(EntityManager $em, FilesystemInterface $publicUploadsFilesystem, FileRepository $fileRepo, string $env_var_bucketName, MessageDispatcher $messageDispatcher)
     {
         $this->em                   = $em;
         $this->fileSystem           = $publicUploadsFilesystem;
         $this->fileRepo             = $fileRepo;
         $this->bucketname           = $env_var_bucketName;
-        $this->messageBus           = $messageBus;
+        $this->messageDispatcher    = $messageDispatcher;
     }
 
     /**
@@ -55,9 +57,7 @@ class FileManager
      */
     public function deleteFile(BaseFileInterface $file)
     {
-        $message = new DeleteFile($file);
-        $this->messageBus->dispatch($message);
-
+        $this->messageDispatcher->dispatchDeleteFile($file);
     }
 
     public function doesRemoteFileExist($filepath)
@@ -159,6 +159,7 @@ class FileManager
         $newFile = $this->fileRepo->createNewByFilepath($filePath, $targetFilepath);
 
         $this->copyFileToCache($filePath, $newFile);
+        $newFile->setStatus(File::STATUS_FILE_PERSISTED);
 
         return $newFile;
     }
