@@ -77,7 +77,7 @@ class ImageOverlayTest extends CustomKernelTestCase
 //        $this->manager->persist($this->person);
 //        $this->manager->flush();
 //        die( 'attempting to asdasds')   ;
-        $this->overlayManager->deleteAllFiles(true);
+        $this->overlayManager->deleteAllFiles(true, false);
     }
 
     /**

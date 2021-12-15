@@ -208,7 +208,7 @@ class OverlayManager
      * This deletes the file entity (an image or PDF), it's template entity, overlay entities
      *
      */
-    public function deleteFile(FileInterface $file)
+    public function deleteFile(FileInterface $file, $throwExceptionOnAlreadyDeleted = true)
     {
 //        $file->setRelatedTemplate(null);
 //        dd($file->getRelatedTemplates());
@@ -219,13 +219,13 @@ class OverlayManager
         // todo: remove all URLs and hits?
         $this->fileRepo->removeAllInArray($file->getRelatedDerivativeFiles());
 
-        $this->fileManager->deleteFile($file);
+        $this->fileManager->deleteFile($file, $throwExceptionOnAlreadyDeleted);
     }
 
     /**
      * delete all files in the DB: DB record, local and remote files - used for cleanup
      */
-    public function deleteAllFiles($areYouSure = false)
+    public function deleteAllFiles($areYouSure = false, $throwExceptionOnAlreadyDeleted = true)
     {
         if (!$areYouSure) {
             throw new \Exception ('please set $areYouSure = true to deleteAllFiles()');
@@ -240,7 +240,7 @@ class OverlayManager
             // in this case, don't try to "re-delete" the same file.
             $alreadyDeleted = !$this->em->contains($curFile);
             if (!$alreadyDeleted) {
-                $this->deleteFile($curFile);
+                $this->deleteFile($curFile, $throwExceptionOnAlreadyDeleted);
             }
         }
 

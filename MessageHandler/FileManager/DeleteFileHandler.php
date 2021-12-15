@@ -39,6 +39,9 @@ class DeleteFileHandler implements MessageHandlerInterface
         $this->fileSystem = $publicUploadsFilesystem;
     }
 
+    build a parent class - for logging
+with abstract functions to auto generate logs sections start and finish
+
     public function __invoke(DeleteFile $msg)
     {
 //        create loggable outcome for cmd-message.

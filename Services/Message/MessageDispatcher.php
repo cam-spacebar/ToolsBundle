@@ -85,13 +85,20 @@ class MessageDispatcher
      * Create a cmd-msg to:
      * delete a file on local storage, remote storage and mark the File db record as deleted.
      */
-    public function dispatchDeleteFile(File $file): Bool
+    public function dispatchDeleteFile(File $file, $throwExceptionOnAlreadyDeleted = true): Bool
     {
         if (
             ($file->getStatus() == File::STATUS_DELETED) ||
             ($file->getStatus() == File::STATUS_MARKED_FOR_DELETION)
         ) {
-            throw new \Exception('File (id: '. $file->getId() .', status: '. $file->getStatus() .') has already been deleted (or is marked for deletion). Cannot dispatch DeleteFile CMD-MSG.');
+            $errorMsg = 'File (id: '. $file->getId() .', status: '. $file->getStatus() .') has already been deleted (or is marked for deletion). Cannot dispatch DeleteFile CMD-MSG.';
+            if ($throwExceptionOnAlreadyDeleted) {
+                throw new \Exception($errorMsg);
+            } else {
+                $this->logger->alert($errorMsg);
+                return false;
+            }
+            
         }
 
         $file->setStatus(File::STATUS_MARKED_FOR_DELETION);

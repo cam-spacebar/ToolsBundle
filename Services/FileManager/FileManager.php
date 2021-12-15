@@ -55,9 +55,9 @@ class FileManager
      * Dispatch a message to delete the file (delete remote file, locally cached file and mark DB record as deleted).
      * handler class: DeleteFileHandler
      */
-    public function deleteFile(BaseFileInterface $file)
+    public function deleteFile(BaseFileInterface $file, $throwExceptionOnAlreadyDeleted = true)
     {
-        $this->messageDispatcher->dispatchDeleteFile($file);
+        $this->messageDispatcher->dispatchDeleteFile($file, $throwExceptionOnAlreadyDeleted);
     }
 
     public function doesRemoteFileExist($filepath)

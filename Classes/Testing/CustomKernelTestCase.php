@@ -53,7 +53,6 @@ abstract class CustomKernelTestCase extends KernelTestCase
     }
 
     protected function tearDown():void {
-    print "\n tearDown";
         // need to run a try catch manually because otherwise an exception will fail silently.
         try {
             $this->logger->info('Calling: customTearDown()');
