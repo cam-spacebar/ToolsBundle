@@ -76,7 +76,7 @@ class FileManagerTest extends CustomKernelTestCase
         $filepath = $this->duplicateLocalFile($basepath, 'testfile.txt');
 
 //        $targetFilepath = 'test/testfile.txt';
-//        $this->fileManager->deleteRemoteFile($targetFilepath, false);1
+//        $this->fileManager->deleteRemoteFile($targetFilepath, false);
 
         $file = $this->fileManager->persistFile($filepath);
         $remoteFilepath = $file->getRemoteFilePath();

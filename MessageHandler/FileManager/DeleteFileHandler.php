@@ -51,6 +51,7 @@ class DeleteFileHandler implements MessageHandlerInterface
 
         if (!$this->checkStatusIsAcceptable($file)) {
             // if status is not acceptable ??
+
             return true;
         }
 
@@ -82,6 +83,7 @@ class DeleteFileHandler implements MessageHandlerInterface
 //        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalBasename());
 
         $this->logger->sectionHeader('Finished handling DeleteFile CMD-MSG');
+        $this->em->flush();
 
         return true;
     }
@@ -89,8 +91,9 @@ class DeleteFileHandler implements MessageHandlerInterface
     // check the composite hasn't been generated already, or has (or will be) deleted.
     private function checkStatusIsAcceptable (File $file) {
 //        update with $file and check statuses
+        $this->logger->info('$file status: '. $file->getStatus());
 
-        $msgSuffix = 'Cannot delete File entity (with: {id})';
+        $msgSuffix = 'Cannot delete File entity (with: '. $file->getId() .')';
         $status = $file->getStatus();
         if ($status == File::STATUS_DELETED) {
             // do nothing.

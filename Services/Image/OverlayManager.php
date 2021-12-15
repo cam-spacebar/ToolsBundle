@@ -240,7 +240,6 @@ class OverlayManager
             // in this case, don't try to "re-delete" the same file.
             $alreadyDeleted = !$this->em->contains($curFile);
             if (!$alreadyDeleted) {
-
                 $this->deleteFile($curFile);
             }
         }

@@ -87,6 +87,13 @@ class MessageDispatcher
      */
     public function dispatchDeleteFile(File $file): Bool
     {
+        if (
+            ($file->getStatus() == File::STATUS_DELETED) ||
+            ($file->getStatus() == File::STATUS_MARKED_FOR_DELETION)
+        ) {
+            throw new \Exception('File (id: '. $file->getId() .', status: '. $file->getStatus() .') has already been deleted (or is marked for deletion). Cannot dispatch DeleteFile CMD-MSG.');
+        }
+
         $file->setStatus(File::STATUS_MARKED_FOR_DELETION);
 
         // provide extra context to the message about to be sent (such as id and any other useful information)

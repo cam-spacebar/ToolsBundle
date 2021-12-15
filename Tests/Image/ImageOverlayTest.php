@@ -76,7 +76,7 @@ class ImageOverlayTest extends CustomKernelTestCase
 //        $this->removeUser($this->person);
 //        $this->manager->persist($this->person);
 //        $this->manager->flush();
-
+//        die( 'attempting to asdasds')   ;
         $this->overlayManager->deleteAllFiles(true);
     }
 
@@ -123,10 +123,10 @@ class ImageOverlayTest extends CustomKernelTestCase
         $this->overlayManager->deleteFile($template->getRelatedOriginalFile());
 
         $this->em->flush();
+
         $this->testingHelper->assertNumberOfDBTableRecords(0, File::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(0, Template::class, $this);
         $this->testingHelper->assertNumberOfDBTableRecords(0, ImageOverlay::class, $this);
-
     }
 
     /**

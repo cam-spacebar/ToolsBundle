@@ -9,10 +9,14 @@ namespace VisageFour\Bundle\ToolsBundle\Classes\Testing;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
+use VisageFour\Bundle\ToolsBundle\Services\Logging\HybridLogger;
 use VisageFour\Bundle\ToolsBundle\Services\Testing\TestingHelper;
+use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 abstract class CustomKernelTestCase extends KernelTestCase
 {
+    use LoggerTrait;
+
     /**
      * @var TestingHelper
      */
@@ -43,12 +47,20 @@ abstract class CustomKernelTestCase extends KernelTestCase
         $container = $this->getContainer();
 
         $this->testingHelper = $container->get('test.'. TestingHelper::class);
+        $this->logger = $container->get('test.'. HybridLogger::class);
 
         $this->customSetUp();
     }
 
     protected function tearDown():void {
-        $this->customTearDown();
+    print "\n tearDown";
+        // need to run a try catch manually because otherwise an exception will fail silently.
+        try {
+            $this->logger->info('Calling: customTearDown()');
+            $this->customTearDown();
+        } catch (\Throwable $e) {
+            dump($e);
+        }
     }
 
     abstract protected function customSetup();
