@@ -155,6 +155,7 @@ class OverlayManager
             $curTrackedFile = $this->trackedFileRepo->createNewTrackedFile($batch, $i, TrackedFile::STATUS_IN_QUEUE);
 //            dump($curTrackedFile);
             $batch->addTrackedFile($curTrackedFile);
+            $this->em->flush();
 
             $this->messageDispatcher->dispatchGenerateGraphicalComposite($curTrackedFile);
         }

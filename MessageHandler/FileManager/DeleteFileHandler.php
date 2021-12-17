@@ -8,16 +8,14 @@ namespace VisageFour\Bundle\ToolsBundle\MessageHandler\FileManager;
 
 use App\Entity\FileManager\File;
 use App\Repository\FileManager\FileRepository;
+use App\VisageFour\Bundle\ToolsBundle\Classes\Messenger\BaseEntityHandler;
 use Doctrine\ORM\EntityManager;
 use League\Flysystem\FilesystemInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use VisageFour\Bundle\ToolsBundle\Message\FileManager\DeleteFile;
-use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 // Delete the remote and local file and the File DB record (for the File entity provided)
-class DeleteFileHandler implements MessageHandlerInterface
+class DeleteFileHandler extends BaseEntityHandler
 {
-    use LoggerTrait;
 
     /**
      * @var EntityManager
@@ -37,28 +35,26 @@ class DeleteFileHandler implements MessageHandlerInterface
         $this->em = $em;
         $this->fileRepository = $fileRepository;
         $this->fileSystem = $publicUploadsFilesystem;
-    }
 
-    build a parent class - for logging
-with abstract functions to auto generate logs sections start and finish
+        parent::__construct();
+    }
 
     public function __invoke(DeleteFile $msg)
     {
-//        create loggable outcome for cmd-message.
+        $this->handleMessage($msg);
+        return true;
+    }
 
-        $id = $msg->getFileId();
-        $this->logger->sectionHeader('Start handling DeleteFile CMD-MSG. File Entity id: '. $id);
-
+    public function runProcess(int $entityId)
+    {
         /** @var File $file */
-        $file = $this->fileRepository->findOneByIdOrException($id);
+        $file = $this->fileRepository->findOneByIdOrException($entityId);
 
         if (!$this->checkStatusIsAcceptable($file)) {
             // if status is not acceptable ??
 
             return true;
         }
-
-//throw new \Exception ('423wecasfas');
 
         $logMsg = 'deleting file (from remote, local and DB record) with id: '. $file->getId() .', (original basename: '. $file->getOriginalBasename() .')';
         $this->logger->info($logMsg, [], 'grey_bold');
@@ -84,10 +80,6 @@ with abstract functions to auto generate logs sections start and finish
         $this->em->remove($file);
 
 //        $this->logger->info('Deleted file (from remote, local and DB record) with original filename: '. $file->getOriginalBasename());
-
-        $this->logger->sectionHeader('Finished handling DeleteFile CMD-MSG');
-        $this->em->flush();
-
         return true;
     }
 

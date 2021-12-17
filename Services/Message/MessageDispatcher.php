@@ -32,6 +32,7 @@ class MessageDispatcher
      * @var LoggedMessageBus
      */
     private $messageBus;
+
     /**
      * @var EntityManager
      */

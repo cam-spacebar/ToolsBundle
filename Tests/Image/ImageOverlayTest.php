@@ -216,4 +216,26 @@ class ImageOverlayTest extends CustomKernelTestCase
         $batchNo = $batch->getBatchNo();
         $this->assertEquals($batchNo, $no, 'the batch->batchNo is incorrect. It should be: '. $no .', instead it is: '. $batchNo);
     }
+
+    /**
+     * @test
+     * ./vendor/bin/phpunit src/VisageFour/Bundle/ToolsBundle/Tests/Image/ImageOverlayTest.php --filter testBatchNoGeneration
+     *
+     * Creates a batch "segment" of tracked files within a larger "creator" batch and changes the url.
+     * Then create a new batch segment that intersects the existing one (and it's trackedFile entities), to simulate the correction of a mistake.
+     * (this simulates adding a coupon and allocating this to a promoter)
+     */
+    public function subBatchTrackedFiles(): void
+    {
+        // todo:
+        // create new batch
+        // create batch segment? - give new name? group, pile?
+//        - promoter / attribution tags
+//        - payload
+//        -
+        // prevent reallocation of trackedFile when it has a hit (or any hit in it's pile?)
+
+
+
+    }
 }

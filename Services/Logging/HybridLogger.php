@@ -95,6 +95,13 @@ class HybridLogger
         $this->info($text, [], 'purple');
     }
 
+    public function consoleLineBreak()
+    {
+        if ($this->kernelEnv == 'test') {
+            print "\n";
+        }
+    }
+
     public function addLogPrefix($prefix)
     {
         if (!empty($this->prefix)) {
@@ -120,5 +127,27 @@ class HybridLogger
         if (!empty($this->prefix)) {
             return '['. $this->prefix .'] ';
         }
+
+        return '';
+    }
+
+    /**
+     * @param \Throwable $e
+     *
+     * displays an exception - in test env only.
+     * it was created as dump() on exceptions, unclear and too verbose.
+     */
+    public function displayException(\Throwable $e)
+    {
+        if ($this->isTestEnv()) {
+            $this->alert('Exception caught: '. $e->getMessage(), [], 'red');
+            $this->alert('For more info, goto marker: #messageDump and uncomment the dump()', []);
+//            dump($e);
+        }
+    }
+
+    private function isTestEnv()
+    {
+        return ($this->kernelEnv == 'test');
     }
 }

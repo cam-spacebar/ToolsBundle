@@ -94,11 +94,10 @@ abstract class BaseEntity implements BaseEntityInterface
         return $text;
     }
 
-    // outputs the important details about the object, specifically for console (for use with either: fixtures or testing)
+    // outputs the important details about the object, specifically for console (for use in terminal, either: fixtures or testing)
     // you can override this if you want to provide a custom output (ussually this is useful for larger/complex entities with relations such as: ToolsBundle::Checkout)
     public function outputContents($lineBreak = "\n")
     {
-
         $lb = $lineBreak;
         $className = get_class($this);
         if (!method_exists($this, '__toString')) {

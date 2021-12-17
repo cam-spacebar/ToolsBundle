@@ -7,24 +7,12 @@
 namespace VisageFour\Bundle\ToolsBundle\Message\FileManager;
 
 use App\Entity\FileManager\File;
-use VisageFour\Bundle\ToolsBundle\Message\BaseMessage;
+use VisageFour\Bundle\ToolsBundle\Classes\Messenger\BaseEntityMessage;
 
-class DeleteFile extends BaseMessage
+class DeleteFile extends BaseEntityMessage
 {
-    private $fileId;
-
     public function __construct (File $file)
     {
-        $id = $file->getId();
-        $this->checkEntityIDIsNotEmpty($id);
-        $this->fileId = $id;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getFileId(): ?int
-    {
-        return $this->fileId;
+        parent::__construct($file);
     }
 }

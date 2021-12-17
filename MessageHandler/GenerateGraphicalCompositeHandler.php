@@ -7,6 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\MessageHandler;
 
 use App\Entity\FileManager\ImageOverlay;
+use App\VisageFour\Bundle\ToolsBundle\Classes\Messenger\BaseEntityHandler;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use VisageFour\Bundle\ToolsBundle\Classes\ImageOverlay\Image;
@@ -19,7 +20,7 @@ use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
 use VisageFour\Bundle\ToolsBundle\Services\UrlShortener\UrlShortenerHelper;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
-class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
+class GenerateGraphicalCompositeHandler extends BaseEntityHandler
 {
     use LoggerTrait;
 
@@ -63,6 +64,7 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
         $this->trackedFileRepository    = $trackedFileRepository;
     }
 
+
     /**
      * @param GenerateGraphicalComposite $msg
      * @return bool
@@ -74,10 +76,14 @@ class GenerateGraphicalCompositeHandler implements MessageHandlerInterface
      * if the AWS File entity is marked as "to delete" or "deleted" - do nothing.
      * todo: add $force - to allow replacement of composite (as payload may change? ).
      */
-    public function __invoke(GenerateGraphicalComposite $msg)
+    public function __invoke(GenerateGraphicalComposite $msg) {
+        parent::handleMessage($msg);
+    }
+
+    public function runProcess(int $id)
     {
         /** @var TrackedFile $trackedFile */
-        $trackedFile = $this->trackedFileRepository->findOneByIdOrException($msg->getFileId());
+        $trackedFile = $this->trackedFileRepository->findOneByIdOrException($id);
 
         $batch = $trackedFile->getRelatedBatch();
         $template = $batch->getRelatedTemplate();

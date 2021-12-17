@@ -8,5 +8,5 @@ namespace VisageFour\Bundle\ToolsBundle\Interfaces;
 
 interface BaseEntityInterface
 {
-
+    public function getShortName();
 }
