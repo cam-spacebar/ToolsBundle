@@ -10,6 +10,10 @@ use App\Entity\FileManager\File;
 use App\Entity\FileManager\ImageOverlay;
 use App\Entity\FileManager\Template;
 use App\Entity\UrlShortener\Url;
+use App\OtaNine\Exceptions\NoPricingMethodSetException;
+use App\OtaNine\Exceptions\TooManyPricingModelsSetException;
+use App\OtaNine\Services\ProductCombiner;
+use Contentful\Delivery\Resource\Entry;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\Batch;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\TrackedFile;
 use VisageFour\Bundle\ToolsBundle\Services\Logging\HybridLogger;
@@ -17,6 +21,7 @@ use VisageFour\Bundle\ToolsBundle\Services\Image\OverlayManager;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\FileManager\FileManager;
 use VisageFour\Bundle\ToolsBundle\Services\Image\ImageManipulation;
+use Contentful\Delivery\Client;
 
 /**
  * Class SecurityTest
@@ -58,6 +63,7 @@ class ImageOverlayTest extends CustomKernelTestCase
     protected function customSetUp()
     {
         $this->getServices(true);
+        $this->getContainer()->get('test.'. ProductCombiner::class);
 
         $this->testingHelper->truncateEntities([
             Template::class,
@@ -234,8 +240,5 @@ class ImageOverlayTest extends CustomKernelTestCase
 //        - payload
 //        -
         // prevent reallocation of trackedFile when it has a hit (or any hit in it's pile?)
-
-
-
     }
 }
