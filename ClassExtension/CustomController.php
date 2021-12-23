@@ -41,6 +41,8 @@ class CustomController extends AbstractController
      * the user is logged out (person: null)
      *
      * $redirect: issues a command to the front-end to redirect the user to a different url on the front-end.
+     *
+     * [invocation examples: https://gist.github.com/cam-spacebar/301d3dc8e9f1fbe0a847864412cd2cdb]
      */
     protected function assembleJsonResponse ($data = null, $redirect = BaseFrontendUrl::NO_REDIRECTION): JsonResponse {
         /** @var Person $loggedInPerson */

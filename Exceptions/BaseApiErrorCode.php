@@ -10,6 +10,9 @@ use VisageFour\Bundle\ToolsBundle\Services\BaseFrontendUrl;
 use VisageFour\Bundle\ToolsBundle\Traits\HasAUniqueConstantsListTrait;
 
 /**
+ * -- Documentation --
+ * https://docs.google.com/presentation/d/1WpWj80uAeQLJtNabbn-CxppNU-pEqteE5g222_qmjCo/edit#slide=id.gb2c1e3197b_0_1
+ *
  * Extend this and implement application codes that are specific to your project.
  */
 class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface //, UniqueConstantsListInterface
@@ -44,7 +47,7 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     const INVALID_SHORTENED_URL_CODE            = 1300;
 
 
-    // Add new route marker: #CMDKKD00-generic
+    // Add new route [marker: #CMDKKD00]
     private static $initialStatusCodes = [
         // security errors:
         self::OK                                    => ['msg'               => 'Request fine.',

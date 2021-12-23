@@ -65,7 +65,7 @@ class ResponseAssembler
      * @return JsonResponse
      * @throws \Exception
      *
-     * return a JsonResponse object, based on the APIErrorCode on file (for the exception).
+     * return a Symfony JsonResponse object, based on the APIErrorCode on file (for the exception).
      */
     public function handleException (ApiErrorCodeInterface $e)
     {
@@ -81,6 +81,8 @@ class ResponseAssembler
      * @param array $redirectData
      * @return JsonResponse
      * @throws \Exception
+     *
+     * return a standardized JSON response to the client.
      */
     public function assembleJsonResponse ($data = null, $redirect = FrontendUrl::NO_REDIRECTION, ApiErrorCodeInterface $error = null, $redirectData = []): JsonResponse {
         $rootKeys = [];
