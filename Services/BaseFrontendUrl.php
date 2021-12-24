@@ -12,6 +12,9 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
  * This provides a list of front-end urls and an additional mapping to the backend (symfony) route.
  * This should allow for easy (centralized) changes to route names and urls
  *
+ * -- why this exists --
+ * ?
+ *
  * note: front-end "file path" url part and backend URL should match (to keep it simple),
  * however symfony route_name does not need to match.
  *

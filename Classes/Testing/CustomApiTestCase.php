@@ -454,7 +454,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected function outputDebugToTerminal($msg)
     {
         if ($this->debugOutputOn) {
-            $this->outputRedTextToTerminal('DEBUG: '. $msg);
+            $this->consoleOutput->outputRedTextToTerminal($msg);
         }
     }
 
@@ -465,7 +465,7 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     protected function outputColoredTextToTerminal($msg, $fgColor = 'red', $bgColor = 'black')
     {
-        $this->consoleOutput->outputColoredTextToTerminal($msg, $fgColor, $bgColor);
+        $this->consoleOutput->outputColoredTextToTerminal($msg, '', $fgColor, $bgColor);
     }
 
     /**
