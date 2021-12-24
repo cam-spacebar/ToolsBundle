@@ -6,12 +6,13 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode;
 
+use App\Exceptions\ApiErrorCode;
 use Psr\Log\LoggerInterface;
 use Stripe\Error\InvalidRequest;
-use VisageFour\Bundle\ToolsBundle\Exceptions\BaseApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 
 // an error that's triggered when a payment charge fails with the stripe SDK
-class PaymentErrorException extends BaseApiErrorCode
+class PaymentErrorException extends ApiErrorCode
 {
     /**
      * @var LoggerInterface
@@ -22,9 +23,9 @@ class PaymentErrorException extends BaseApiErrorCode
     {
         $this->logger = $logger;
         $this->logger->info('Stripe payment exception (Stripe\Error\InvalidRequest) caught. $e: ', [$e]);
-        $errorMsg = $this->getStripeExceptionPublicErrorMsg($e, $logger);
+        $errorMsg = $this->getStripeExceptionPublicErrorMsg($e);
         parent::__construct(
-            BaseApiErrorCode::STRIPE_PAYMENT_ERROR,
+            VFApiStatusCodes::STRIPE_PAYMENT_ERROR,
             $errorMsg
             . '. (Please note: your card has not been charged)'
         );

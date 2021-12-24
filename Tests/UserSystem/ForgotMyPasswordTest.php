@@ -5,6 +5,7 @@ namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 use App\Services\FrontendUrl;
 use App\Entity\Person;
 use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\BaseFrontendUrl;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
@@ -66,7 +67,7 @@ class ForgotMyPasswordTest extends CustomApiTestCase
         $data = [
             'email'         => $this->person->getEmail()
         ];
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $crawler = $this->sendJSONRequest('POST', $data);
         $this->assertResponseHeaderSame('content-type', 'application/json');
     }

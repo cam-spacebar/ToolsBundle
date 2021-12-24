@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 
@@ -64,14 +65,14 @@ class NewAccountTest extends CustomApiTestCase
 
         // create a new account
         $this->setTargetRoutePairConstant(FrontendUrl::NEW_ACCOUNT);
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $data = [
             'email'         => $this->faker->email()
         ];
         $crawler = $this->sendJSONRequest('POST', $data);
         $this->buildUrlWithParams($data);
 //        $this->outputDebugToTerminal('email: '. $this->person->getPassword());
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $this->assertResponseHeaderSame('content-type', 'application/json');
 
         // send a duplicate create account request

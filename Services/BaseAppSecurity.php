@@ -8,6 +8,7 @@ use App\Services\FrontendUrl;
 use App\Traits\FlashBagTrait;
 use App\Exceptions\ApiErrorCode;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PersonNotFoundException;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\MissingInputException;
 use VisageFour\Bundle\ToolsBundle\Exceptions\AccountAlreadyVerified;
 use Doctrine\ORM\EntityManager;
@@ -91,7 +92,7 @@ class BaseAppSecurity
         $this->passwordManager          = $passwordManager;
         $this->baseFrontendUrl          = $frontendUrl;
         $this->emailRegisterMan         = $emailRegisterManager;
-        $this->apiErrorCode             = new ApiErrorCode(ApiErrorCode::OK);
+        $this->apiErrorCode             = new ApiErrorCode(VFApiStatusCodes::OK);
     }
 
     /**
@@ -112,7 +113,7 @@ class BaseAppSecurity
 
         switch ($errorMsg) {
             case 'Invalid credentials.':
-                $errorCode = ApiErrorCode::INVALID_CREDENTIALS;
+                $errorCode = VFApiStatusCodes::INVALID_CREDENTIALS;
                 break;
             default:
                 $errorCode = $errorMsg;
@@ -129,7 +130,7 @@ class BaseAppSecurity
 
         if (!empty($errorCode)) {
             // if there was an authentication error, BUT the user is already logged in, change the error message.
-            $errorCode = ($loggedInUser !== 'anon.') ? ApiErrorCode::ERROR_BUT_ALREADY_LOGGED_IN : $errorCode;
+            $errorCode = ($loggedInUser !== 'anon.') ? VFApiStatusCodes::ERROR_BUT_ALREADY_LOGGED_IN : $errorCode;
 //            $this->ra->addErrorMessage($msg);
         }
 
@@ -205,7 +206,7 @@ class BaseAppSecurity
                     // redirect to reset password page.
                     $redirect = BaseFrontendUrl::RESET_PASSWORD;
                 }
-                throw new ApiErrorCode(ApiErrorCode::ACCOUNT_ALREADY_VERIFIED, null, $redirect);
+                throw new ApiErrorCode(VFApiStatusCodes::ACCOUNT_ALREADY_VERIFIED, null, $redirect);
             }
 
             // token was correct (and account is now verified) - so they must set a password:
@@ -258,7 +259,6 @@ class BaseAppSecurity
             $newPassword    = $this->getPOSTParam($request,'newPassword');
 
 //            dd('asd', $email);
-
             $person = $this->getPersonByEmailAddress($email);
 //            dd('123', $person);
 
@@ -300,14 +300,14 @@ class BaseAppSecurity
     {
         $this->logger->info('change password token comparison: '. $person->getChangePasswordToken() .' =? '. $changePasswordToken);
         if (!$person->isChangePasswordTokenCorrect($changePasswordToken)) {
-            throw new ApiErrorCode(ApiErrorCode::CHANGE_PASSWORD_TOKEN_INVALID);
+            throw new ApiErrorCode(VFApiStatusCodes::CHANGE_PASSWORD_TOKEN_INVALID);
         }
 
         // update the password
         try {
             $this->passwordManager->validatePasswordAndEncode($person, $newPassword);
         } catch (PasswordValidationException $e) {
-            throw new ApiErrorCode(ApiErrorCode::INVALID_NEW_PASSWORD, $e->getPublicMsg() );
+            throw new ApiErrorCode(VFApiStatusCodes::INVALID_NEW_PASSWORD, $e->getPublicMsg() );
         }
 
         $this->em->persist($person);
@@ -349,7 +349,7 @@ class BaseAppSecurity
         $result = $this->attemptAccountVerification($person, $token);
 
         if (!$result) {
-            throw new ApiErrorCode(ApiErrorCode::INVALID_ACCOUNT_VERIFICATION_TOKEN);
+            throw new ApiErrorCode(VFApiStatusCodes::INVALID_ACCOUNT_VERIFICATION_TOKEN);
         }
 
         $token = $person->createChangePasswordToken();

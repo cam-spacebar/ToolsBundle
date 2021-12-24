@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 
@@ -71,8 +72,9 @@ class ChangePasswordTest extends CustomApiTestCase
             'email'                 => $this->person->getEmail()
         ];
         $this->buildUrlWithParams($urlParams);
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $crawler = $this->sendJSONRequest('GET');
+
 //        dump($crawler);
         $this->assertResponseHeaderSame('content-type', 'application/json');
 
@@ -80,7 +82,7 @@ class ChangePasswordTest extends CustomApiTestCase
 
         // Attempt login with new (correct) password.
         $this->setTargetRoutePairConstant(FrontendUrl::LOGIN);
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $data = [
             'email'         => $this->person->getEmail(),
             'password'      => $newPassword
@@ -110,7 +112,7 @@ class ChangePasswordTest extends CustomApiTestCase
             'email'         => $this->person->getEmail()
         ];
         $this->buildUrlWithParams($data);
-        $this->setExpectedResponse(ApiErrorCode::INVALID_NEW_PASSWORD);
+        $this->setExpectedResponse(VFApiStatusCodes::INVALID_NEW_PASSWORD);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
 
@@ -134,7 +136,7 @@ class ChangePasswordTest extends CustomApiTestCase
             'email'         => $this->person->getEmail()
         ];
         $this->buildUrlWithParams($data);
-        $this->setExpectedResponse(ApiErrorCode::ACCOUNT_NOT_VERIFIED);
+        $this->setExpectedResponse(VFApiStatusCodes::ACCOUNT_NOT_VERIFIED);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
         $this->assertResponseHeaderSame('content-type', 'application/json');

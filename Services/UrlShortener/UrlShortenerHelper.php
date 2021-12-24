@@ -26,6 +26,7 @@ class UrlShortenerHelper
 
     /** @var Router */
     private $router;
+
     /**
      * @var QRCodeGenerator
      */

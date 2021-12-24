@@ -12,6 +12,7 @@ use App\Entity\UrlShortener\Url;
 use App\Exceptions\ApiErrorCode;
 use App\Repository\UrlShortener\UrlRepository;
 use App\Services\FrontendUrl;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomKernelTestCase;
 use Doctrine\ORM\EntityManager;
@@ -95,7 +96,7 @@ class UrlTest extends CustomApiTestCase
             'code' => $url->getCode()
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::SHORTENED_URL_LP, $params);
-        $this->setExpectedResponse(ApiErrorCode::REDIRECT_301);
+        $this->setExpectedResponse(VFApiStatusCodes::REDIRECT_301);
 //        $this->buildUrlWithParams($data);
         $this->expectStatusCode = false;
         $crawler = $this->sendJSONRequest('GET');

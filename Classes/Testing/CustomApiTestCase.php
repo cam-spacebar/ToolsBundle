@@ -162,6 +162,7 @@ abstract class CustomApiTestCase extends ApiTestCase
         $this->routePairConstant = $routePairConstant;
         $this->urlParams = $urlParams;
 //            $this->frontendUrl->getControllerName($routePairConstant);
+
         $this->buildUrlWithParams($urlParams);
 //        $this->setTargetRoutePairConstant(FrontendUrl::CHANGE_PASSWORD);
 //        $this->controllerName
@@ -418,12 +419,15 @@ abstract class CustomApiTestCase extends ApiTestCase
      */
     protected function outputTestingUrl()
     {
+
         if(empty($this->url)) {
             throw new \Exception('$this->url cannot be empty. (Error is in test: '. $this->currentMethod .')');
         }
+
         $this->outputColoredTextToTerminal(
             'target URL set to: '. $this->url
         );
+
         $this->outputColoredTextToTerminal(
             $this->frontendUrl->getRoutePairDebugMsg($this->routePairConstant)
             .' (using HTTP method: '. $this->HTTPMethod .')'
@@ -461,7 +465,7 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     protected function outputColoredTextToTerminal($msg, $fgColor = 'red', $bgColor = 'black')
     {
-        $this->outputColoredTextToTerminal($msg, $fgColor, $bgColor);
+        $this->consoleOutput->outputColoredTextToTerminal($msg, $fgColor, $bgColor);
     }
 
     /**
@@ -512,7 +516,7 @@ abstract class CustomApiTestCase extends ApiTestCase
             'password'      => $this->userPassword
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::LOGIN);
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $crawler = $this->sendJSONRequest('POST', $data);
         try {
 //            print 'HTTP status code provided: '. $crawler->getStatusCode() ."\n";

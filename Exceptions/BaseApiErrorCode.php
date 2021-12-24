@@ -3,6 +3,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Exceptions;
 
 use Symfony\Component\HttpFoundation\Request;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\ApiStatusCodePayloadInterface;
 use VisageFour\Bundle\ToolsBundle\Classes\UniqueConstantsList;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\UniqueConstantsListInterface;
@@ -15,86 +16,9 @@ use VisageFour\Bundle\ToolsBundle\Traits\HasAUniqueConstantsListTrait;
  *
  * Extend this and implement application codes that are specific to your project.
  */
-class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface //, UniqueConstantsListInterface
+abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface
 {
     use HasAUniqueConstantsListTrait;
-
-    // security error codes:
-    const OK                                    = 10;       // the default of a response, which indicates there were not problems.
-    const INPUT_MISSING                         = 20;       // a GET or POST parameter is missing.
-    const INVALID_EMAIL_ADDRESS                 = 30;       // the email address provided is invalid.
-    const ALREADY_LOGGED_IN                     = 40;       // when a user is attempting to login
-    const ERROR_BUT_ALREADY_LOGGED_IN           = 43;       // originally it used the already logged in error (if logged in but failed authentication) - but
-                                                            // this could cause confusion so this error code was created
-    const INVALID_ACCOUNT_VERIFICATION_TOKEN    = 50;
-    const ACCOUNT_ALREADY_VERIFIED              = 60;
-    const CHANGE_PASSWORD_TOKEN_INVALID         = 70;
-    const INVALID_CREDENTIALS                   = 80;       // incorrect password
-    const INVALID_NEW_PASSWORD                  = 90;       // when a user provides a new passwords that's too short or too long (for instance).
-    const ACCOUNT_NOT_VERIFIED                  = 100;
-    const LOGIN_REQUIRED                        = 110;
-    const REDIRECT_301                          = 120;
-
-    // purchase codes:
-    const PRODUCT_REF_INVALID                   = 1110;
-    const INVALID_CART_TOTAL                    = 1120;
-    const PRODUCT_QUANTITY_INVALID              = 1130;
-    const STRIPE_PAYMENT_ERROR                  = 1140;
-
-    const CANNOT_CONNECT_TO_STRIPE              = 1201;
-
-    // Url shortener related
-    const INVALID_SHORTENED_URL_CODE            = 1300;
-
-
-    // Add new route [marker: #CMDKKD00]
-    private static $initialStatusCodes = [
-        // security errors:
-        self::OK                                    => ['msg'               => 'Request fine.',
-                                                        'HTTPStatusCode'    => 200],
-        self::INPUT_MISSING                         => ['msg'               => 'You are missing an input parameter',
-                                                        'HTTPStatusCode'    => 400],
-        self::INVALID_EMAIL_ADDRESS                 => ['msg'               => 'Email could not be found.',
-                                                        'HTTPStatusCode'    => 400],            // todo: should this be 401 for authentication related throws?!
-        self::ALREADY_LOGGED_IN                     => ['msg'               => 'You are already logged in!',
-                                                        'HTTPStatusCode'    => 200],
-        self::ERROR_BUT_ALREADY_LOGGED_IN           => ['msg'               => 'There was an error in your login attempt, however you are already logged in.',
-                                                        'HTTPStatusCode'    => 400],
-        self::INVALID_ACCOUNT_VERIFICATION_TOKEN    => ['msg'               => 'The token provided is invalid. This account cannot be verified.',
-                                                        'HTTPStatusCode'    => 400],
-        self::ACCOUNT_ALREADY_VERIFIED              => ['msg'               => 'Your account has already been verified.',
-                                                        'HTTPStatusCode'    => 400],
-        self::CHANGE_PASSWORD_TOKEN_INVALID         => ['msg'               => 'The token provided is invalid. The password cannot be changed. Please re-try the "forgot your password" form to get a new link/token.',
-                                                        'HTTPStatusCode'    => 401],
-        self::INVALID_CREDENTIALS                   => ['msg'               => 'Invalid credentials.',
-                                                        'HTTPStatusCode'    => 401],
-        self::INVALID_NEW_PASSWORD                  => ['msg'               => 'The password provided is incorrect.',
-                                                        'HTTPStatusCode'    => 401],
-        self::ACCOUNT_NOT_VERIFIED                  => ['msg'               => 'Cannot complete this request as this account is not verified. Please check your email (and spam folder) for an email containing a verification link.',
-                                                        'HTTPStatusCode'    => 401],        // message inherited from the exception class: AccountNotVerifiedException
-        self::LOGIN_REQUIRED                        => ['msg'               => 'You must login first to view this page.',
-                                                        'HTTPStatusCode'    => 401],
-        self::REDIRECT_301                          => ['msg'               => 'Being redirected.',
-                                                        'HTTPStatusCode'    => 301],
-
-        // purchase codes:
-        self::PRODUCT_REF_INVALID                   => ['msg'               => 'A product with the reference provided does not exist.',
-                                                        'HTTPStatusCode'    => 400],
-        self::INVALID_CART_TOTAL                    => ['msg'               => 'The total provided does not match the one calculated on the backend',
-                                                        'HTTPStatusCode'    => 400],
-        self::PRODUCT_QUANTITY_INVALID              => ['msg'               => 'Product quantity cannot be 0 or negative.',
-                                                        'HTTPStatusCode'    => 400],
-        self::STRIPE_PAYMENT_ERROR                  => ['msg'               => self::USE_CLIENT_MSG,
-                                                        'HTTPStatusCode'    => 400],
-        self::CANNOT_CONNECT_TO_STRIPE              => ['msg'               => self::USE_CLIENT_MSG,
-                                                        'HTTPStatusCode'    => 400],
-        self::INVALID_SHORTENED_URL_CODE            => ['msg'               => self::USE_CLIENT_MSG,
-                                                        'HTTPStatusCode'    => 400]
-    ];
-
-    // use this when the app should use the exception message, not a "stdMessage" message
-    // todo: throw an exception if a stdMessage exists but the exception constructor has a client messge - they both shouldn't exist, its confusing.
-    const USE_CLIENT_MSG = 'MARKER#23Dzwdcfko2#FCW';
 
     /**
      * @var int|null
@@ -103,20 +27,52 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
      */
     private $redirectCode;
 
-    public function __construct(int $initialValue, string $clientMsg = null, string $redirectCode = null, $additionalStatusCodes = null)
+    /**
+     * @var string[]
+     * array keys to check when attempting to add new status codes to the UCL - ensuring the inputs are not mal-formed.
+     *
+     * only call parent::__construct() once the UCL has been populated with ALL statusCodes
+     */
+    private $expectedKeys;
+
+    // use this when the app should use the exception message, not a "stdMessage" message
+    // todo: throw an exception if a stdMessage exists but the exception constructor has a client messge - they both shouldn't exist, its confusing.
+    const USE_CLIENT_MSG = 'MARKER#23Dzwdcfko2#FCW';
+
+    /**
+     * BaseApiErrorCode constructor.
+     * @param $value
+     * @param array $codePayloads
+     * @param string|null $clientMsgOverride
+     * @param string|null $redirectCode
+     * @throws \Exception
+     *
+     * $statusCode is the internal "statusCode" that maps to a constant. This is *not* the HTTP status code. (however it will define a HTTP status code it expects - useful for testing)
+     * $clientMsgOverride will override the "standard" message (provided by the "statusCodes" classes)
+     */
+    public function __construct($statusCode, array $codePayloads, string $clientMsgOverride = null, string $redirectCode = null)
     {
-        $this->buildUCL($initialValue, $additionalStatusCodes);
+        if (empty($statusCode)) {
+            throw new \Exception('$statusCode is empty. Please set it to a valid value.');
+        }
+        $this->expectedKeys = ['msg', 'HTTPStatusCode'];
+
+        $this->buildUCL();
 
         if (!empty($redirect)) {
             $this->redirectCode = $redirectCode;
         }
 
+        $this->addArrayOfPayloads($codePayloads);
+
+        $this->setUclValue($statusCode);
+
         // $clientMsg can only be empty if it has a "stdMessage". If not, throw an error.
-        if (empty($clientMsg)) {
-            $clientMsg = $this->getStandardResponseMsg();
+        if (empty($clientMsgOverride)) {
+            $clientMsgOverride = $this->getStandardResponseMsg();
         }
 
-        parent::__construct($clientMsg);
+        parent::__construct($clientMsgOverride);
     }
 
     /**
@@ -170,13 +126,57 @@ class BaseApiErrorCode extends PublicException implements ApiErrorCodeInterface 
     }
 
     // build the Unique Constants List (UCL)
-    private function buildUCL($initialValue, $additionalStatusCodes)
+    private function buildUCL()
     {
         $this->uniqueConstantsList = new UniqueConstantsList(
             'API status codes',
-            [self::$initialStatusCodes, $additionalStatusCodes],
-            $initialValue,
             'CMDKKD00'
         );
+    }
+
+    /**
+     * @param array $codePayloads
+     * Adds an array of payloads (of status codes) to the UCL
+     */
+    private function addArrayOfPayloads(array $codePayloads)
+    {
+        foreach($codePayloads as $curI => $curPayload) {
+            $this->addStatusCodesPayload($curPayload);
+        }
+    }
+
+    /**
+     * Adds a payload of status codes to UCL - but does some additional checks (on the array elements / keys) first.
+     */
+    public function addStatusCodesPayload (ApiStatusCodePayloadInterface $apiStatusCodePayload)
+    {
+        foreach ($apiStatusCodePayload->getStatusCodes() as $internalCode => $responseSet) {
+            $this->checkKeysExist($internalCode, $responseSet, $apiStatusCodePayload);
+
+            $this->uniqueConstantsList->addListItem($responseSet, $internalCode);
+        }
+
+    }
+
+    /**
+     * @param array $expectedKeys
+     * @param $internalCode
+     * @param array $responseSet
+     * @param ApiStatusCodePayloadInterface $apiStatusCodePayload
+     * @return bool
+     * @throws \Exception
+     *
+     * Check that 'msg' and 'HTTPStatusCode' keys exist
+     */
+    private function checkKeysExist ($internalCode, array $responseSet, ApiStatusCodePayloadInterface $apiStatusCodePayload)
+    {
+        foreach ($this->expectedKeys as $curI2 => $curExpectedKey) {
+            if (empty($responseSet['msg'])) {
+                $className = get_class($apiStatusCodePayload);
+                throw new \Exception('the $apiStatusCodePayload: "'. $className .'" has no element set for the "msg" key on array index: '. $internalCode);
+            }
+        }
+
+        return true;
     }
 }

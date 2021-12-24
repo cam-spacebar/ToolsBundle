@@ -7,14 +7,15 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode;
 
-use VisageFour\Bundle\ToolsBundle\Exceptions\BaseApiErrorCode;
+use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 
-class InvalidCartTotalException extends BaseApiErrorCode
+class InvalidCartTotalException extends ApiErrorCode
 {
     public function __construct($providedTotal, $calculatedTotal)
     {
         parent::__construct(
-            BaseApiErrorCode::INVALID_CART_TOTAL,
+            VFApiStatusCodes::INVALID_CART_TOTAL,
             'The $providedCart total of: '. $providedTotal .' is not the same as the $calculatedTotal of: '. $calculatedTotal
         );
     }

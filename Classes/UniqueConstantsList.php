@@ -40,8 +40,8 @@ class UniqueConstantsList implements UniqueConstantsListInterface
     /**
      * @var string
      *
-     * This is a code marker that is displayed to the developer  so they
-     * can quickly/easily add a new item to the UCL
+     * This is a code marker that is displayed to the developer so they
+     * can quickly/easily find the place (in the code) to add a new item to the UCL
      */
     private $addItemMarker;
 
@@ -50,12 +50,10 @@ class UniqueConstantsList implements UniqueConstantsListInterface
      */
     private $list;
 
-    public function __construct(string $itemPhrase, array $listItemsToMerge, $initialValue, string $addItemMarker = null)
+    public function __construct(string $itemPhrase, string $addItemMarker = null)
     {
         $this->itemPhrase = $itemPhrase;
         $this->addItemMarker = $addItemMarker;
-        $this->mergeItemArrays($listItemsToMerge);
-        $this->setValue($initialValue);
     }
 
     public function setValue($value)
@@ -120,9 +118,9 @@ class UniqueConstantsList implements UniqueConstantsListInterface
      *
      * loop over the supplied array and add it's items to this objects unique items list.
      */
-    private function addArrayOfItems($newArray): UniqueConstantsListInterface
+    public function addArrayOfItems($newArray): UniqueConstantsListInterface
     {
-        if (empty($newArray)){
+        if (empty($newArray)) {
             return $this;
         }
 
@@ -133,7 +131,7 @@ class UniqueConstantsList implements UniqueConstantsListInterface
         return $this;
     }
 
-    private function addListItem($item, $arrIndex)
+    public function addListItem($item, $arrIndex)
     {
         $this->checkIndexIsNotAlreadySet($arrIndex);
 
@@ -168,7 +166,7 @@ class UniqueConstantsList implements UniqueConstantsListInterface
     {
         if (!isset($this->list[$arrIndex])) {
             throw new \Exception(
-                'Cannot retrieve list item with the array index: '. $arrIndex .' (on the '. $this->itemPhrase .' list as it) does not exist.'
+                'Cannot retrieve list item with the array index: "'. $arrIndex .'" (on the "'. $this->itemPhrase .'" list as it) does not exist.'
             );
         }
 

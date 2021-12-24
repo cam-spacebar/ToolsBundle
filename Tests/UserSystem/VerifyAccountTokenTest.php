@@ -4,6 +4,7 @@ namespace VisageFour\Bundle\ToolsBundle\Tests\UserSystem;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Classes\Testing\CustomApiTestCase;
 
 /**
@@ -54,7 +55,7 @@ class VerifyAccountTokenTest extends CustomApiTestCase
             'verificationToken' => 'bad token'
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::CONFIRM_EMAIL, $data);
-        $this->setExpectedResponse(ApiErrorCode::INVALID_ACCOUNT_VERIFICATION_TOKEN);
+        $this->setExpectedResponse(VFApiStatusCodes::INVALID_ACCOUNT_VERIFICATION_TOKEN);
 //        $this->buildUrlWithParams($data);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
@@ -81,7 +82,7 @@ class VerifyAccountTokenTest extends CustomApiTestCase
             'verificationToken' => $correctToken
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::CONFIRM_EMAIL, $data);
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
 
@@ -101,14 +102,14 @@ class VerifyAccountTokenTest extends CustomApiTestCase
             'verificationToken' => $correctToken
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::CONFIRM_EMAIL, $data);
-        $this->setExpectedResponse(ApiErrorCode::OK);
+        $this->setExpectedResponse(VFApiStatusCodes::OK);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
 
         $this->manager->flush();
 
         // attempt validation (second time)
-        $this->setExpectedResponse(ApiErrorCode::ACCOUNT_ALREADY_VERIFIED);
+        $this->setExpectedResponse(VFApiStatusCodes::ACCOUNT_ALREADY_VERIFIED);
 //        $this->buildUrlWithParams($data);
         $crawler = $this->sendJSONRequest('GET');
         $this->assertResponseHeaderSame('content-type', 'application/json');

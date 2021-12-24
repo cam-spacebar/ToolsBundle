@@ -39,7 +39,7 @@ trait HasAUniqueConstantsListTrait
         return $this->uniqueConstantsList->checkConstantIsValid($arrIndex);
     }
 
-    public function setValue($arrIndex)
+    public function setUclValue($arrIndex)
     {
         $this->uniqueConstantsList->setValue($arrIndex);
     }

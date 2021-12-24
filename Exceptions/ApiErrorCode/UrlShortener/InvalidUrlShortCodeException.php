@@ -6,14 +6,15 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\UrlShortener;
 
-use VisageFour\Bundle\ToolsBundle\Exceptions\BaseApiErrorCode;
+use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 
-class InvalidUrlShortCodeException extends BaseApiErrorCode
+class InvalidUrlShortCodeException extends ApiErrorCode
 {
     public function __construct(string $code)
     {
         parent::__construct(
-            BaseApiErrorCode::INVALID_SHORTENED_URL_CODE,
+            VFApiStatusCodes::INVALID_SHORTENED_URL_CODE,
             'The URL you provided is not recognized in this system.'
         );
     }

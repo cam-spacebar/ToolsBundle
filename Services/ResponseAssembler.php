@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
@@ -119,7 +120,7 @@ class ResponseAssembler
             $rootKeys['error_msgs'] = $respMsg; // $error->getPublicMsg();
             $rootKeys['status'] = $error->getValue();
         } else {
-            $rootKeys['status'] = ApiErrorCode::OK;
+            $rootKeys['status'] = VFApiStatusCodes::OK;
         }
 
         $payload = [

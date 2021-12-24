@@ -6,9 +6,10 @@
 
 namespace App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode;
 
-use VisageFour\Bundle\ToolsBundle\Exceptions\BaseApiErrorCode;
+use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 
-class ProductQuantityInvalidException extends BaseApiErrorCode
+class ProductQuantityInvalidException extends ApiErrorCode
 {
     /**
      * ProductQuantityInvalidException constructor.
@@ -18,7 +19,7 @@ class ProductQuantityInvalidException extends BaseApiErrorCode
      public function __construct(string $productReference, int $quantity)
     {
         parent::__construct(
-            BaseApiErrorCode::PRODUCT_QUANTITY_INVALID,
+            VFApiStatusCodes::PRODUCT_QUANTITY_INVALID,
             'The quantity: "'. $quantity .'" is an invalid quantity for product (with reference: "'. $productReference .'")'
         );
     }
