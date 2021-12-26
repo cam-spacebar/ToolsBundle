@@ -7,13 +7,16 @@ use App\Controller\SecurityController;
 use VisageFour\Bundle\ToolsBundle\Controller\UrlShortener\LandingPageController;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
+use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 /**
  * This provides a list of front-end urls and an additional mapping to the backend (symfony) route.
  * This should allow for easy (centralized) changes to route names and urls
  *
  * -- why this exists --
- * ?
+ * - to generate urls for automated testing (to point the browser at)
+ * - generate urls for redirections that are sent to the client (check this)
+ * ? why else?
  *
  * note: front-end "file path" url part and backend URL should match (to keep it simple),
  * however symfony route_name does not need to match.
@@ -23,6 +26,8 @@ use VisageFour\Bundle\ToolsBundle\Interfaces\FrontendUrlInterface;
  */
 class BaseFrontendUrl implements FrontendUrlInterface
 {
+    use LoggerTrait;
+
     /**
      * @var array
      * a list of all possible routes - with a route to the front-end and another to the backend.
@@ -31,8 +36,6 @@ class BaseFrontendUrl implements FrontendUrlInterface
 
     // this ensures that a redirection is *specifically* set, so that if a null / false is accidentally returned, that the bug is caught.
     public const NO_REDIRECTION = 'noRedirect';
-
-    private $baseUrl;
 
     // list of routes constants:
     const LOGIN                     = 'LOGIN';
@@ -60,21 +63,25 @@ class BaseFrontendUrl implements FrontendUrlInterface
      */
     private $frontend_base_url;
 
-    public function __construct (UrlGeneratorInterface $router, string $frontend_base_url)
+    private $backend_base_url;
+
+    public function __construct (UrlGeneratorInterface $router, string $frontend_base_url, string $backend_base_url)
     {
         // todo: add an environment var to determine if is in prod! (then change to www.newtoMelbourne.org
 
-        $env = 'test';
-        if ($env == 'prod') {
-            // todo: create a domain variable.
-            $this->baseUrl = 'http://api.newtomelbourne.org';
-        } else {
-            // test and dev:
-            $this->baseUrl = 'http://localhost:8000';
-        }
+//        $env = 'test';
+//        if ($env == 'prod') {
+//            // todo: create a domain variable.
+//            $this->baseUrl = 'http://api.newtomelbourne.org';
+//        } else {
+//            // test and dev:
+//            $this->baseUrl = 'http://localhost:8000';
+//        }
 
         $this->router               = $router;
         $this->frontend_base_url    = $frontend_base_url;
+        $this->backend_base_url     = $backend_base_url;
+
         $this->populateRouteList();
     }
 
@@ -134,14 +141,18 @@ class BaseFrontendUrl implements FrontendUrlInterface
      * @throws \Exception
      *
      * Return the URL of the symfony route (for the $constant provided).
+     * $param can be used to populate the query string of the url that's generated.
      */
     public function getSymfonyURL (string $constant, array $params = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
         $routeName = $this->getSymfonyRouteNAME($constant);
+        $this->logger->info('getSymfonyUrl $constant: '. $routeName);
 
         // generate URL
         $pathPart = $this->router->generate($routeName, $params, $referenceType);
-        return $this->baseUrl . $pathPart;
+        $urlGenerated = $this->backend_base_url . $pathPart;
+        $this->logger->info('url generated: '. $urlGenerated);
+        return $urlGenerated;
     }
 
     public function getControllerName(string $routePairConstant)
@@ -227,7 +238,7 @@ class BaseFrontendUrl implements FrontendUrlInterface
         $pathPart = $route['front_end'];
 
         if ($addBaseUrl == true) {
-            return $this->baseUrl .'/'. $pathPart;
+            return $this->backend_base_url .'/'. $pathPart;
         }
 
         return '/'. $route['front_end'];

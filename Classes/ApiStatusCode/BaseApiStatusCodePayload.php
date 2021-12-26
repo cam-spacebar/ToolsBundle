@@ -4,7 +4,6 @@
 * by: Cameron
 */
 
-
 namespace VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode;
 
 use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\ApiStatusCodePayloadInterface;

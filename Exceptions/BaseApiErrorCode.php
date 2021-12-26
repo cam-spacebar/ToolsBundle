@@ -37,7 +37,7 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
 
     // use this when the app should use the exception message, not a "stdMessage" message
     // todo: throw an exception if a stdMessage exists but the exception constructor has a client messge - they both shouldn't exist, its confusing.
-    const USE_CLIENT_MSG = 'MARKER#23Dzwdcfko2#FCW';
+    const USE_EXCEPTION_MSG = 'MARKER#23Dzwdcfko2#FCW';
 
     /**
      * BaseApiErrorCode constructor.
@@ -103,7 +103,7 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
     {
         $stdResponse = $this->getPayload();
 
-        if ($stdResponse['msg'] == self::USE_CLIENT_MSG) {
+        if ($stdResponse['msg'] == self::USE_EXCEPTION_MSG) {
             // use the custom message configured in the exceptions constructor.
             return $this->getMessage();
 //            die ('use client message die()');

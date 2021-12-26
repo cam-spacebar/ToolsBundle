@@ -79,7 +79,7 @@ class UniqueConstantsList implements UniqueConstantsListInterface
         $phrase = $this->itemPhrase;
         throw new \Exception(
             $phrase .' with value: "'. $constantValue .'" does not exist in the '. $phrase .'s list. '.
-            'Please review the '. $phrase .' provided or add the new code to the possible options.'
+            'Please review the "'. $phrase .'" provided (marker: '. $this->addItemMarker .') or add the new code to the possible options.'
         );
     }
 

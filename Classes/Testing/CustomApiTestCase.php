@@ -154,7 +154,7 @@ abstract class CustomApiTestCase extends ApiTestCase
      * @param $data
      * @throws \Exception
      *
-     * Generate the target testing URL, and set the route pair (so the test can display a debug msg of what controller and what RoutePair was used - later on).
+     * Generate the target testing URL (including any query parameters), and set the route pair (so the test can display a debug msg of what controller and what RoutePair was used - later on).
      */
     protected function setTargetRoutePairConstant (string $routePairConstant, $urlParams = []) {
 //        $this->outputDebugToTerminal($this->frontendUrl->getControllerName($routePairConstant));

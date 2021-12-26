@@ -13,7 +13,8 @@ use VisageFour\Bundle\ToolsBundle\Exceptions\BaseApiErrorCode;
  * -- Documentation --
  * https://docs.google.com/presentation/d/1WpWj80uAeQLJtNabbn-CxppNU-pEqteE5g222_qmjCo/edit#slide=id.gb2c1e3197b_0_1
  *
- * [add a controller snippet & checklist: https://3cols.com/board/COz2cm/10161/18737/38672]
+ * Add a new ApiStatusCodes class (3Cols snippet):
+ * https://3cols.com/board/COz2cm/10161/18738/38706
  */
 class VFApiStatusCodes extends BaseApiStatusCodePayload
 {
@@ -82,11 +83,11 @@ class VFApiStatusCodes extends BaseApiStatusCodePayload
                 'HTTPStatusCode'    => 400],
             self::PRODUCT_QUANTITY_INVALID              => ['msg'               => 'Product quantity cannot be 0 or negative.',
                 'HTTPStatusCode'    => 400],
-            self::STRIPE_PAYMENT_ERROR                  => ['msg'               => BaseApiErrorCode::USE_CLIENT_MSG,
+            self::STRIPE_PAYMENT_ERROR                  => ['msg'               => BaseApiErrorCode::USE_EXCEPTION_MSG,
                 'HTTPStatusCode'    => 400],
-            self::CANNOT_CONNECT_TO_STRIPE              => ['msg'               => BaseApiErrorCode::USE_CLIENT_MSG,
+            self::CANNOT_CONNECT_TO_STRIPE              => ['msg'               => BaseApiErrorCode::USE_EXCEPTION_MSG,
                 'HTTPStatusCode'    => 400],
-            self::INVALID_SHORTENED_URL_CODE            => ['msg'               => BaseApiErrorCode::USE_CLIENT_MSG,
+            self::INVALID_SHORTENED_URL_CODE            => ['msg'               => BaseApiErrorCode::USE_EXCEPTION_MSG,
                 'HTTPStatusCode'    => 400]
         ];
 
