@@ -6,8 +6,6 @@
 
 namespace VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode;
 
-use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\ApiStatusCodePayloadInterface;
-
 abstract class BaseApiStatusCodePayload implements ApiStatusCodePayloadInterface
 {
     protected $statusCodes;
@@ -18,5 +16,9 @@ abstract class BaseApiStatusCodePayload implements ApiStatusCodePayloadInterface
     public function getStatusCodes(): array
     {
         return $this->statusCodes;
+    }
+
+    public function __construct()
+    {
     }
 }

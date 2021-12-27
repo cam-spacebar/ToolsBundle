@@ -72,7 +72,7 @@ class ChangePasswordTest extends CustomApiTestCase
             'email'                 => $this->person->getEmail()
         ];
         $this->buildUrlWithParams($urlParams);
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $crawler = $this->sendJSONRequest('GET');
 
 //        dump($crawler);
@@ -82,7 +82,7 @@ class ChangePasswordTest extends CustomApiTestCase
 
         // Attempt login with new (correct) password.
         $this->setTargetRoutePairConstant(FrontendUrl::LOGIN);
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $data = [
             'email'         => $this->person->getEmail(),
             'password'      => $newPassword

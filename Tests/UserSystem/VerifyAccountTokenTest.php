@@ -82,7 +82,7 @@ class VerifyAccountTokenTest extends CustomApiTestCase
             'verificationToken' => $correctToken
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::CONFIRM_EMAIL, $data);
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
 
@@ -102,7 +102,7 @@ class VerifyAccountTokenTest extends CustomApiTestCase
             'verificationToken' => $correctToken
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::CONFIRM_EMAIL, $data);
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $crawler = $this->sendJSONRequest('GET');
 //        dump($crawler->getcontent());
 

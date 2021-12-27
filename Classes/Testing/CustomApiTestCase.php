@@ -253,10 +253,52 @@ abstract class CustomApiTestCase extends ApiTestCase
                 'status' => $this->getExpectedBodyCode()
             ]);
         } catch (ExpectationFailedException $e) {
+//            dump('zzz', $e);
+            $this->displayErrorNEW($e);
 //        } catch (ClientException|ServerException|RedirectionException $e) {
 //            dump($e);
 //            $e
-            $this->displayResponse($crawler);
+
+//            dump($e->getMessage());
+
+            // for some reason, this doesn't work:
+//            $this->displayError($e);
+//            $this->displayResponse($crawler);
+        }
+
+    }
+
+    private function displayErrorNEW(ExpectationFailedException $e)
+    {
+//        dump('dump($e) below [marker: #dfgerg]: ', $e);
+        $comparisonFailure = $e->getComparisonFailure();
+//        dump($comparisonFailure);
+
+        dump("== Actual vs. Expected: ==");
+        dump('Expected:', $comparisonFailure->getExpected());
+        dump('Actual: ', $comparisonFailure->getActual());
+        $trace = $e->getTrace();
+        // Display stack trace (if one was provided).
+        $hideStackTrace = true;
+        if ($hideStackTrace) {
+            print "\n\nnote: Stack trace hidden (unhide via: [marker: #thr90])";
+        } else {
+            if (isset($trace)) {
+                print "\n\n== Error == \n";
+                print $e->getMessage() ."\n\n";
+
+
+                print "== Stack trace ==\n";
+                foreach ($trace as $i => $curCall) {
+                    print "$i: ". $curCall['file'] .' line: '. $curCall['line'] ."\n";
+                }
+
+//            print "\n\nTip: you can uncomment the dump() of \$e (at: [marker: #dfgerg]) to compare 'actual' to 'expected' to find the issue. \n";
+
+//            dump('Server response: ',$e->get );
+            } else {
+                print ("\nNote: no stack trace provided.]\n");
+            }
         }
 
     }
@@ -293,6 +335,7 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     private function displayError($data)
     {
+//        dump('123xxx', $data);
         $trace = $data['trace'];
         // Display stack trace (if one was provided).
         if (isset($trace)) {
@@ -516,7 +559,7 @@ abstract class CustomApiTestCase extends ApiTestCase
             'password'      => $this->userPassword
         ];
         $this->setTargetRoutePairConstant(FrontendUrl::LOGIN);
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $crawler = $this->sendJSONRequest('POST', $data);
         try {
 //            print 'HTTP status code provided: '. $crawler->getStatusCode() ."\n";

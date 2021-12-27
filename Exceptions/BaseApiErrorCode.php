@@ -39,6 +39,10 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
     // todo: throw an exception if a stdMessage exists but the exception constructor has a client messge - they both shouldn't exist, its confusing.
     const USE_EXCEPTION_MSG = 'MARKER#23Dzwdcfko2#FCW';
 
+    // generic status codes (that will be shared will inheriting classes)
+    const OK                                    = 10;       // the default of a response, which indicates there were not problems.
+    const INPUT_MISSING                         = 20;       // a GET or POST parameter is missing.
+
     /**
      * BaseApiErrorCode constructor.
      * @param $value
@@ -62,6 +66,16 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
         if (!empty($redirect)) {
             $this->redirectCode = $redirectCode;
         }
+
+        $baseStatusCodes = [
+            // security errors:
+            self::OK                                    => ['msg'               => 'Request fine.',
+                'HTTPStatusCode'    => 200],
+            self::INPUT_MISSING                         => ['msg'               => 'You are missing an input parameter',
+                'HTTPStatusCode'    => 400]
+        ];
+
+        $this->addArrayOfCodes($baseStatusCodes);
 
         $this->addArrayOfPayloads($codePayloads);
 
@@ -146,16 +160,34 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
     }
 
     /**
+     * @param ApiStatusCodePayloadInterface $apiStatusCodePayload
+     * @throws \Exception
+     *
      * Adds a payload of status codes to UCL - but does some additional checks (on the array elements / keys) first.
      */
     public function addStatusCodesPayload (ApiStatusCodePayloadInterface $apiStatusCodePayload)
     {
-        foreach ($apiStatusCodePayload->getStatusCodes() as $internalCode => $responseSet) {
-            $this->checkKeysExist($internalCode, $responseSet, $apiStatusCodePayload);
+        $newCodes = $apiStatusCodePayload->getStatusCodes();
+        if (empty($newCodes)) {
+            $className = get_class($apiStatusCodePayload);
+            throw new \Exception ('The Api status codes payload provided is empty (className: '. $className .')');
+        }
+        $this->addArrayOfCodes($newCodes);
+    }
+
+    /**
+     * @param array $arr
+     * @throws \Exception
+     *
+     * directly adds codes to the UCL
+     */
+    private function addArrayOfCodes(array $arr)
+    {
+        foreach ($arr as $internalCode => $responseSet) {
+            $this->checkIfKeyAlreadyExists($internalCode, $responseSet);
 
             $this->uniqueConstantsList->addListItem($responseSet, $internalCode);
         }
-
     }
 
     /**
@@ -168,12 +200,11 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
      *
      * Check that 'msg' and 'HTTPStatusCode' keys exist
      */
-    private function checkKeysExist ($internalCode, array $responseSet, ApiStatusCodePayloadInterface $apiStatusCodePayload)
+    private function checkIfKeyAlreadyExists ($internalCode, array $responseSet)
     {
         foreach ($this->expectedKeys as $curI2 => $curExpectedKey) {
             if (empty($responseSet['msg'])) {
-                $className = get_class($apiStatusCodePayload);
-                throw new \Exception('the $apiStatusCodePayload: "'. $className .'" has no element set for the "msg" key on array index: '. $internalCode);
+                throw new \Exception('there is no element set for the api code: "msg" key (on array index: '. $internalCode .')');
             }
         }
 

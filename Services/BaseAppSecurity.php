@@ -92,7 +92,7 @@ class BaseAppSecurity
         $this->passwordManager          = $passwordManager;
         $this->baseFrontendUrl          = $frontendUrl;
         $this->emailRegisterMan         = $emailRegisterManager;
-        $this->apiErrorCode             = new ApiErrorCode(VFApiStatusCodes::OK);
+        $this->apiErrorCode             = new ApiErrorCode(ApiErrorCode::OK);
     }
 
     /**

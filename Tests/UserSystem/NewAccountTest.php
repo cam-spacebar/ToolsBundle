@@ -65,14 +65,14 @@ class NewAccountTest extends CustomApiTestCase
 
         // create a new account
         $this->setTargetRoutePairConstant(FrontendUrl::NEW_ACCOUNT);
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $data = [
             'email'         => $this->faker->email()
         ];
         $crawler = $this->sendJSONRequest('POST', $data);
         $this->buildUrlWithParams($data);
 //        $this->outputDebugToTerminal('email: '. $this->person->getPassword());
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $this->assertResponseHeaderSame('content-type', 'application/json');
 
         // send a duplicate create account request

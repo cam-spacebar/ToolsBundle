@@ -19,8 +19,6 @@ use VisageFour\Bundle\ToolsBundle\Exceptions\BaseApiErrorCode;
 class VFApiStatusCodes extends BaseApiStatusCodePayload
 {
     // security error codes:
-    const OK                                    = 10;       // the default of a response, which indicates there were not problems.
-    const INPUT_MISSING                         = 20;       // a GET or POST parameter is missing.
     const INVALID_EMAIL_ADDRESS                 = 30;       // the email address provided is invalid.
     const ALREADY_LOGGED_IN                     = 40;       // when a user is attempting to login
     const ERROR_BUT_ALREADY_LOGGED_IN           = 43;       // originally it used the already logged in error (if logged in but failed authentication) - but
@@ -49,10 +47,6 @@ class VFApiStatusCodes extends BaseApiStatusCodePayload
     {
         $this->statusCodes = [
             // security errors:
-            self::OK                                    => ['msg'               => 'Request fine.',
-                'HTTPStatusCode'    => 200],
-            self::INPUT_MISSING                         => ['msg'               => 'You are missing an input parameter',
-                'HTTPStatusCode'    => 400],
             self::INVALID_EMAIL_ADDRESS                 => ['msg'               => 'Email could not be found.',
                 'HTTPStatusCode'    => 400],            // todo: should this be 401 for authentication related throws?!
             self::ALREADY_LOGGED_IN                     => ['msg'               => 'You are already logged in!',

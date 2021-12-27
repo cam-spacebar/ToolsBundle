@@ -67,7 +67,7 @@ class ForgotMyPasswordTest extends CustomApiTestCase
         $data = [
             'email'         => $this->person->getEmail()
         ];
-        $this->setExpectedResponse(VFApiStatusCodes::OK);
+        $this->setExpectedResponse(ApiErrorCode::OK);
         $crawler = $this->sendJSONRequest('POST', $data);
         $this->assertResponseHeaderSame('content-type', 'application/json');
     }
