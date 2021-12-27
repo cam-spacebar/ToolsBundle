@@ -13,6 +13,7 @@ use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use VisageFour\Bundle\ToolsBundle\Services\Debugging\ConsoleOutput;
+use VisageFour\Bundle\ToolsBundle\Services\Logging\HybridLogger;
 use VisageFour\Bundle\ToolsBundle\Services\PasswordManager;
 use App\Services\AppSecurity;
 use App\Services\EmailRegisterManager;
@@ -43,6 +44,8 @@ use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
 
 abstract class CustomApiTestCase extends ApiTestCase
 {
+
+
     /** @var PersonManager */
     private $personMan;
 
@@ -131,6 +134,11 @@ abstract class CustomApiTestCase extends ApiTestCase
     protected $testingHelper;
 
     /**
+     * @var HybridLogger
+     */
+    protected $logger;
+
+    /**
      * @return string
      */
     public function getRoutePairConstant(): string
@@ -181,12 +189,16 @@ abstract class CustomApiTestCase extends ApiTestCase
         $client = static::createClient();
         $client->enableProfiler();
 
-        $this->manager = $client->getKernel()->getContainer()
+        $container = $client->getKernel()->getContainer();
+
+        $this->manager = $container
             ->get('doctrine')
             ->getManager();
         $this->em = $this->manager;
 
         $this->client = $client;
+        $this->logger = $container->get('test.'. HybridLogger::class);
+//        dump('xasd', $this->logger);
 
         $this->faker = Factory::create();
         $this->getBaseServices();
@@ -268,41 +280,6 @@ abstract class CustomApiTestCase extends ApiTestCase
 
     }
 
-    private function displayErrorNEW(ExpectationFailedException $e)
-    {
-//        dump('dump($e) below [marker: #dfgerg]: ', $e);
-        $comparisonFailure = $e->getComparisonFailure();
-//        dump($comparisonFailure);
-
-        dump("== Actual vs. Expected: ==");
-        dump('Expected:', $comparisonFailure->getExpected());
-        dump('Actual: ', $comparisonFailure->getActual());
-        $trace = $e->getTrace();
-        // Display stack trace (if one was provided).
-        $hideStackTrace = true;
-        if ($hideStackTrace) {
-            print "\n\nnote: Stack trace hidden (unhide via: [marker: #thr90])";
-        } else {
-            if (isset($trace)) {
-                print "\n\n== Error == \n";
-                print $e->getMessage() ."\n\n";
-
-
-                print "== Stack trace ==\n";
-                foreach ($trace as $i => $curCall) {
-                    print "$i: ". $curCall['file'] .' line: '. $curCall['line'] ."\n";
-                }
-
-//            print "\n\nTip: you can uncomment the dump() of \$e (at: [marker: #dfgerg]) to compare 'actual' to 'expected' to find the issue. \n";
-
-//            dump('Server response: ',$e->get );
-            } else {
-                print ("\nNote: no stack trace provided.]\n");
-            }
-        }
-
-    }
-
     /**
      * Display the http status code and response body.
      */
@@ -350,6 +327,50 @@ abstract class CustomApiTestCase extends ApiTestCase
         } else {
             print ("\nNote: no stack trace provided.]\n");
         }
+    }
+
+    private function displayErrorNEW(ExpectationFailedException $e)
+    {
+//        dump('dump($e) below [marker: #dfgerg]: ', $e);
+        $comparisonFailure = $e->getComparisonFailure();
+//        dump($comparisonFailure)
+
+        $responseLength = strlen($comparisonFailure->getExpectedAsString());
+        if ($responseLength > 5000) {
+            dump('Error: The response length (from the server) is over 5000 characters long (actual length = '. $responseLength. '). This is likely due to an internet connection problem and guzzle returning a massive error. The "expect" and "Actual" will not be dumped for comparison. Check your connection');
+        } else {
+            dump("== Expected vs. Actual: ==");
+            dump('Expected:', $comparisonFailure->getExpected());
+            dump('Actual: ', $comparisonFailure->getActual());
+
+        }
+        $trace = $e->getTrace();
+        // Display stack trace (if one was provided).
+        $hideStackTrace = true;
+        if ($hideStackTrace) {
+            $this->logger->info('Stack trace hidden (unhide via: [marker: #thr90])');
+        } else {
+            if (isset($trace)) {
+                print "\n\n== Error == \n";
+                print $e->getMessage() ."\n\n";
+
+                print "== Stack trace ==\n";
+                foreach ($trace as $i => $curCall) {
+                    print "$i: ". $curCall['file'] .' line: '. $curCall['line'] ."\n";
+                }
+
+//            print "\n\nTip: you can uncomment the dump() of \$e (at: [marker: #dfgerg]) to compare 'actual' to 'expected' to find the issue. \n";
+
+//            dump('Server response: ',$e->get );
+            } else {
+                print ("\nNote: no stack trace provided.]\n");
+            }
+        }
+
+        $this->logger->info('throwing (previously caught) $e again, otherwise the failed test will (wrongly) pass.');
+
+        throw $e;
+
     }
 
     /**
@@ -431,7 +452,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     private function displayException (\Exception $e)
     {
         print "\n=== An exception occured ===";
-        print "\nException class:" . get_class($e);
+        print "\nException class: " . get_class($e);
         print "\nmessage: ". $e->getMessage();
 
         print "\n\nStack trace:\n";
@@ -608,5 +629,11 @@ abstract class CustomApiTestCase extends ApiTestCase
 
         $this->outputColoredTextToTerminal('Currently in test: '. $shortened .'()', 'blue');
 
+    }
+
+    protected function getResponseAsArray(ResponseInterface $crawler)
+    {
+        $response = $crawler->getContent(false);
+        return json_decode($response, true);
     }
 }

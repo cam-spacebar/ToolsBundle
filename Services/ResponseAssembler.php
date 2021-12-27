@@ -120,7 +120,7 @@ class ResponseAssembler
             $rootKeys['error_msgs'] = $respMsg; // $error->getPublicMsg();
             $rootKeys['status'] = $error->getValue();
         } else {
-            $rootKeys['status'] = ApiErrorCode::OK;
+            $rootKeys['status'] = (string) ApiErrorCode::OK;
         }
 
         $payload = [
