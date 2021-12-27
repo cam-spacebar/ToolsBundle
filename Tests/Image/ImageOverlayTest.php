@@ -11,7 +11,7 @@ use App\Entity\FileManager\ImageOverlay;
 use App\Entity\FileManager\Template;
 use App\Entity\UrlShortener\Url;
 use App\OtaNine\Exceptions\ApiStatusCode\NoPricingMethodSetException;
-use App\OtaNine\Exceptions\TooManyPricingModelsSetException;
+use App\OtaNine\Exceptions\ApiStatusCode\TooManyPricingModelsSetException;
 use App\OtaNine\Services\ProductCombiner;
 use Contentful\Delivery\Resource\Entry;
 use VisageFour\Bundle\ToolsBundle\Entity\PrintAttribution\Batch;
