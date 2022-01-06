@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Serializer\SerializerInterface;
 use VisageFour\Bundle\ToolsBundle\Classes\ApiStatusCode\VFApiStatusCodes;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
@@ -40,15 +41,20 @@ class ResponseAssembler
      * @var BaseFrontendUrl
      */
     private $baseFrontendUrl;
+    /**
+     * @var SerializerInterface
+     */
+    private $serializer;
 
     use LoggerTrait;
 
-    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, FrontendUrl $frontendUrl, AuthenticationUtils $authentication_utils)
+    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, FrontendUrl $frontendUrl, AuthenticationUtils $authentication_utils, SerializerInterface $serializer)
     {
         $this->tokenStorageInterface    = $tokenStorageInterface;
         $this->flashbag                 = $flashbag;
         $this->authentication_utils     = $authentication_utils;
         $this->baseFrontendUrl          = $frontendUrl;
+        $this->serializer               = $serializer;
     }
 
     private function getLoggedInUser () {
@@ -73,6 +79,21 @@ class ResponseAssembler
         $this->logger->info("Exception caught, class name: ". get_class($e));
         $this->logger->info("Exception message: ". $e->getMessage());
         return $this->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
+    }
+
+    /**
+     * accepts an object|array that can be serialized. Just provide the $serializationGroup
+     * then passes the result $data array intop assembleJsonResponse()
+     */
+    public function assembleJsonResponseViaSerialization($toSerialize, string $serializationGroup)
+    {
+        if (!is_object($toSerialize) & !is_array($toSerialize) ) {
+            throw new \Exception('the $obj provided is not an object');
+        }
+
+        $context = ['groups' => $serializationGroup];
+        $array1 = $this->serializer->normalize($toSerialize, null, $context);
+        return $this->assembleJsonResponse($array1);
     }
 
     /**

@@ -24,11 +24,29 @@ class CustomController extends AbstractController
      * @var AppSecurity
      */
     private $appSecurity;
+    private $kernelEnv;
 
-    public function __construct(ResponseAssembler $ra, AppSecurity $appSecurity)
+    public function __construct(ResponseAssembler $ra, AppSecurity $appSecurity, $kernelEnv)
     {
         $this->ra = $ra;
         $this->appSecurity = $appSecurity;
+        $this->kernelEnv = $kernelEnv;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * returns true if "?mockData=1"
+     * used for helping endpoints trigger
+     */
+    protected function isMockDataOn(Request $request)
+    {
+        $mockData = $request->get('mockData');
+        if ($mockData == "1") {
+            return true;
+        }
+
+        return false;
     }
 
     /**
