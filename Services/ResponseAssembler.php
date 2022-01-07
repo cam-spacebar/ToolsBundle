@@ -83,7 +83,7 @@ class ResponseAssembler
 
     /**
      * accepts an object|array that can be serialized. Just provide the $serializationGroup
-     * then passes the result $data array intop assembleJsonResponse()
+     * then passes the result $data array into assembleJsonResponse()
      */
     public function assembleJsonResponseViaSerialization($toSerialize, string $serializationGroup)
     {

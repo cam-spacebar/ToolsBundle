@@ -36,7 +36,7 @@ class CustomController extends AbstractController
     /**
      * @param Request $request
      *
-     * returns true if "?mockData=1"
+     * Returns true if "?mockData=1"
      * used for helping endpoints trigger
      */
     protected function isMockDataOn(Request $request)

@@ -11,11 +11,11 @@ use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 /**
  * This provides a list of front-end urls and an additional mapping to the backend (symfony) route.
- * This should allow for easy (centralized) changes to route names and urls
+ * This class allows for easy (and centralized) changes to route names and urls.
  *
  * -- why this exists --
  * - to generate urls for automated testing (to point the browser at)
- * - generate urls for redirections that are sent to the client (check this)
+ * - generate urls for redirects that are sent to the client (check this)
  * ? why else?
  *
  * note: front-end "file path" url part and backend URL should match (to keep it simple),
