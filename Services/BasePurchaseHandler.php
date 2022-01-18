@@ -4,7 +4,9 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Entity\Person;
 use App\Entity\Purchase\Checkout;
+use App\Entity\Purchase\Product;
 use App\Entity\Purchase\PurchaseQuantity;
+use App\OtaNine\Services\ProductFactory;
 use App\Repository\Purchase\CheckoutRepository;
 use App\Repository\Purchase\ProductRepository;
 use App\Repository\Purchase\PurchaseQuantityRepository;
@@ -23,7 +25,6 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use VisageFour\Bundle\ToolsBundle\Entity\Purchase\Product;
 use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidProductReferenceException;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
@@ -55,6 +56,10 @@ class BasePurchaseHandler
      * @var PurchaseQuantityRepository
      */
     private $quantityRepo;
+    /**
+     * @var ProductFactory
+     */
+    private $OtaProductFactory;
 
     /**
      * zz @var TokenStorageInterface
@@ -68,20 +73,31 @@ class BasePurchaseHandler
      * @param ProductRepository $prodRepo
      * @param EntityManager $em
      */
-    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em, CheckoutRepository $checkoutRepository, PurchaseQuantityRepository $quantityRepo)
+    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em, CheckoutRepository $checkoutRepository, PurchaseQuantityRepository $quantityRepo, ProductFactory $OtaProductFactory)
     {
         $this->stripe_api_key       = $stripe_key;
         $this->prodRepo             = $prodRepo;
         $this->em                   = $em;
         $this->checkoutRepository   = $checkoutRepository;
         $this->quantityRepo         = $quantityRepo;
+        $this->OtaProductFactory    = $OtaProductFactory;
     }
 
+    // get the product by it $ref (reference) string
+    // if it's prefixed with an "OTA_" string, it will need to be pulled in from a different source.
     public function getProductByReference($ref): ?Product
     {
+        try {
+            $otaProd = $this->OtaProductFactory->getProductByReference($ref);
+            return $otaProd;
+        } catch (InvalidProductReferenceException $e) {
+            // continue
+        }
+
         $curProd = $this->prodRepo->findOneBy([
             'reference' => $ref
         ]);
+
 
         if (empty($curProd)) {
             throw new InvalidProductReferenceException($ref);

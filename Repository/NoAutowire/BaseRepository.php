@@ -80,11 +80,19 @@ class BaseRepository extends ServiceEntityRepository
         $this->em->flush();
     }
 
-    public function findOneByIdOrException(int $id)
+    public function findOneById($id)
     {
         $entity = $this->findOneBy(
-          ['id' => $id]
+            ['id' => $id]
         );
+
+        return $entity;
+    }
+
+    public function findOneByIdOrException(int $id)
+    {
+        $entity = $this->findOneById($id);
+
 //        dump($entity);
 //        print "\nsd12w\n";
         if (empty($entity)) {
