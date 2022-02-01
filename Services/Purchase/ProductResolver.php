@@ -7,6 +7,7 @@
 namespace VisageFour\Bundle\ToolsBundle\Services\Purchase;
 
 use App\Entity\Purchase\Product;
+use App\OtaNine\Services\OtaToPurchaseProductConverter;
 use App\OtaNine\Services\ProductFactory;
 use App\Repository\Purchase\ProductRepository;
 use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidProductReferenceException;
@@ -15,7 +16,7 @@ use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidProductReferenc
  * Class ProductResolver
  * @package App\VisageFour\Bundle\ToolsBundle\Services
  * 
- * Gets a 'purchase product' by reference: a default product or an Ota product
+ * Gets a 'purchase product' by reference: a default 'purchase product' or an Ota product
  */
 class ProductResolver
 {
@@ -28,10 +29,16 @@ class ProductResolver
      */
     private $otaProductFactory;
 
-    public function __construct(ProductRepository $productRepository, ProductFactory $otaProductFactory)
+    /**
+     * @var OtaToPurchaseProductConverter
+     */
+    private $otaToPurchaseProductConverter;
+
+    public function __construct(ProductRepository $productRepository, ProductFactory $otaProductFactory, OtaToPurchaseProductConverter $otaToPurchaseProductConverter)
     {
         $this->productRepository = $productRepository;
         $this->otaProductFactory = $otaProductFactory;
+        $this->otaToPurchaseProductConverter = $otaToPurchaseProductConverter;
     }
 
     /**
@@ -39,15 +46,15 @@ class ProductResolver
      * @return Product|null
      * @throws InvalidProductReferenceException
      *
-     * attempt getting an Ota product first, if fails then attempt for a "default" product (from the DB)
+     * Attempt getting an Ota product first, if fails then attempt for a "default" product (from the DB)
      */
     public function getProductByReference($ref): ?Product
     {
         try {
-            $otaProd = $this->otaProductFactory->getProductByReference($ref);
-            return $otaProd;
+            // if TicketTypeNotFoundException() thrown, let it go through.
+            return $this->otaToPurchaseProductConverter->getPurchaseProductByReference($ref);
         } catch (InvalidProductReferenceException $e) {
-            // continue
+            // there's no OTA product, so just continue to next
         }
 
         $curProd = $this->productRepository->findOneBy([
