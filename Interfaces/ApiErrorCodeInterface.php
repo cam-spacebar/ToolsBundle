@@ -14,5 +14,7 @@ namespace VisageFour\Bundle\ToolsBundle\Interfaces;
 
 interface ApiErrorCodeInterface
 {
+    // see classes: ApiErrorCode & BaseApiErrorCode for implementations
 
+    public function getLoggerContext();
 }

@@ -27,6 +27,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidProductReferenceException;
 use VisageFour\Bundle\ToolsBundle\Interfaces\ApiErrorCodeInterface;
+use VisageFour\Bundle\ToolsBundle\Services\Purchase\ProductResolver;
 use VisageFour\Bundle\ToolsBundle\Traits\LoggerTrait;
 
 /**
@@ -60,6 +61,10 @@ class BasePurchaseHandler
      * @var ProductFactory
      */
     private $OtaProductFactory;
+    /**
+     * @var ProductResolver
+     */
+    private $productResolver;
 
     /**
      * zz @var TokenStorageInterface
@@ -73,7 +78,7 @@ class BasePurchaseHandler
      * @param ProductRepository $prodRepo
      * @param EntityManager $em
      */
-    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em, CheckoutRepository $checkoutRepository, PurchaseQuantityRepository $quantityRepo, ProductFactory $OtaProductFactory)
+    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em, CheckoutRepository $checkoutRepository, PurchaseQuantityRepository $quantityRepo, ProductFactory $OtaProductFactory, ProductResolver $productResolver)
     {
         $this->stripe_api_key       = $stripe_key;
         $this->prodRepo             = $prodRepo;
@@ -81,6 +86,7 @@ class BasePurchaseHandler
         $this->checkoutRepository   = $checkoutRepository;
         $this->quantityRepo         = $quantityRepo;
         $this->OtaProductFactory    = $OtaProductFactory;
+        $this->productResolver      = $productResolver;
     }
 
     // get the product by it $ref (reference) string
@@ -88,7 +94,8 @@ class BasePurchaseHandler
     public function getProductByReference($ref): ?Product
     {
         try {
-            $otaProd = $this->OtaProductFactory->getProductByReference($ref);
+
+            $otaProd = $this->OtaProductFactory->getOtaProductByCmsEntryId($ref);
             return $otaProd;
         } catch (InvalidProductReferenceException $e) {
             // continue
@@ -111,14 +118,15 @@ class BasePurchaseHandler
      * @return array
      * @throws InvalidProductReferenceException
      *
-     * Get the product entities/objs (based on the product reference provided).
+     * Get the purchase product objs (based on the product reference provided).
      */
     private function parseJsonItems($jsonItems)
     {
         $items = [];
         foreach($jsonItems as $productRef => $curItem) {
             // get product
-            $items[$productRef]['product'] = $this->getProductByReference($productRef);
+//            $items[$productRef]['product'] = $this->getProductByReference($productRef);
+            $items[$productRef]['product'] = $this->productResolver->getProductByReference($productRef);;
             $curQuan = $curItem['quantity'];
             if ($curQuan <= 0) {
                 throw new ProductQuantityInvalidException($productRef, $curQuan);

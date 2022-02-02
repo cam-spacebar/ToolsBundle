@@ -28,6 +28,13 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
     private $redirectCode;
 
     /**
+     * @var array
+     * The context that is passed into logger->alert() when the exception is caught by the RA (response assembler).
+     * This allows the exception to "pass down" to the RA and allow this $context information to be seen in the logger.
+     */
+    protected $loggerContext;
+
+    /**
      * @var string[]
      * array keys to check when attempting to add new status codes to the UCL - ensuring the inputs are not mal-formed.
      *
@@ -45,16 +52,17 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
 
     /**
      * BaseApiErrorCode constructor.
-     * @param $value
+     * @param $statusCode
      * @param array $codePayloads
-     * @param string|null $clientMsgOverride
+     * @param string|null $loggerErrorMsg
      * @param string|null $redirectCode
+     * @param array $loggerContext
      * @throws \Exception
      *
      * $statusCode is the internal "statusCode" that maps to a constant. This is *not* the HTTP status code. (however it will define a HTTP status code it expects - useful for testing)
-     * $clientMsgOverride will override the "standard" message (provided by the "statusCodes" classes)
+     * $loggerErrorMsg will override the "standard" message (provided by the "statusCodes" classes)
      */
-    public function __construct($statusCode, array $codePayloads, string $clientMsgOverride = null, string $redirectCode = null)
+    public function __construct($statusCode, array $codePayloads, string $clientMsg, string $loggerErrorMsg = null, string $redirectCode = null, $loggerContext = [])
     {
         if (empty($statusCode)) {
             throw new \Exception('$statusCode is empty. Please set it to a valid value.');
@@ -80,13 +88,14 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
         $this->addArrayOfPayloads($codePayloads);
 
         $this->setUclValue($statusCode);
+        $this->loggerContext = $loggerContext;
 
         // $clientMsg can only be empty if it has a "stdMessage". If not, throw an error.
-        if (empty($clientMsgOverride)) {
-            $clientMsgOverride = $this->getStandardResponseMsg();
+        if (empty($loggerErrorMsg)) {
+            $loggerErrorMsg = $this->getStandardResponseMsg();
         }
 
-        parent::__construct($clientMsgOverride);
+        parent::__construct($clientMsg, $loggerErrorMsg);
     }
 
     /**
@@ -209,5 +218,13 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
         }
 
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLoggerContext(): array
+    {
+        return $this->loggerContext;
     }
 }

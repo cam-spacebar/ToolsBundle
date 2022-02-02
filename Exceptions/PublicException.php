@@ -22,7 +22,7 @@ class PublicException extends \Exception
     {
         $this->publicMsg = $publicMsg;
 
-        if ($exceptionMsg == null) {
+        if (empty($exceptionMsg)) {
             $exceptionMsg = $publicMsg;
         }
 

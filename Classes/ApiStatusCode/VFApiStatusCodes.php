@@ -45,6 +45,7 @@ class VFApiStatusCodes extends BaseApiStatusCodePayload
 
     public function __construct()
     {
+        // note: there's a client message and an internal error log message (that ussually contains useful information like ids for debugging).
         $this->statusCodes = [
             // security errors:
             self::INVALID_EMAIL_ADDRESS                 => ['msg'               => 'Email could not be found.',

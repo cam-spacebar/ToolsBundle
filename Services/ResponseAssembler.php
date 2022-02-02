@@ -72,12 +72,13 @@ class ResponseAssembler
      * @return JsonResponse
      * @throws \Exception
      *
-     * return a Symfony JsonResponse object, based on the APIErrorCode on file (for the exception).
+     * Return a Symfony JsonResponse object, based on the APIErrorCode on file (for the exception).
      */
     public function handleException (ApiErrorCodeInterface $e)
     {
-        $this->logger->info("Exception caught, class name: ". get_class($e));
-        $this->logger->info("Exception message: ". $e->getMessage());
+        $this->logger->info("Exception caught, class name: '". get_class($e) ."'");
+        $context = $e->getLoggerContext();
+        $this->logger->info("Exception message: ". $e->getMessage(), $context);
         return $this->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
     }
 
