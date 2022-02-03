@@ -16,6 +16,9 @@ use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\CannotConnectToStr
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\InvalidCartTotalException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\PaymentErrorException;
 use App\VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\ProductQuantityInvalidException;
+use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\CombinedException;
+use VisageFour\Bundle\ToolsBundle\Services\ApiStatusCode\CombinedExceptionBuilder;
+use VisageFour\Bundle\ToolsBundle\Services\ApiStatusCode\LogException;
 use Doctrine\ORM\EntityManager;
 use Stripe\Customer;
 use Stripe\Error\ApiConnection;
@@ -61,10 +64,19 @@ class BasePurchaseHandler
      * @var ProductFactory
      */
     private $OtaProductFactory;
+
     /**
      * @var ProductResolver
      */
     private $productResolver;
+    /**
+     * @var LogException
+     */
+    private $logException;
+    /**
+     * @var CombinedExceptionBuilder
+     */
+    private $combinedExceptionBuilder;
 
     /**
      * zz @var TokenStorageInterface
@@ -78,15 +90,17 @@ class BasePurchaseHandler
      * @param ProductRepository $prodRepo
      * @param EntityManager $em
      */
-    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em, CheckoutRepository $checkoutRepository, PurchaseQuantityRepository $quantityRepo, ProductFactory $OtaProductFactory, ProductResolver $productResolver)
+    public function __construct(string $stripe_key, ProductRepository $prodRepo, EntityManager $em, CheckoutRepository $checkoutRepository, PurchaseQuantityRepository $quantityRepo, ProductFactory $OtaProductFactory, ProductResolver $productResolver, LogException $logException, CombinedExceptionBuilder $combinedExceptionBuilder)
     {
-        $this->stripe_api_key       = $stripe_key;
-        $this->prodRepo             = $prodRepo;
-        $this->em                   = $em;
-        $this->checkoutRepository   = $checkoutRepository;
-        $this->quantityRepo         = $quantityRepo;
-        $this->OtaProductFactory    = $OtaProductFactory;
-        $this->productResolver      = $productResolver;
+        $this->stripe_api_key           = $stripe_key;
+        $this->prodRepo                 = $prodRepo;
+        $this->em                       = $em;
+        $this->checkoutRepository       = $checkoutRepository;
+        $this->quantityRepo             = $quantityRepo;
+        $this->OtaProductFactory        = $OtaProductFactory;
+        $this->productResolver          = $productResolver;
+        $this->logException             = $logException;
+        $this->combinedExceptionBuilder = $combinedExceptionBuilder;
     }
 
     // get the product by it $ref (reference) string
@@ -94,17 +108,16 @@ class BasePurchaseHandler
     public function getProductByReference($ref): ?Product
     {
         try {
-
             $otaProd = $this->OtaProductFactory->getOtaProductByCmsEntryId($ref);
             return $otaProd;
         } catch (InvalidProductReferenceException $e) {
             // continue
         }
 
+        /** @var Product $curProd */
         $curProd = $this->prodRepo->findOneBy([
             'reference' => $ref
         ]);
-
 
         if (empty($curProd)) {
             throw new InvalidProductReferenceException($ref);
@@ -122,18 +135,26 @@ class BasePurchaseHandler
      */
     private function parseJsonItems($jsonItems)
     {
+//        $this->logger->info
         $items = [];
-        foreach($jsonItems as $productRef => $curItem) {
-            // get product
-//            $items[$productRef]['product'] = $this->getProductByReference($productRef);
-            $items[$productRef]['product'] = $this->productResolver->getProductByReference($productRef);;
-            $curQuan = $curItem['quantity'];
-            if ($curQuan <= 0) {
-                throw new ProductQuantityInvalidException($productRef, $curQuan);
-            }
 
-            $items[$productRef]['quantity'] = $curQuan;
+        foreach($jsonItems as $productRef => $curItem) {
+            try {
+                // get product
+//            $items[$productRef]['product'] = $this->getProductByReference($productRef);
+                $items[$productRef]['product'] = $this->productResolver->getProductByReference($productRef);;
+                $curQuan = $curItem['quantity'];
+                if ($curQuan <= 0) {
+                    throw new ProductQuantityInvalidException($productRef, $curQuan);
+                }
+
+                $items[$productRef]['quantity'] = $curQuan;
+            } catch (ApiErrorCodeInterface $e) {
+                // build a lsit of exceptions
+                $this->combinedExceptionBuilder->addException($e, $productRef);
+            }
         }
+        $this->combinedExceptionBuilder->throwIfHasErrors();
 
         return $items;
     }

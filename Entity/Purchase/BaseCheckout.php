@@ -209,8 +209,6 @@ class BaseCheckout extends BaseEntity
     }
 
     /**
-     * @param LoggerInterface|null $logger
-     * @return $this
      *
      * calculate totals (both with coupon and without a discount coupon)
      */

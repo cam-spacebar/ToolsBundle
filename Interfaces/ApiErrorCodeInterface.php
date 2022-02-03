@@ -17,4 +17,6 @@ interface ApiErrorCodeInterface
     // see classes: ApiErrorCode & BaseApiErrorCode for implementations
 
     public function getLoggerContext();
+
+    public function getPublicMsg();
 }

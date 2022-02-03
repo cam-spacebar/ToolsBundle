@@ -4,6 +4,8 @@ namespace VisageFour\Bundle\ToolsBundle\Services;
 
 use App\Services\FrontendUrl;
 use App\Exceptions\ApiErrorCode;
+use VisageFour\Bundle\ToolsBundle\Exceptions\ApiErrorCode\CombinedException;
+use VisageFour\Bundle\ToolsBundle\Services\ApiStatusCode\LogException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
@@ -45,16 +47,21 @@ class ResponseAssembler
      * @var SerializerInterface
      */
     private $serializer;
+    /**
+     * @var LogException
+     */
+    private $logException;
 
     use LoggerTrait;
 
-    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, FrontendUrl $frontendUrl, AuthenticationUtils $authentication_utils, SerializerInterface $serializer)
+    public function __construct(TokenStorageInterface $tokenStorageInterface, FlashBagInterface $flashbag, FrontendUrl $frontendUrl, AuthenticationUtils $authentication_utils, SerializerInterface $serializer, LogException $logException)
     {
         $this->tokenStorageInterface    = $tokenStorageInterface;
         $this->flashbag                 = $flashbag;
         $this->authentication_utils     = $authentication_utils;
         $this->baseFrontendUrl          = $frontendUrl;
         $this->serializer               = $serializer;
+        $this->logException             = $logException;
     }
 
     private function getLoggedInUser () {
@@ -72,13 +79,11 @@ class ResponseAssembler
      * @return JsonResponse
      * @throws \Exception
      *
-     * Return a Symfony JsonResponse object, based on the APIErrorCode on file (for the exception).
+     * Log the exception, then return a Symfony JsonResponse object, based on the APIErrorCode on file (for the exception).
      */
     public function handleException (ApiErrorCodeInterface $e)
     {
-        $this->logger->info("Exception caught, class name: '". get_class($e) ."'");
-        $context = $e->getLoggerContext();
-        $this->logger->info("Exception message: ". $e->getMessage(), $context);
+        $this->logException->run($e);
         return $this->assembleJsonResponse(null, $e->getRedirectionCode(), $e);
     }
 
@@ -109,7 +114,27 @@ class ResponseAssembler
      */
     public function assembleJsonResponse ($data = null, $redirect = FrontendUrl::NO_REDIRECTION, ApiErrorCodeInterface $error = null, $redirectData = []): JsonResponse {
         $rootKeys = [];
+        $this->setLoggedInUser($rootKeys);
 
+        $rootKeys['data'] = $data;
+
+        if ($redirect !== FrontendUrl::NO_REDIRECTION) {
+            $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendUrl($redirect, $redirectData);
+        }
+
+        $this->checkFlashBagForMessages($rootKeys);
+        $HTTPStatusCode = $this->getHttpStatusCode($error, $rootKeys);
+        $this->setErrorMessages($rootKeys, $error);
+//        dd($rootKeys);
+
+        $payload = $this->assemblePayload($rootKeys);
+
+        return new JsonResponse($payload, $HTTPStatusCode);
+    }
+
+    // Set the logged in user (if they are logged in)
+    private function setLoggedInUser($rootKeys)
+    {
         $loggedInUser = $this->getLoggedInUser();
         if ($loggedInUser !== 'anon.') {
             $rootKeys['userData'] = [
@@ -117,45 +142,65 @@ class ResponseAssembler
                 'email' => $loggedInUser->getEmailCanonical()
             ];
         }
+    }
 
-        $rootKeys['data'] = $data;
-//        dump($data);
-
-        if ($redirect !== FrontendUrl::NO_REDIRECTION) {
-            $rootKeys['redirect'] = $this->baseFrontendUrl->getFrontendUrl($redirect, $redirectData);
-        }
-
-        $rootKeys['success_msgs'] = $this->flashbag->get('success_msgs');    // an array of success messages (is returned)
-        $rootKeys['error_msgs'] = $this->flashbag->get('error_msgs');        // an array of success messages (is returned)
-        if (!empty($rootKeys['error_msgs'])) {
+    // throw exception if flashbag is still being used
+    private function checkFlashBagForMessages (&$rootKeys) {
+//        $rootKeys['success_msgs'] = $this->flashbag->get('success_msgs');    // an array of success messages (is returned)
+//        $rootKeys['error_msgs'] = $this->flashbag->get('error_msgs');        // an array of success messages (is returned)
+//        if (!empty($rootKeys['error_msgs'])) {
+        if (!empty($this->flashbag->get('error_msgs'))) {
             throw new \Exception(
                 'error messages must not be sent through the flashbag anymore, use the ApiErrorCode class instead. error reads: "'.
                 implode(', ', $rootKeys['error_msgs']) .'"'
             );
         }
+    }
 
+    // (if an error exists) get it's HTTP status code, otherwise use 200:OK. Also set the "response code".
+    // also add the error messages.
+    private function getHttpStatusCode(ApiErrorCodeInterface $error, &$rootKeys)
+    {
         $HTTPStatusCode = 200;
+
         if (!empty($error)) {
-            $respMsg = $error->getUserMessage();
+            // if an error exists, then get its status code
             $HTTPStatusCode = $error->getHTTPStatusCode();
 
-            $rootKeys['error_msgs'] = $respMsg; // $error->getPublicMsg();
             $rootKeys['status'] = $error->getValue();
         } else {
             $rootKeys['status'] = (string) ApiErrorCode::OK;
         }
 
-        $payload = [
-        ];
+        return $HTTPStatusCode;
+    }
 
+    // if error msg/s exist, add it/them to the return keys.
+    private function setErrorMessages(&$rootKeys, ApiErrorCodeInterface $error)
+    {
+        if (!empty($error)) {
+            $rootKeys['error_msgs'] = $error->getPublicMsg();
+            if ($error instanceof CombinedException) {
+
+                $rootKeys['combinedErrors'] = $error->getCombinedPublicErrorMessages();
+//                dump($error->getCombinedErrorResponses());
+            }
+        }
+//        $rootKeys['test123'] = 'youyou';
+    }
+
+    /**
+     * Assemble the payload that will be returned to the client.
+     */
+    private function assemblePayload(array &$rootKeys)
+    {
+        $payload = [];
         foreach($rootKeys as $curKey => $curValue) {
             if (empty($curValue)) { continue; }
-
             $payload[$curKey] = $curValue;
         }
 
-
-        return new JsonResponse($payload, $HTTPStatusCode);
+        return $payload;
     }
 
     public function addErrorMessage($msg)

@@ -47,6 +47,7 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
     const USE_EXCEPTION_MSG = 'MARKER#23Dzwdcfko2#FCW';
 
     // generic status codes (that will be shared will inheriting classes)
+    const MIXED_RESPONSES                       = 5;        // this indicates that there will be multiple codes wrapped into this HTTP response. see ResponseCombiner class for more details.
     const OK                                    = 10;       // the default of a response, which indicates there were not problems.
     const INPUT_MISSING                         = 20;       // a GET or POST parameter is missing.
 
@@ -62,7 +63,7 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
      * $statusCode is the internal "statusCode" that maps to a constant. This is *not* the HTTP status code. (however it will define a HTTP status code it expects - useful for testing)
      * $loggerErrorMsg will override the "standard" message (provided by the "statusCodes" classes)
      */
-    public function __construct($statusCode, array $codePayloads, string $clientMsg, string $loggerErrorMsg = null, string $redirectCode = null, $loggerContext = [])
+    public function __construct($statusCode, array $codePayloads, string $clientMsg = null, string $loggerErrorMsg = null, string $redirectCode = null, $loggerContext = [])
     {
         if (empty($statusCode)) {
             throw new \Exception('$statusCode is empty. Please set it to a valid value.');
@@ -76,6 +77,8 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
         }
 
         $baseStatusCodes = [
+            self::MIXED_RESPONSES                                    => ['msg'               => null,
+                'HTTPStatusCode'    => 200],
             // security errors:
             self::OK                                    => ['msg'               => 'Request fine.',
                 'HTTPStatusCode'    => 200],
@@ -121,19 +124,20 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
         return $stdResponse ['HTTPStatusCode'];
     }
 
-    // get the message that can be displayed to the user.
-    public function getUserMessage()
-    {
-        $stdResponse = $this->getPayload();
-
-        if ($stdResponse['msg'] == self::USE_EXCEPTION_MSG) {
-            // use the custom message configured in the exceptions constructor.
-            return $this->getMessage();
-//            die ('use client message die()');
-        } else {
-            return $this->getStandardResponseMsg();
-        }
-    }
+//    // get the message that can be displayed to the user.
+//    public function getUserMessage()
+//    {
+//        $stdResponse = $this->getPayload();
+//
+//        if ($stdResponse['msg'] == self::USE_EXCEPTION_MSG) {
+//            // use the custom message configured in the exceptions constructor.
+//            return $this->getMessage();
+////            die ('use client message die()');
+//        } else {
+//            return $this->getStandardResponseMsg();
+//        }
+//        return $this->getPublicMsg();
+//    }
 
     // get the stdMessage (in the const array above)
     public function getStandardResponseMsg(): string
@@ -193,8 +197,7 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
     private function addArrayOfCodes(array $arr)
     {
         foreach ($arr as $internalCode => $responseSet) {
-            $this->checkIfKeyAlreadyExists($internalCode, $responseSet);
-
+//            $this->checkIfKeyAlreadyExists($internalCode, $responseSet);
             $this->uniqueConstantsList->addListItem($responseSet, $internalCode);
         }
     }
@@ -209,16 +212,16 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
      *
      * Check that 'msg' and 'HTTPStatusCode' keys exist
      */
-    private function checkIfKeyAlreadyExists ($internalCode, array $responseSet)
-    {
-        foreach ($this->expectedKeys as $curI2 => $curExpectedKey) {
-            if (empty($responseSet['msg'])) {
-                throw new \Exception('there is no element set for the api code: "msg" key (on array index: '. $internalCode .')');
-            }
-        }
-
-        return true;
-    }
+//    private function checkIfKeyAlreadyExists ($internalCode, array $responseSet)
+//    {
+////        foreach ($this->expectedKeys as $curI2 => $curExpectedKey) {
+//            if (empty($responseSet['msg'])) {
+//                throw new \Exception('there is no element set for the api code: "msg" key (on array index: '. $internalCode .')');
+//            }
+////        }
+//
+//        return true;
+//    }
 
     /**
      * @return array

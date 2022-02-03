@@ -15,7 +15,7 @@ use VisageFour\Bundle\ToolsBundle\Services\Debugging\ConsoleOutput;
  *
  * Use overloading and dynamic method invocation to simulate inheritance.
  */
-class HybridLogger
+class HybridLogger implements LoggerInterface
 {
     /**
      * @var LoggerInterface
@@ -149,5 +149,47 @@ class HybridLogger
     private function isTestEnv()
     {
         return ($this->kernelEnv == 'test');
+    }
+
+    public function emergency($message, array $context = array())
+    {
+        throw new \Exception('DIE(). todo: add extra command line features to logger: '. __METHOD__);
+        $this->logger->emergency($message, $context);
+    }
+
+    public function critical($message, array $context = array())
+    {
+        throw new \Exception('DIE(). todo: add extra command line features to logger: '. __METHOD__);
+        $this->logger->critical($message, $context);
+    }
+
+    public function error($message, array $context = array())
+    {
+        throw new \Exception('DIE(). todo: add extra command line features to logger: '. __METHOD__);
+        $this->logger->error($message, $context);
+    }
+
+    public function warning($message, array $context = array())
+    {
+        throw new \Exception('DIE(). todo: add extra command line features to logger: '. __METHOD__);
+        $this->logger->warning($message, $context);
+    }
+
+    public function notice($message, array $context = array())
+    {
+        throw new \Exception('DIE(). todo: add extra command line features to logger: '. __METHOD__);
+        $this->logger->notice($message, $context);
+    }
+
+    public function debug($message, array $context = array())
+    {
+        throw new \Exception('DIE(). todo: add extra command line features to logger: '. __METHOD__);
+        $this->logger->debug($message, $context);
+    }
+
+    public function log($level, $message, array $context = array())
+    {
+        throw new \Exception('DIE(). todo: add extra command line features to logger: '. __METHOD__);
+        $this->logger->log($message, $context);
     }
 }
