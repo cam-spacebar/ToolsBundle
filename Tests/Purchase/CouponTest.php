@@ -4,7 +4,7 @@
 * by: Cameron
 */
 
-namespace App\VisageFour\Bundle\ToolsBundle\Tests\Purchase;
+namespace VisageFour\Bundle\ToolsBundle\Tests\Purchase;
 
 namespace VisageFour\Bundle\ToolsBundle\Tests\Purchase;
 

@@ -159,7 +159,7 @@ class ResponseAssembler
 
     // (if an error exists) get it's HTTP status code, otherwise use 200:OK. Also set the "response code".
     // also add the error messages.
-    private function getHttpStatusCode(ApiErrorCodeInterface $error, &$rootKeys)
+    private function getHttpStatusCode(?ApiErrorCodeInterface $error, &$rootKeys)
     {
         $HTTPStatusCode = 200;
 
@@ -176,7 +176,7 @@ class ResponseAssembler
     }
 
     // if error msg/s exist, add it/them to the return keys.
-    private function setErrorMessages(&$rootKeys, ApiErrorCodeInterface $error)
+    private function setErrorMessages(&$rootKeys, ?ApiErrorCodeInterface $error)
     {
         if (!empty($error)) {
             $rootKeys['error_msgs'] = $error->getPublicMsg();

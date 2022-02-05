@@ -453,6 +453,8 @@ class BasePerson extends BaseEntity implements BasePersonInterface, JsonSerializ
     {
         $this->email = $email;
         $this->emailCanonical = self::canonicalizeEmail($email);
+
+        return $this;
     }
 
     /**

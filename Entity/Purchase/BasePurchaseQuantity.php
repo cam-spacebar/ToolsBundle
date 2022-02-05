@@ -128,7 +128,7 @@ class BasePurchaseQuantity extends BaseEntity
     /**
      * Return the total of the products price * quantity amount (apply the discount coupon - if one exists)
      */
-    public function getTotal(?Coupon $coupon)
+    public function getTotal(?Coupon $coupon = null)
     {
         if (!empty($coupon)) {
 //            print '=--======'."\n";
@@ -137,6 +137,18 @@ class BasePurchaseQuantity extends BaseEntity
             return $this->getTotalWithoutCoupon();
         }
 
+    }
+
+    public function getTotalAsString(?Coupon $coupon = null)
+    {
+        return $this->getAsCurrencyString($this->getTotal($coupon));
+    }
+
+    // returns the amount in format: "$43.50 AUD"
+    private function getAsCurrencyString(int $amountInCents)
+    {
+        $val = number_format(($this->getTotal() /100), 2, '.', '');
+        return '$'. $val .' AUD';
     }
 
     /**

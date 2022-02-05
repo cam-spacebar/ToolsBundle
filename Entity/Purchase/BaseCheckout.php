@@ -42,6 +42,10 @@ class BaseCheckout extends BaseEntity
      */
     protected $status;
 
+    const AWAITING_PAYMENT = 200;
+    const PAID = 300;
+    const ERROR_ON_PAYMENT_ATTEMPT = 400;
+
     /**
      * @var int
      *
@@ -51,10 +55,6 @@ class BaseCheckout extends BaseEntity
      */
     protected $paymentCode;
 
-    const AWAITING_PAYMENT = 200;
-    const PAID = 300;
-    const ERROR_ON_PAYMENT_ATTEMPT = 400;
-
     /**
      * @var int
      *
@@ -63,6 +63,12 @@ class BaseCheckout extends BaseEntity
      * The total price of all items in the checkout - in cents (not dollars) and INCLUDING discount coupons
      */
     protected $total;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="paymentDateTime", type="datetime")
+     */
+    protected $paymentDateTime;
 
     /**
      * @var int
@@ -144,6 +150,21 @@ class BaseCheckout extends BaseEntity
     public function getTotal(): int
     {
         return $this->total;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getTotalAsString(): string
+    {
+        return $this->getAsCurrencyString($this->total);
+    }
+
+    // returns the amount in format: "$43.50 AUD"
+    private function getAsCurrencyString(int $amountInCents)
+    {
+        $val = number_format(($this->getTotal() /100), 2, '.', '');
+        return '$'. $val .' AUD';
     }
 
 //    /**
@@ -247,6 +268,40 @@ class BaseCheckout extends BaseEntity
     public function setStatus(int $status): void
     {
         $this->status = $status;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getPaymentDateTime(): \DateTime
+    {
+        $this->checkAlreadyPaidFor();
+        return $this->paymentDateTime;
+    }
+
+    public function getPaymentDateTimeAsString($format)
+    {
+        return $this->paymentDateTime->format($format);
+    }
+
+    private function checkAlreadyPaidFor()
+    {
+        if ($this->status != self::PAID) {
+             throw new \Exception('cannot get payment datetime as the checkout has not yet been paid for.');
+        }
+    }
+
+    /**
+     * @param \DateTime $paymentDateTime
+     */
+    public function setToPaid(): void
+    {
+        if ($this->status != self::AWAITING_PAYMENT) {
+            throw new \Exception('checkout status must be set to AWAITING_PAYMENT prior to being marked as "PAID"');
+        }
+
+        $this->status = self::PAID;
+        $this->paymentDateTime = new \DateTime('now');
     }
 
     private function log()

@@ -83,6 +83,22 @@ class BaseProduct extends BaseEntity
     protected $relatedCoupons;
 
     /**
+     * @var
+     *
+     * @ORM\Column(name="line_items_serialized", type="blob")
+     *
+     * a serialized array of custom product items like: "pickup location: xyz", "ticket type: first release" etc.
+     *
+     */
+    private $lineItemsSerialized;
+
+    /**
+     * @var array
+     * the deserialized version of lineItems
+     */
+    private $lineItemsArray;
+
+    /**
      * Product constructor.
      * @param $title
      * @param $description
@@ -93,10 +109,12 @@ class BaseProduct extends BaseEntity
         $this->relatedPurchaseQuantities    = new ArrayCollection();
         $this->relatedCoupons               = new ArrayCollection();
 
-        $this->title        = $title;
-        $this->reference    = $reference;
-        $this->description  = $description;
-        $this->price        = $price;
+        $this->title            = $title;
+        $this->reference        = $reference;
+        $this->description      = $description;
+        $this->price            = $price;
+
+        $this->lineItemsArray   = unserialize($this->lineItemsSerialized);
     }
 
     /**
@@ -239,5 +257,42 @@ class BaseProduct extends BaseEntity
         }
 
         return true;
+    }
+
+    public function addLineItem(string $item, $updateSerialized = true)
+    {
+        $this->lineItemsArray[] = $item;
+
+        if ($updateSerialized) {
+            // update the serialized array.
+            // if adding multiple items that will affect performance (if serialized occurs each time an items is added), you can do it manually.
+            $this->updateLineItemsSerialized();
+
+        }
+
+        return $this;
+    }
+
+    // note: this must be done before $em->flush() otherwise changes to lineItems will not be persisted.
+    public function updateLineItemsSerialized()
+    {
+        $this->lineItemsSerialized = serialize($this->lineItemsArray);
+    }
+
+    /**
+     * @param mixed $lineItemsSerialized
+     * @return BaseProduct
+     */
+    public function setLineItemsSerialized($lineItemsSerialized)
+    {
+        $this->lineItemsSerialized = $lineItemsSerialized;
+        $this->lineItemsArray = unserialize($lineItemsSerialized);
+
+        return $this;
+    }
+
+    public function getLineItems()
+    {
+        return $this->lineItemsArray;
     }
 }
