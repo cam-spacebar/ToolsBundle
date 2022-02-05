@@ -107,4 +107,12 @@ class CustomController extends AbstractController
 
         return $value;
     }
+
+    // this is useful if you want to build out some testing / dev code - but it's not ready for prod.
+    protected function crashIfNotInDevOrTestEnvironment()
+    {
+        if ($this->kernelEnv != 'dev' && $this->kernelEnv != 'test') {
+            throw new \Exception('This code / controller can only be run in the dev environment');
+        }
+    }
 }
