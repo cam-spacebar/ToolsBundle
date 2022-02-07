@@ -107,21 +107,22 @@ class BasePurchaseHandler
     // if it's prefixed with an "OTA_" string, it will need to be pulled in from a different source.
     public function getProductByReference($ref): ?Product
     {
-        try {
-            $otaProd = $this->OtaProductFactory->getOtaProductByCmsEntryId($ref);
-            return $otaProd;
-        } catch (InvalidProductReferenceException $e) {
-            // continue
-        }
-
-        /** @var Product $curProd */
-        $curProd = $this->prodRepo->findOneBy([
-            'reference' => $ref
-        ]);
-
-        if (empty($curProd)) {
-            throw new InvalidProductReferenceException($ref);
-        }
+        throw new \Exception('remove this? 1231qsdc marked: 5 feb 2022');
+//        try {
+//            $otaProd = $this->OtaProductFactory->getOtaProductByCmsEntryId($ref);
+//            return $otaProd;
+//        } catch (InvalidProductReferenceException $e) {
+//            // continue
+//        }
+//
+//        /** @var Product $curProd */
+//        $curProd = $this->prodRepo->findOneBy([
+//            'reference' => $ref
+//        ]);
+//
+//        if (empty($curProd)) {
+//            throw new InvalidProductReferenceException($ref);
+//        }
 
         return $curProd;
     }

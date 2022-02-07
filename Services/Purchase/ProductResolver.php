@@ -47,14 +47,20 @@ class ProductResolver
      * @throws InvalidProductReferenceException
      *
      * Attempt getting an Ota product first, if fails then attempt for a "default" product (from the DB)
+     * PurchasePorduct creation behaviour: https://docs.google.com/presentation/d/1citBtVYpSjApO_aNBUNsebRe2WtIktSRkMRMpbxsS9w/edit#slide=id.g112c8113523_0_0
+     * (see note: #2)
      */
     public function getProductByReference($ref): ?Product
     {
         try {
-            // if TicketTypeNotFoundException() thrown, let it go through.
-            return $this->otaToPurchaseProductConverter->getPurchaseProductByReference($ref);
+            // look for an OtaProduct first:
+            $purchaseProductTemp = $this->otaToPurchaseProductConverter->getPurchaseProductByReference($ref);
+
+            if (!empty($purchaseProductTemp)) {
+                return $this->productRepository->getPurchaseProductCanonical($purchaseProductTemp);
+            }
         } catch (InvalidProductReferenceException $e) {
-            // there's no OTA product, so just continue to next
+            // there's no OTA product, so just continue...
         }
 
         $curProd = $this->productRepository->findOneBy([

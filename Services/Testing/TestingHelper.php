@@ -24,7 +24,7 @@ class TestingHelper
         $this->em  = $em;
     }
 
-//
+    // remember to use this with truncateEntities() in the tests: customSetUp()
     public function assertNumberOfDBTableRecords(int $expectedCount, string $entityName, object $testCase)
     {
         $count = (int) $this->em->getRepository($entityName)

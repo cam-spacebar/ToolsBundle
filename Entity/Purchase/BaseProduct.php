@@ -52,14 +52,14 @@ class BaseProduct extends BaseEntity
      * @ORM\Column(name="price", type="integer", nullable=false)
      * @Groups({"api_coupon:read", "api_product:item:get"})
      *
-     * price - in cents.
+     * sale price - in cents.
      */
     protected $price;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="reference", type="string", length=50, unique=true, nullable=false)
+     * @ORM\Column(name="reference", type="string", length=150, unique=false, nullable=false)
      * @Groups({"api_coupon:read", "api_product:item:get"})
      * @ApiProperty(identifier=true)
      *
@@ -132,7 +132,7 @@ class BaseProduct extends BaseEntity
      * @param bool $addToOppositeSide
      * @return bool
      */
-    public function addRelatedPersonnel(PurchaseQuantity $purQuan, $addToOppositeSide = true)
+    public function addRelatedPurchaseQuantity(PurchaseQuantity $purQuan, $addToOppositeSide = true)
     {
         if ($this->relatedPurchaseQuantities->contains($purQuan)) {
             return true;
@@ -144,6 +144,11 @@ class BaseProduct extends BaseEntity
         }
 
         return true;
+    }
+
+    public function getPurchaseQuantities()
+    {
+        return $this->relatedPurchaseQuantities;
     }
 
     /**
@@ -159,6 +164,7 @@ class BaseProduct extends BaseEntity
      */
     public function setDescription(string $description): void
     {
+        $this->isThisMutable();
         $this->description = $description;
     }
 
@@ -181,8 +187,9 @@ class BaseProduct extends BaseEntity
     /**
      * @param string $price
      */
-    public function setPrice(integer $price): void
+    public function setPrice(int $price): void
     {
+        $this->isThisMutable();
         $this->price = $price;
     }
 
@@ -199,6 +206,7 @@ class BaseProduct extends BaseEntity
      */
     public function setReference(string $reference): void
     {
+        $this->isThisMutable();
         $this->reference = $reference;
     }
 
@@ -229,6 +237,7 @@ class BaseProduct extends BaseEntity
      */
     public function setTitle(string $title): void
     {
+        $this->isThisMutable();
         $this->title = $title;
     }
 
@@ -247,6 +256,7 @@ class BaseProduct extends BaseEntity
      */
     public function addRelatedCoupon(Coupon $coupon, $addToOppositeSide = true): bool
     {
+        $this->isThisMutable();
         if ($this->relatedCoupons->contains($coupon)) {
             return true;
         }
@@ -261,6 +271,7 @@ class BaseProduct extends BaseEntity
 
     public function addLineItem(string $item, $updateSerialized = true)
     {
+        $this->isThisMutable();
         $this->lineItemsArray[] = $item;
 
         if ($updateSerialized) {
@@ -273,9 +284,15 @@ class BaseProduct extends BaseEntity
         return $this;
     }
 
+    public function getLineItemsSerialized()
+    {
+        return $this->lineItemsSerialized;
+    }
+
     // note: this must be done before $em->flush() otherwise changes to lineItems will not be persisted.
     public function updateLineItemsSerialized()
     {
+        $this->isThisMutable();
         $this->lineItemsSerialized = serialize($this->lineItemsArray);
     }
 
@@ -285,6 +302,7 @@ class BaseProduct extends BaseEntity
      */
     public function setLineItemsSerialized($lineItemsSerialized)
     {
+        $this->isThisMutable();
         $this->lineItemsSerialized = $lineItemsSerialized;
         $this->lineItemsArray = unserialize($lineItemsSerialized);
 
@@ -294,5 +312,29 @@ class BaseProduct extends BaseEntity
     public function getLineItems()
     {
         return $this->lineItemsArray;
+    }
+
+    // throws an exception if 'id' is set.
+    // see documentation on why this exists: https://docs.google.com/presentation/d/1WpWj80uAeQLJtNabbn-CxppNU-pEqteE5g222_qmjCo/edit#slide=id.g112cb1597e6_0_0
+    private function isThisMutable()
+    {
+        if (isset($this->id)) {
+            throw new \Exception ('Unable to modify Product with id: "'. $this->id .'" as this object is immutable. See documentation: https://docs.google.com/presentation/d/1WpWj80uAeQLJtNabbn-CxppNU-pEqteE5g222_qmjCo/edit#slide=id.g112cb1597e6_0_0');
+        }
+    }
+
+    // Remove the id, so that Doctrine doesn't recognize it.
+    public function __clone() {
+        $this->id = null;
+        $this->relatedPurchaseQuantities->clear();
+        $this->relatedPurchaseQuantities=new ArrayCollection();
+//        /**
+//         * @var Coupon  $curCoupon
+//        */
+//        foreach($this->relatedCoupons as $curI => $curCoupon) {
+//            $curCoupon->addRelatedAffectedProduct($this);
+//        }
+
+//        dd($this->relatedCoupons);
     }
 }

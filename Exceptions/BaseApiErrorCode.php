@@ -95,7 +95,8 @@ abstract class BaseApiErrorCode extends PublicException implements ApiErrorCodeI
 
         // $clientMsg can only be empty if it has a "stdMessage". If not, throw an error.
         if (empty($loggerErrorMsg)) {
-            $loggerErrorMsg = $this->getStandardResponseMsg();
+            $loggerErrorMsg = $clientMsg;
+//            $loggerErrorMsg = $this->getStandardResponseMsg();
         }
 
         parent::__construct($clientMsg, $loggerErrorMsg);
